@@ -5,7 +5,7 @@
         // Select the h2 element inside .artdeco-modal and check if its text is 'Application sent'
         const modalHeading = document.querySelector('.artdeco-modal h2');
 
-        if (modalHeading && modalHeading.textContent.trim() === 'Application sent') {
+        if (modalHeading && (modalHeading.textContent.trim() === 'Application sent' || modalHeading.textContent.trim() === 'Premium' || modalHeading.textContent.trim() === 'Top Choice' || modalHeading.textContent.trim().includes('Your application was sent'))) {
             // Find the dismiss button inside the same modal
             const dismissButton = document.querySelector('.artdeco-modal button[aria-label="Dismiss"]');
 
@@ -41,6 +41,44 @@
         });
     }
 
+    function fillLinkedinUrl() {
+        // Find all label elements
+        const labels = document.querySelectorAll('label');
+
+        // Loop through all label elements to find the one with the text 'Prefer not to disclose'
+        labels.forEach(label => {
+            if (label.textContent.trim().includes('LinkedIn')) {
+                const inputBoxId = label.getAttribute('for');
+                const inputBox = document.getElementById(inputBoxId);
+
+                // If the checkbox exists and is not already checked, check it
+                if (inputBox && inputBox.type === 'text') {
+                    inputBox.value = 'https://www.linkedin.com/in/panoslin/';
+                    inputBox.dispatchEvent(new Event('change', {bubbles: true}));
+                }
+            }
+        });
+    }
+
+    // function fillSponsorship() {
+    //     // Find all label elements
+    //     const labels = document.querySelectorAll('label');
+    //
+    //     // Loop through all label elements to find the one with the text 'Prefer not to disclose'
+    //     labels.forEach(label => {
+    //         if (label.textContent.trim() === 'Do you have US citizenship or a Greencard') {
+    //             const inputBoxId = label.getAttribute('for');
+    //             const inputBox = document.getElementById(inputBoxId);
+    //
+    //             // If the checkbox exists and is not already checked, check it
+    //             if (inputBox && inputBox.type === 'text') {
+    //                 inputBox.value = 'https://www.linkedin.com/in/panoslin/';
+    //                 inputBox.dispatchEvent(new Event('change', {bubbles: true}));
+    //             }
+    //         }
+    //     });
+    // }
+
     // Function to uncheck the follow company checkbox
     function uncheckFollowCompanyCheckbox() {
         const followCheckbox = document.getElementById('follow-company-checkbox');
@@ -55,6 +93,7 @@
     // Call the functions initially
     uncheckFollowCompanyCheckbox();
     checkPreferNotToDisclose();
+    fillLinkedinUrl();
     dismissApplicationSentModal();
 
     // Set up a MutationObserver to watch for changes in the DOM
@@ -64,12 +103,32 @@
                 uncheckFollowCompanyCheckbox();
                 checkPreferNotToDisclose();
                 dismissApplicationSentModal();
+                fillLinkedinUrl();
             }
         }
     });
 
     // Start observing the body for added nodes
     observer.observe(document.body, {childList: true, subtree: true});
+
+    function downladJD(applied=false) {
+        // download the jd to local
+        const text = extractTextFromElement('.jobs-box__html-content .mt4');
+        console.log(text)
+        if (text) {
+            const blob = new Blob([text], {type: 'text/plain'});
+            const url = URL.createObjectURL(blob);
+
+            const currentJobId =  new URL(window.location.href).searchParams.get("currentJobId");
+
+            chrome.runtime.sendMessage({
+                action: 'download',
+                url: url,
+                filename: `LinkedinJD-${applied}-${currentJobId}.txt`
+            });
+        }
+
+    }
 
     // Function to select and click the next li element
     function selectAndClickNextLi() {
@@ -105,9 +164,19 @@
 
     // Event listener for Shift + Ctrl + X to select and click next li element
     document.addEventListener('keydown', function (event) {
+        if (event.ctrlKey && event.code === 'KeyD') {
+            event.preventDefault();
+            event.stopPropagation();
+            downladJD(false);
+        }
+    });
+
+    // Event listener for Shift + Ctrl + X to select and click next li element
+    document.addEventListener('keydown', function (event) {
         if (event.shiftKey && event.ctrlKey && event.code === 'KeyX') {
             event.preventDefault();
             event.stopPropagation();
+            downladJD(false);
             selectAndClickNextLi();
         }
     });
@@ -131,10 +200,32 @@
                 let button = document.querySelector(selector);
                 if (button) {
                     console.log('Found button:', button);
+                    if (selector=== '.jobs-s-apply button.jobs-apply-button.artdeco-button--3[data-job-id][aria-label]' || selector === '.jobs-apply-button--top-card .jobs-apply-button') {
+                        downladJD(true);
+                    }
                     button.click();
                     break;
                 }
             }
         }
     });
+
+
+    function extractTextFromElement(selector) {
+        // get job title from .job-details-jobs-unified-top-card__job-title a
+        const jobTitleElement = document.querySelector('.job-details-jobs-unified-top-card__job-title a');
+        if (jobTitleElement) {
+            const jobTitle = jobTitleElement.textContent.trim();
+
+            const element = document.querySelector(selector);
+            if (element) {
+                return jobTitle + '\n' + element.textContent.trim(); // Use .trim() to remove leading/trailing whitespace
+            } else {
+                console.error('Element not found');
+                return '';
+            }
+        }
+    }
+
+
 })();

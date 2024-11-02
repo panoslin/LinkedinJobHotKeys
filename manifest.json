@@ -3,7 +3,10 @@
   "name": "LinkedIn Job Page Button Clicker",
   "version": "1.0",
   "description": "Streamline LinkedIn job applications with Control+X Hotkey.",
-  "permissions": ["activeTab", "scripting"],
+  "permissions": ["activeTab", "scripting", "downloads"],
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
       "matches": ["https://www.linkedin.com/jobs/*"],
