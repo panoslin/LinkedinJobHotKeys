@@ -23,8 +23,9 @@ git clone https://github.com/abhishekpandey/LinkedinJobHotKeys.git
 2. Head to [chrome://extensions/](chrome://extensions/).
 3. Enable Developer mode with the switch at the top-right corner.
 4. Click Load unpacked and select the folder you just cloned (LinkedinJobHotKeys).
-
-
+5. Update Personal Information:
+   - Open the data/personalInfo.json file within the extension folder.
+   - Fill in your personal details like name, LinkedIn profile URL, location, etc.
 
 Boom! Your extension is now ready to supercharge your job search.
 
@@ -41,30 +42,29 @@ Boom! Your extension is now ready to supercharge your job search.
 
 
 
-**Ctrl + x: Hotkey for Easy Apply & Next Step**
+**`Ctrl + x`: Hotkey for Easy Apply & Next Step**
 
 - Apply for the current job posting instantly.
 - Click through next steps in the application process like a breeze.
+- **Auto-Fill Forms**: Personal information fields are automatically filled using your details from personalInfo.json.
 
 
-
-**Shift + Ctrl + x: Hotkey for Next Job Posting**
+**`Shift + Ctrl + x`: Hotkey for Next Job Posting**
 
 - Skip to the next job that’s NOT viewed and NOT applied for yet.
 - Effortlessly turn the page to find more opportunities.
+- **Auto-Download JD**: Automatically downloads the job description of the current job.
 
 
 
-**Auto Form Filling**
-
-- Automatically uncheck the “Follow Company” box to keep things tidy.
-- Check the EEO Form box and select “Prefer Not To Disclose” with no hassle.
+**`Ctrl + d`: Download Job Description**
+- Manually download the job description of the current job posting.
 
 
 
 **Auto-Advance to the Next Job**
 
-- Once you’ve completed an application, the extension automatically jumps to the next NOT viewed & NOT applied job, keeping the momentum going!
+- Once you’ve completed an application, the extension automatically downloads the job description for your records and seamlessly moves on to the next available opportunity, keeping the momentum going!
 
 
 
