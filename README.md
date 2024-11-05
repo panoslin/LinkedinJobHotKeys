@@ -1,6 +1,6 @@
 # LinkedIn Job Page Button Clicker
 
-
+The LinkedIn Job Page Button Clicker is a Chrome extension designed to streamline and accelerate your job search on LinkedIn by automating repetitive tasks and enhancing your application workflow
 ## 🚀 1. Getting Started
 
 
@@ -10,7 +10,7 @@
 
 
 ```bash
-git clone https://github.com/abhishekpandey/LinkedinJobHotKeys.git
+git clone https://github.com/panoslin/LinkedinJobHotKeys.git
 ```
 
 
