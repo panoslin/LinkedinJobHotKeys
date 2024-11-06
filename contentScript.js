@@ -22,7 +22,7 @@
         const modalText = modalHeading?.textContent.trim();
 
         if (modalText && (
-            ['Application sent', 'Premium', 'Top Choice'].includes(modalText) ||
+            ['Application sent', 'Premium', 'Top Choice', 'Added to your applied jobs'].includes(modalText) ||
             modalText.includes('Your application was sent')
         )) {
             // Find the dismiss button inside the same modal

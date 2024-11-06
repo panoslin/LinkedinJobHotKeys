@@ -10,7 +10,7 @@
   "web_accessible_resources": [
     {
       "resources": ["data/personalInfo.json"],
-      "matches": ["https://www.linkedin.com/jobs/*"]
+      "matches": ["<all_urls>"]
     }
   ],
   "content_scripts": [
