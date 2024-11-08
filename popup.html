@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>LinkedIn Job Helper Settings</title>
+    <style>
+      body { font-family: Arial, sans-serif; padding: 10px; width: 25rem; }
+      label { display: block; margin-top: 10px; }
+      input { width: 100%;
+        margin-top: 5px;
+        padding: 5px 0px 5px 5px;
+        margin-right: 40%;
+      }
+      button { margin-top: 15px; padding: 10px; width: 100%; }
+    </style>
+  </head>
+  <body>
+    <h2>Personal Information</h2>
+    <form id="personalInfoForm">
+      <label>Name
+        <input type="text" id="name" name="name" required>
+      </label>
+      <label>LinkedIn URL
+        <input type="url" id="linkedin" name="linkedin">
+      </label>
+      <label>Location
+        <input type="text" id="location" name="location">
+      </label>
+      <label>Current Company
+        <input type="text" id="company" name="company">
+      </label>
+      <label>GitHub URL
+        <input type="url" id="github" name="github">
+      </label>
+      <button type="submit">Save</button>
+    </form>
+    <p id="status"></p>
+    <script src="popup.js"></script>
+  </body>
+</html>

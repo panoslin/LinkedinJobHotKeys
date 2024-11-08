@@ -6,10 +6,14 @@
     // Fetch personal information once and start the observer after it's loaded
     (async function fetchPersonalInfo() {
         try {
-            const url = chrome.runtime.getURL('data/personalInfo.json');
-            const response = await fetch(url);
-            personalInfo = await response.json();
-            startObserver(); // Start observing after personalInfo is loaded
+            chrome.storage.local.get('personalInfo', (result) => {
+                personalInfo = result.personalInfo;
+                if (!personalInfo) {
+                    console.warn('Personal info not found. Please set it in the extension popup.');
+                    return;
+                }
+                startObserver();
+            });
         } catch (error) {
             console.error('Failed to load personal information:', error);
         }
@@ -68,21 +72,24 @@
                     // Check if the input is a text field and fill it with personal information
                     if (inputBox.type === 'text') {
                         switch (labelText) {
-                            case labelText.includes('LinkedIn') && personalInfo.linkedin && labelText:
+                            case labelText.toLowerCase().includes('LinkedIn') && personalInfo.linkedin && labelText:
                                 inputBox.value = personalInfo.linkedin;
                                 break;
                             case 'What is your current location?':
-                            case 'City':
-                                inputBox.value = personalInfo.location;
+                            case labelText.includes('City') && !label.classList.contains('jobs-search-box__input-icon') && labelText:
+                                inputBox.value = 'test';
                                 break;
                             case 'Current company':
                                 inputBox.value = personalInfo.company;
                                 break;
-                            case 'Link to Github':
+                            case labelText.toLowerCase().includes('Github') && personalInfo.github && labelText:
                                 inputBox.value = personalInfo.github;
                                 break;
                             case 'Your Name':
                                 inputBox.value = personalInfo.name;
+                                break;
+                            case 'How did you hear about this job?':
+                                inputBox.value = 'LinkedIn';
                                 break;
                         }
                         // Dispatch an input event to trigger any validation
