@@ -90,7 +90,7 @@
                             case [
                                 'location',
                                 'city',
-                                'address'
+                                'home address'
                             ].some(term => labelText.includes(term)) && !label.classList.contains('jobs-search-box__input-icon') && labelText:
                                 inputBox.value = personalInfo.location;
                                 console.log("Location filled automatically.");
@@ -217,22 +217,30 @@
 
     function selectAndClickNextLi() {
         const now = Date.now();
-
-        // Check if 1 second has passed since the last execution
         if (now - lastExecutionTime < 1000) {
-            return; // Exit the function if it's too soon
+            return;
         }
-
-        lastExecutionTime = now; // Update the last execution time
-
-        const element = document.querySelector('.jobs-search-results-list');
-        if (!element) return;
-        // Scroll to the bottom of the element
-        element.scrollTop = element.scrollHeight;
+        lastExecutionTime = now;
 
         let activeLi = document.querySelector('.jobs-search-results-list__list-item--active');
         let nextLi = activeLi ? activeLi.closest('li').nextElementSibling : null;
+        let count = 0;
+        while (nextLi) {
+            const viewedElement = nextLi.querySelector('.job-card-container__footer-job-state');
+            const text = viewedElement?.textContent.trim();
+            if (!viewedElement || !['Viewed', 'Applied'].includes(text)) {
+                count += 1;
+            }
+            nextLi = nextLi.nextElementSibling;
+        }
+        if (count <= 2) {
+            const element = document.querySelector('.jobs-search-results-list');
+            if (!element) return;
+            // Scroll to the bottom of the element
+            element.scrollTop = element.scrollHeight;
+        }
 
+        nextLi = activeLi ? activeLi.closest('li').nextElementSibling : null;
         while (nextLi) {
             const viewedElement = nextLi.querySelector('.job-card-container__footer-job-state');
             const text = viewedElement?.textContent.trim();
