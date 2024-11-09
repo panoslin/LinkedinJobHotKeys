@@ -9,6 +9,9 @@
     "downloads",
     "storage"
   ],
+  "host_permissions": [
+    "*://*/*"
+  ],
   "action": {
     "default_popup": "popup.html",
     "default_title": "LinkedIn Job Helper"
@@ -19,7 +22,7 @@
   "content_scripts": [
     {
       "matches": [
-        "https://www.linkedin.com/jobs/*"
+        "*://*/*"
       ],
       "js": [
         "contentScript.js"
