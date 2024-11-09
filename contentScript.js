@@ -69,36 +69,64 @@
                 const inputBox = document.getElementById(inputBoxId);
 
                 if (inputBox) {
-                    // Check if the input is a text field and fill it with personal information
-                    if (inputBox.type === 'text') {
+                    if (
+                        (
+                            inputBox.type === 'text' ||
+                            inputBox.type === 'email' ||
+                            inputBox.type === 'number' ||
+                            inputBox.type === 'tel' ||
+                            inputBox.type === 'url' ||
+                            inputBox.type === 'password'
+                        ) && inputBox.value === ''
+                    ) {
                         switch (labelText) {
-                            case labelText.toLowerCase().includes('LinkedIn') && personalInfo.linkedin && labelText:
+                            case labelText.toLowerCase().includes('linkedin') && personalInfo.linkedin && labelText:
                                 inputBox.value = personalInfo.linkedin;
+                                console.log("LinkedIn URL filled automatically.");
                                 break;
                             case 'What is your current location?':
                             case labelText.includes('City') && !label.classList.contains('jobs-search-box__input-icon') && labelText:
-                                inputBox.value = 'test';
+                                inputBox.value = personalInfo.location;
+                                console.log("Location filled automatically.");
                                 break;
                             case 'Current company':
                                 inputBox.value = personalInfo.company;
+                                console.log("Current company filled automatically.");
                                 break;
-                            case labelText.toLowerCase().includes('Github') && personalInfo.github && labelText:
+                            case labelText.toLowerCase().includes('github') && personalInfo.github && labelText:
                                 inputBox.value = personalInfo.github;
+                                console.log("GitHub URL filled automatically.");
+                                break;
+                            case labelText.toLowerCase().includes('first name') && personalInfo.name && labelText:
+                                inputBox.value = personalInfo.name.split(' ')[0];
+                                console.log("First name filled automatically.");
+                                break;
+                            case labelText.toLowerCase().includes('last name') && personalInfo.name && labelText:
+                                inputBox.value = personalInfo.name.split(' ')[1];
+                                console.log("Last name filled automatically.");
                                 break;
                             case 'Your Name':
                                 inputBox.value = personalInfo.name;
+                                console.log("Name filled automatically.");
                                 break;
                             case 'How did you hear about this job?':
                                 inputBox.value = 'LinkedIn';
+                                console.log("Source filled automatically.");
                                 break;
                         }
-                        // Dispatch an input event to trigger any validation
                         inputBox.dispatchEvent(new Event('input', {bubbles: true, cancelable: true}));
                     }
-                    // Check if the input is a checkbox or radio button and check it if necessary
-                    else if ((inputBox.type === 'checkbox' || inputBox.type === 'radio') &&
+                    else if (
+                        (inputBox.type === 'checkbox' || inputBox.type === 'radio') &&
                         !inputBox.checked &&
-                        ['Prefer not to disclose', "I don't wish to answer", 'Prefer not to say', 'Prefer to not disclose', 'Prefer not to identify'].includes(labelText)) {
+                        [
+                            'Prefer not to disclose',
+                            "I don't wish to answer",
+                            'Prefer not to say',
+                            'Prefer to not disclose',
+                            'Prefer not to identify'
+                        ].includes(labelText)
+                    ) {
                         inputBox.checked = true;
                         inputBox.dispatchEvent(new Event('change', {bubbles: true}));
                         console.log("Checkbox for 'Prefer not to disclose' checked automatically.");
