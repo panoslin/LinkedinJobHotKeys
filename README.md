@@ -23,9 +23,6 @@ git clone https://github.com/panoslin/LinkedinJobHotKeys.git
 2. Head to [chrome://extensions/](chrome://extensions/).
 3. Enable Developer mode with the switch at the top-right corner.
 4. Click Load unpacked and select the folder you just cloned (LinkedinJobHotKeys).
-5. Update Personal Information:
-   - Open the data/personalInfo.json file within the extension folder.
-   - Fill in your personal details like name, LinkedIn profile URL, location, etc.
 
 Boom! Your extension is now ready to supercharge your job search.
 
@@ -34,7 +31,12 @@ Boom! Your extension is now ready to supercharge your job search.
 ## **⚡ 2. How to Use**
 
 1. Navigate to the LinkedIn Job Search [page](https://www.linkedin.com/jobs/search).
-2. Start using **hotkeys** to speed through job applications like a pro!
+
+2. Click open the extension popup and fill in your personal information.
+
+	<img src="./README.assets/image-20241108210554790.png" alt="image-20241108210554790" style="zoom:25%;" />
+
+3. Start using **hotkeys** to speed through job applications like a pro!
 
 
 
