@@ -1,6 +1,4 @@
 (function () {
-    let lastDismissTime = 0;
-    let lastExecutionTime = 0;
     let personalInfo = null;
 
     // Fetch personal information once and start the observer after it's loaded
@@ -34,17 +32,6 @@
 
             // If the dismiss button exists, click it
             if (dismissButton) {
-
-                const now = Date.now();
-
-                // Check if 5 seconds have passed since the last execution
-                if (now - lastDismissTime < 5000) {
-                    console.log("Too soon to dismiss modal.");
-                    return; // Exit the function if it's too soon
-                }
-
-                lastDismissTime = now; // Update the last execution time
-
                 dismissButton.click();
                 console.log("Dismiss button clicked for modal.");
                 // Select and click the next li element
@@ -138,13 +125,11 @@
                     } else if (
                         (inputBox.type === 'checkbox' || inputBox.type === 'radio') &&
                         !inputBox.checked &&
-                        [
-                            'prefer not to disclose',
-                            "i don't wish to answer",
-                            'prefer not to say',
-                            'prefer to not disclose',
-                            'prefer not to identify'
-                        ].includes(labelText)
+                        (
+                            (labelText.includes('prefer') && labelText.includes('not')) ||
+                            (labelText.includes("don't") && labelText.includes('answer')) ||
+                            (labelText.includes("do not") && labelText.includes('answer'))
+                        )
                     ) {
                         inputBox.checked = true;
                         inputBox.dispatchEvent(new Event('change', {bubbles: true}));
@@ -216,13 +201,12 @@
     }
 
     function selectAndClickNextLi() {
-        const now = Date.now();
-        if (now - lastExecutionTime < 1000) {
-            return;
-        }
-        lastExecutionTime = now;
 
         let activeLi = document.querySelector('.jobs-search-results-list__list-item--active');
+        if (!activeLi) {
+            document.querySelector('.job-card-list').click();
+            return;
+        }
         let nextLi = activeLi ? activeLi.closest('li').nextElementSibling : null;
         let count = 0;
         while (nextLi) {

@@ -4,13 +4,12 @@
   "version": "1.0",
   "description": "Streamline LinkedIn job applications with Control+X Hotkey.",
   "permissions": [
-    "activeTab",
     "scripting",
     "downloads",
     "storage"
   ],
   "host_permissions": [
-    "*://*/*"
+    "https://*.linkedin.com/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -22,7 +21,7 @@
   "content_scripts": [
     {
       "matches": [
-        "*://*/*"
+        "https://*.linkedin.com/*"
       ],
       "js": [
         "contentScript.js"
