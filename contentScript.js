@@ -64,7 +64,10 @@
             const labels = document.querySelectorAll('label');
 
             labels.forEach(label => {
-                const labelText = label.textContent.trim();
+                const labelText = label.textContent
+                    .trim()
+                    .replace('*', '')
+                    .toLowerCase();
                 const inputBoxId = label.getAttribute('for');
                 const inputBox = document.getElementById(inputBoxId);
 
@@ -80,55 +83,67 @@
                         ) && inputBox.value === ''
                     ) {
                         switch (labelText) {
-                            case labelText.toLowerCase().includes('linkedin') && personalInfo.linkedin && labelText:
+                            case labelText.includes('linkedin') && personalInfo.linkedin && labelText:
                                 inputBox.value = personalInfo.linkedin;
                                 console.log("LinkedIn URL filled automatically.");
                                 break;
-                            case 'What is your current location?':
-                            case labelText.includes('City') && !label.classList.contains('jobs-search-box__input-icon') && labelText:
+                            case [
+                                'location',
+                                'city',
+                                'address'
+                            ].some(term => labelText.includes(term)) && !label.classList.contains('jobs-search-box__input-icon') && labelText:
                                 inputBox.value = personalInfo.location;
                                 console.log("Location filled automatically.");
                                 break;
-                            case 'Current company':
+                            case 'current company':
                                 inputBox.value = personalInfo.company;
                                 console.log("Current company filled automatically.");
                                 break;
-                            case labelText.toLowerCase().includes('github') && personalInfo.github && labelText:
+                            case labelText.includes('github') && personalInfo.github && labelText:
                                 inputBox.value = personalInfo.github;
                                 console.log("GitHub URL filled automatically.");
                                 break;
-                            case labelText.toLowerCase().includes('first name') && personalInfo.name && labelText:
+                            case labelText.includes('first name') && personalInfo.name && labelText:
                                 inputBox.value = personalInfo.name.split(' ')[0];
                                 console.log("First name filled automatically.");
                                 break;
-                            case labelText.toLowerCase().includes('last name') && personalInfo.name && labelText:
+                            case labelText.includes('last name') && personalInfo.name && labelText:
                                 inputBox.value = personalInfo.name.split(' ')[1];
                                 console.log("Last name filled automatically.");
                                 break;
-                            case 'Your Name':
+                            case 'full Name':
+                            case 'your Name':
                                 inputBox.value = personalInfo.name;
                                 console.log("Name filled automatically.");
                                 break;
-                            case 'How did you hear about this job?':
+                            case 'how did you hear about this job?':
                                 inputBox.value = 'LinkedIn';
                                 console.log("Source filled automatically.");
                                 break;
-                            case labelText.toLowerCase().includes('email') && personalInfo.name && labelText:
+                            case labelText.includes('email') && personalInfo.email && labelText:
                                 inputBox.value = personalInfo.email;
                                 console.log("Email filled automatically.");
                                 break;
+                            case [
+                                'phone',
+                                'mobile',
+                                'phone number',
+                                'mobile number'
+                            ].some(term => labelText.includes(term)) && personalInfo.phone && labelText:
+                                inputBox.value = personalInfo.phone;
+                                console.log("Phone number filled automatically.");
+                                break;
                         }
                         inputBox.dispatchEvent(new Event('input', {bubbles: true, cancelable: true}));
-                    }
-                    else if (
+                    } else if (
                         (inputBox.type === 'checkbox' || inputBox.type === 'radio') &&
                         !inputBox.checked &&
                         [
-                            'Prefer not to disclose',
-                            "I don't wish to answer",
-                            'Prefer not to say',
-                            'Prefer to not disclose',
-                            'Prefer not to identify'
+                            'prefer not to disclose',
+                            "i don't wish to answer",
+                            'prefer not to say',
+                            'prefer to not disclose',
+                            'prefer not to identify'
                         ].includes(labelText)
                     ) {
                         inputBox.checked = true;
