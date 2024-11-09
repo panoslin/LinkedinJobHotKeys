@@ -98,8 +98,11 @@
                                 inputBox.value = personalInfo.name.split(' ')[1];
                                 console.log("Last name filled automatically.");
                                 break;
-                            case 'full Name':
-                            case 'your Name':
+                            case labelText.includes('preferred name') && personalInfo.preferred_name && labelText:
+                                inputBox.value = personalInfo.preferred_name;
+                                console.log("Preferred name filled automatically.");
+                                break;
+                            case labelText.includes('name') && personalInfo.name && labelText:
                                 inputBox.value = personalInfo.name;
                                 console.log("Name filled automatically.");
                                 break;

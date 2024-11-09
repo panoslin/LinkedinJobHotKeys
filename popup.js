@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
             github: document.getElementById('github').value,
             email: document.getElementById('email').value,
             phone: document.getElementById('phone').value,
+            preferred_name: document.getElementById('preferred_name').value,
         };
 
         chrome.storage.local.set({ personalInfo }, () => {
