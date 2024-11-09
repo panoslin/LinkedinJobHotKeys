@@ -258,6 +258,10 @@
             event.preventDefault();
             downloadJD(false);
             selectAndClickNextLi();
+        } else if (ctrlKey && code === 'KeyZ') {
+            event.preventDefault();
+            let activeLi = document.querySelector('.jobs-search-results-list__list-item--active');
+            activeLi.scrollIntoView({behavior: 'smooth', block: 'center'});
         } else if (ctrlKey && !shiftKey && code === 'KeyX') {
             event.preventDefault();
 
