@@ -113,6 +113,10 @@
                                 inputBox.value = 'LinkedIn';
                                 console.log("Source filled automatically.");
                                 break;
+                            case labelText.toLowerCase().includes('email') && personalInfo.name && labelText:
+                                inputBox.value = personalInfo.email;
+                                console.log("Email filled automatically.");
+                                break;
                         }
                         inputBox.dispatchEvent(new Event('input', {bubbles: true, cancelable: true}));
                     }

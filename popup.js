@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
             location: document.getElementById('location').value,
             company: document.getElementById('company').value,
             github: document.getElementById('github').value,
+            email: document.getElementById('email').value,
         };
 
         chrome.storage.local.set({ personalInfo }, () => {
