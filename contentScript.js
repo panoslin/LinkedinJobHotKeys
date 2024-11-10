@@ -58,7 +58,7 @@
                 const inputBoxId = label.getAttribute('for');
                 const inputBox = document.getElementById(inputBoxId);
 
-                if (inputBox) {
+                if (inputBox && !inputBox.dataset.autofilled) {
                     if (
                         (
                             inputBox.type === 'text' ||
@@ -124,17 +124,80 @@
                                 console.log("Phone number filled automatically.");
                                 break;
                         }
+                        inputBox.dataset.autofilled = 'true';
                         inputBox.dispatchEvent(new Event('input', {bubbles: true, cancelable: true}));
                     } else if (
-                        (inputBox.type === 'checkbox' || inputBox.type === 'radio') &&
+                        (
+                            inputBox.type === 'checkbox' ||
+                            inputBox.type === 'radio'
+                        ) &&
                         !inputBox.checked &&
                         (
                             (labelText.includes('prefer') && labelText.includes('not')) ||
                             (labelText.includes("don't") && labelText.includes('answer')) ||
-                            (labelText.includes("do not") && labelText.includes('answer'))
+                            (labelText.includes("do not") && labelText.includes('answer')) ||
+                            labelText === 'decline to self identify'
                         )
                     ) {
                         inputBox.checked = true;
+                        inputBox.dispatchEvent(new Event('change', {bubbles: true}));
+                        console.log("Checkbox for 'Prefer not to disclose' checked automatically.");
+                        inputBox.dataset.autofilled = 'true';
+                    } else if (
+                        inputBox.type === 'select-one'
+                    ) {
+                        switch (labelText) {
+                            case [
+                                "legally",
+                                "authorized",
+                                "work",
+                            ].every(keyword => labelText.includes(keyword)) && labelText:
+                                inputBox.value = 'Yes';
+                                console.log("Select 'Yes' for 'Legally authorized to work in the United States' automatically.");
+                                break;
+                            case [
+                                "lawfully",
+                                "authorized",
+                                "work",
+                            ].every(keyword => labelText.includes(keyword)) && labelText:
+                                inputBox.value = 'Yes';
+                                console.log("Select 'Yes' for 'Legally authorized to work in the United States' automatically.");
+                                break;
+                            case [
+                                "now",
+                                "future",
+                                "sponsor",
+                            ].every(keyword => labelText.includes(keyword)) && labelText:
+                                inputBox.value = 'Yes';
+                                console.log("Select 'Yes' for 'Will you in the future, require sponsorship' automatically.");
+                                break;
+                            case [
+                                "non-compete",
+                                "restrictions",
+                            ].every(keyword => labelText.includes(keyword)) && labelText:
+                                inputBox.value = 'No';
+                                console.log("Select 'No' for 'Are you subject to any non-compete restrictions?' automatically.");
+                                break;
+                            case [
+                                "currently",
+                                "employed",
+                                "by",
+                            ].every(keyword => labelText.includes(keyword)) && labelText:
+                                inputBox.value = 'No';
+                                console.log("Select 'No' for 'Currently employed by another company' automatically.");
+                                break;
+                            case [
+                                "ever",
+                                "been",
+                                "employed",
+                                "by",
+                            ].every(keyword => labelText.includes(keyword)) && labelText:
+                                inputBox.value = 'No';
+                                console.log("Select 'No' for 'Have you ever been employed by another company' automatically.");
+                                break;
+
+                        }
+                        inputBox.dataset.autofilled = 'true';
                         inputBox.dispatchEvent(new Event('change', {bubbles: true}));
                         console.log("Checkbox for 'Prefer not to disclose' checked automatically.");
                     }
