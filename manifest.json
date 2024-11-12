@@ -23,7 +23,8 @@
         "https://*.linkedin.com/*"
       ],
       "js": [
-        "contentScript.js"
+        "contentScript.js",
+        "config.js"
       ],
       "run_at": "document_end"
     }

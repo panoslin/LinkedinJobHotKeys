@@ -1,5 +1,6 @@
 (function () {
     let personalInfo = null;
+    let curJid = null;
 
     // Fetch personal information once and start the observer after it's loaded
     (async function fetchPersonalInfo() {
@@ -237,6 +238,7 @@
                     uncheckFollowCompanyCheckbox();
                     dismissApplicationSentModal();
                     fillForm();
+                    predictCompatibility();
                     break; // Exit after handling the first relevant mutation
                 }
             }
@@ -364,6 +366,71 @@
         } else {
             console.error('Element not found');
             return '';
+        }
+    }
+
+    function predictCompatibility() {
+        const jobDescriptionEle = document.querySelector('.jobs-box__html-content .mt4');
+        const jobId = new URL(window.location.href).searchParams.get("currentJobId");
+        if (jobDescriptionEle && jobId !== curJid) {
+            const jdText = extractTextFromElement('.jobs-box__html-content .mt4');
+            const topCard = document.querySelector('.job-details-jobs-unified-top-card__container--two-pane .mt4 div.display-flex');
+            const compatibleButton = document.querySelector('.job-details-jobs-unified-top-card__container--two-pane .mt4 div.display-flex .evaluation');
+            if (!compatibleButton && topCard) {
+                const jobsApplyDiv = document.createElement('div');
+                jobsApplyDiv.classList.add('jobs-s-apply', 'inline-flex', 'ml2');
+                jobsApplyDiv.innerHTML = `
+                        <div class="jobs-apply-button--top-card">
+                            <button class="jobs-apply-button artdeco-button artdeco-button--3 artdeco-button--premium ember-view evaluation" disabled>
+                                <span class="artdeco-button__text">Evaluating ☕️</span>
+                            </button>
+                        </div>
+                    `;
+                topCard.appendChild(jobsApplyDiv);
+            }
+            if (compatibleButton) {
+                compatibleButton.querySelector('span').textContent = 'Evaluating ☕️';
+                compatibleButton.disabled = true;
+                makePredictionRequest('', 'dataset/resume.pdf', jdText).then(response => {
+                    compatibleButton.disabled = response.predicted_class !== 1;
+                    compatibleButton.querySelector('span').textContent = response.predicted_class === 1 ? 'Compatible 🎉' : 'Incompatible 🙁';
+                }).catch(error => {
+                    console.error('Error:', error);
+                    compatibleButton.querySelector('span').textContent = error.detail[0].msg;
+                })
+                curJid = jobId;
+            }
+        }
+
+
+    }
+
+    async function makePredictionRequest(resumeText, resumePdfPath, jobDescriptionText) {
+        const url = CONFIG.API_URL;
+
+        const data = {
+            "resume_text": resumeText,
+            "resume_pdf_path": resumePdfPath,
+            "job_description_text": jobDescriptionText
+        };
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error:', error);
+            return {error: error.message}; // Optionally return the error message in case of failure
         }
     }
 
