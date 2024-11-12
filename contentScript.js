@@ -360,7 +360,7 @@
 
         const element = document.querySelector(selector);
         if (jobTitle && element) {
-            return `${jobTitle}\n${element.textContent.trim()}`;
+            return `${jobTitle}\n${element.innerText.trim()}`;
         } else {
             console.error('Element not found');
             return '';
