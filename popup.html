@@ -1,129 +1,148 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>LinkedIn Job Helper Settings</title>
-    <style>
-      body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        padding: 15px;
-        min-width: 380px;
-        background-color: #f5f5f5;
-        margin: 0;
-        height: auto;
-      }
-      h2 {
-        color: #333;
-        text-align: center;
-        margin-bottom: 15px;
-      }
-      form {
-        background-color: #fff;
-        padding: 15px;
-        border-radius: 8px;
-      }
-      .form-group {
-        position: relative;
-        margin-top: 15px;
-      }
-      label {
-        display: block;
-        color: #555;
-        font-weight: bold;
-        margin-bottom: 5px;
-      }
-      .form-group input {
-        width: 100%;
-        padding: 10px 10px 10px 10px;
-        box-sizing: border-box;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-      }
-      .form-group input:focus {
-        outline: none;
-        border-color: #0073b1;
-        box-shadow: 0 0 5px rgba(0,115,177,0.3);
-      }
-      .form-group .icon {
-        position: absolute;
-        top: 35px;
-        left: 10px;
-        font-size: 18px;
-        color: #aaa;
-      }
-      button {
-        margin-top: 20px;
-        padding: 12px;
-        width: 100%;
-        background-color: #0073b1;
-        color: #fff;
-        border: none;
-        border-radius: 4px;
-        font-size: 16px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-      }
-      button:hover {
-        background-color: #005f8d;
-      }
-      #status {
-        margin-top: 20px;
-        text-align: center;
-        color: #0073b1;
-        font-weight: bold;
-      }
-      /* Responsive adjustments */
-      @media (max-width: 440px) {
-        body {
-          width: auto;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <form id="personalInfoForm">
-      <div class="form-group">
-        <label for="name">Name</label>
-        <i class="fas fa-user icon"></i>
-        <input type="text" id="name" name="name" aria-label="Name" required>
-      </div>
-      <div class="form-group">
-        <label for="linkedin">LinkedIn URL</label>
-        <i class="fab fa-linkedin icon"></i>
-        <input type="url" id="linkedin" name="linkedin" aria-label="LinkedIn URL">
-      </div>
-      <div class="form-group">
-        <label for="location">Location</label>
-        <i class="fas fa-map-marker-alt icon"></i>
-        <input type="text" id="location" name="location" aria-label="Location">
-      </div>
-      <div class="form-group">
-        <label for="company">Current Company</label>
-        <i class="fas fa-building icon"></i>
-        <input type="text" id="company" name="company" aria-label="Current Company">
-      </div>
-      <div class="form-group">
-        <label for="github">GitHub URL</label>
-        <i class="fab fa-github icon"></i>
-        <input type="url" id="github" name="github" aria-label="GitHub URL">
-      </div>
-      <div class="form-group">
-        <label for="email">Email</label>
-        <i class="fab fa-github icon"></i>
-        <input type="email" id="email" name="email" aria-label="Email">
-      </div>
-      <div class="form-group">
-        <label for="phone">Phone</label>
-        <i class="fab fa-github icon"></i>
-        <input type="tel" id="phone" name="phone" aria-label="Phone">
-      </div>
-      <div class="form-group">
-        <label for="preferred_name">Preferred Name</label>
-        <i class="fab fa-github icon"></i>
-        <input type="text" id="preferred_name" name="preferred_name" aria-label="Preferred Name">
-      </div>
-      <button type="submit">Save</button>
-    </form>
-    <p id="status"></p>
-    <script src="popup.js"></script>
-  </body>
+	<head>
+		<title>LinkedIn Job Helper Settings</title>
+		<style>
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                padding: 15px;
+                min-width: 380px;
+                background-color: #f5f5f5;
+                margin: 0;
+                height: auto;
+            }
+
+            h2 {
+                color: #333;
+                text-align: center;
+                margin-bottom: 15px;
+            }
+
+            form {
+                background-color: #fff;
+                padding: 15px;
+                border-radius: 8px;
+            }
+
+            .form-group {
+                position: relative;
+                margin-top: 15px;
+            }
+
+            label {
+                display: block;
+                color: #555;
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+
+            .form-group input {
+                width: 100%;
+                padding: 10px 10px 10px 10px;
+                box-sizing: border-box;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+            }
+
+            .form-group input:focus {
+                outline: none;
+                border-color: #0073b1;
+                box-shadow: 0 0 5px rgba(0, 115, 177, 0.3);
+            }
+
+            .form-group .icon {
+                position: absolute;
+                top: 35px;
+                left: 10px;
+                font-size: 18px;
+                color: #aaa;
+            }
+
+            button {
+                margin-top: 20px;
+                padding: 12px;
+                width: 100%;
+                background-color: #0073b1;
+                color: #fff;
+                border: none;
+                border-radius: 4px;
+                font-size: 16px;
+                cursor: pointer;
+                transition: background-color 0.3s ease;
+            }
+
+            button:hover {
+                background-color: #005f8d;
+            }
+
+            #status {
+                margin-top: 20px;
+                text-align: center;
+                color: #0073b1;
+                font-weight: bold;
+            }
+
+            /* Responsive adjustments */
+            @media (max-width: 440px) {
+                body {
+                    width: auto;
+                }
+            }
+		</style>
+	</head>
+	<body>
+		<form id="personalInfoForm">
+			<div class="form-group">
+				<label for="name">Name</label>
+				<i class="fas fa-user icon"></i>
+				<input type="text" id="name" name="name" aria-label="Name" required>
+			</div>
+			<div class="form-group">
+				<label for="linkedin">LinkedIn URL</label>
+				<i class="fab fa-linkedin icon"></i>
+				<input type="url" id="linkedin" name="linkedin" aria-label="LinkedIn URL">
+			</div>
+			<div class="form-group">
+				<label for="location">Location</label>
+				<i class="fas fa-map-marker-alt icon"></i>
+				<input type="text" id="location" name="location" aria-label="Location">
+			</div>
+			<div class="form-group">
+				<label for="company">Current Company</label>
+				<i class="fas fa-building icon"></i>
+				<input type="text" id="company" name="company" aria-label="Current Company">
+			</div>
+			<div class="form-group">
+				<label for="github">GitHub URL</label>
+				<i class="fab fa-github icon"></i>
+				<input type="url" id="github" name="github" aria-label="GitHub URL">
+			</div>
+			<div class="form-group">
+				<label for="email">Email</label>
+				<i class="fab fa-github icon"></i>
+				<input type="email" id="email" name="email" aria-label="Email">
+			</div>
+			<div class="form-group">
+				<label for="phone">Phone</label>
+				<i class="fab fa-github icon"></i>
+				<input type="tel" id="phone" name="phone" aria-label="Phone">
+			</div>
+			<div class="form-group">
+				<label for="preferred_name">Preferred Name</label>
+				<i class="fab fa-github icon"></i>
+				<input type="text" id="preferred_name" name="preferred_name" aria-label="Preferred Name">
+			</div>
+			<div class="form-group">
+				<label for="resume">Upload Resume (PDF)</label>
+				<i class="fas fa-file-pdf icon"></i>
+				<input type="file" id="resume" name="resume" accept="application/pdf" aria-label="Upload Resume">
+			</div>
+			<button type="submit">Save</button>
+
+		</form>
+		<p id="status"></p>
+
+		<script src="pdf.js"></script>
+		<script src="popup.js"></script>
+	</body>
 </html>

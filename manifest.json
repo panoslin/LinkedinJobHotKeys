@@ -17,6 +17,15 @@
   "background": {
     "service_worker": "background.js"
   },
+  "web_accessible_resources": [
+    {
+      "resources": ["pdf.worker.js"],
+      "matches": ["https://*.linkedin.com/*"]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';"
+  },
   "content_scripts": [
     {
       "matches": [
