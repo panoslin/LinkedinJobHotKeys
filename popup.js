@@ -10,8 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.storage.local.get('personalInfo', (result) => {
         if (result.personalInfo) {
             Object.entries(result.personalInfo).forEach(([key, value]) => {
-                const input = document.getElementById(key);
-                if (input) input.value = value;
+                if (key !== 'resume') {
+                    const input = document.getElementById(key);
+                    if (input) input.value = value;
+                }
             });
         }
     });
@@ -50,8 +52,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const typedarray = new Uint8Array(this.result);
 
                 extractTextFromPDF(typedarray).then((resumeText) => {
-                    chrome.storage.local.set({resumeText}, function () {
-                        alert(resumeText);
+                    const reductedResumeText = redactSensitiveInfo(resumeText, personalInfo);
+                    chrome.storage.local.set({resumeText: reductedResumeText}, function () {
+                        console.log(reductedResumeText);
                     });
                 });
             };
@@ -74,4 +77,45 @@ async function extractTextFromPDF(typedarray) {
     }
 
     return fullText;
+}
+
+
+function redactSensitiveInfo(text, userInfo) {
+    const regexPatterns = {
+        email: /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi,
+        phone: /(\+?\d{1,3}[\s-]?)?(\(?\d{3}\)?[\s-]?)?[\d\s-]{7,15}/g,
+        ssn: /\b\d{3}-\d{2}-\d{4}\b/g,
+        dob: /\b\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\b/g,
+    };
+
+    let redactedText = text;
+
+    // Redact predefined patterns
+    for (const key in regexPatterns) {
+        redactedText = redactedText.replace(regexPatterns[key], '[REDACTED]');
+    }
+
+    // Redact personal information from userInfo
+    for (const key in userInfo) {
+        if (userInfo[key]) {
+            if (key === 'name') {
+                // redact first name and last name
+                const names = userInfo[key].split(' ');
+                const firstNameRegex = new RegExp(`\\b${escapeRegExp(names[0])}\\b`, 'gi');
+                const lastNameRegex = new RegExp(`\\b${escapeRegExp(names[names.length - 1])}\\b`, 'gi');
+                redactedText = redactedText.replace(firstNameRegex, '[REDACTED]');
+                redactedText = redactedText.replace(lastNameRegex, '[REDACTED]');
+            } else {
+                const escapedValue = escapeRegExp(userInfo[key]);
+                const infoRegex = new RegExp(`\\b${escapedValue}\\b`, 'gi');
+                redactedText = redactedText.replace(infoRegex, '[REDACTED]');
+            }
+        }
+    }
+
+    return redactedText;
+}
+
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
