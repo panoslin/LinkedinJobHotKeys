@@ -1,6 +1,7 @@
 (function () {
     let personalInfo = null;
     let curJid = null;
+    let resumeText = null;
 
     // Fetch personal information once and start the observer after it's loaded
     (async function fetchPersonalInfo() {
@@ -9,6 +10,14 @@
                 personalInfo = result.personalInfo;
                 if (!personalInfo) {
                     console.warn('Personal info not found. Please set it in the extension popup.');
+                    return;
+                }
+                startObserver();
+            });
+            chrome.storage.local.get('resumeText', (result) => {
+                resumeText = result.resumeText;
+                if (!resumeText) {
+                    console.warn('resumeText not found. Please set it in the extension popup.');
                     return;
                 }
                 startObserver();
@@ -391,13 +400,18 @@
             if (compatibleButton) {
                 compatibleButton.querySelector('span').textContent = 'Evaluating ☕️';
                 compatibleButton.disabled = true;
-                makePredictionRequest('', 'dataset/resume.pdf', jdText).then(response => {
-                    compatibleButton.disabled = response.predicted_class !== 1;
-                    compatibleButton.querySelector('span').textContent = response.predicted_class === 1 ? 'Compatible 🎉' : 'Incompatible 🙁';
-                }).catch(error => {
-                    console.error('Error:', error);
-                    compatibleButton.querySelector('span').textContent = error.detail[0].msg;
-                })
+                if (!resumeText) {
+                    compatibleButton.querySelector('span').textContent = 'upload Resume to Evaluate';
+                } else {
+                    makePredictionRequest(resumeText, '', jdText).then(response => {
+                        compatibleButton.disabled = response.predicted_class !== 1;
+                        compatibleButton.querySelector('span').textContent = response.predicted_class === 1 ? 'Compatible 🎉' : 'Incompatible 🙁';
+                    }).catch(error => {
+                        console.error('Error:', error);
+                        compatibleButton.querySelector('span').textContent = error.message;
+                    })
+                }
+
                 curJid = jobId;
             }
         }
@@ -414,24 +428,19 @@
             "job_description_text": jobDescriptionText
         };
 
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
 
-            if (!response.ok) {
-                throw new Error(`Server error: ${response.status}`);
-            }
-
-            return await response.json();
-        } catch (error) {
-            console.error('Error:', error);
-            return {error: error.message}; // Optionally return the error message in case of failure
+        if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
         }
+
+        return await response.json();
     }
 
 })();
