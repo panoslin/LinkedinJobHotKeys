@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "LinkedIn Job Page Button Clicker",
+  "name": "LinkedIn Job Turbo",
   "version": "1.0",
-  "description": "Streamline LinkedIn job applications with Control+X Hotkey.",
+  "description": "Streamline and accelerate your job search on LinkedIn",
   "permissions": [
     "downloads",
     "storage"
