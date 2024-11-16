@@ -10,9 +10,19 @@
   "host_permissions": [
     "https://*.linkedin.com/*"
   ],
+  "icons": {
+    "16": "icons/img.png",
+    "48": "icons/img.png",
+    "128": "icons/img.png"
+  },
   "action": {
     "default_popup": "popup.html",
-    "default_title": "LinkedIn Job Helper"
+    "default_title": "LinkedIn Job Turbo",
+    "default_icon": {
+      "16": "icons/img.png",
+      "48": "icons/img.png",
+      "128": "icons/img.png"
+    }
   },
   "background": {
     "service_worker": "background.js"
