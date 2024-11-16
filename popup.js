@@ -119,3 +119,19 @@ function redactSensitiveInfo(text, userInfo) {
 function escapeRegExp(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
+
+
+function setThemeBasedOnTime() {
+    const body = document.body;
+    const hour = new Date().getHours();
+    if (hour >= 19 || hour < 6) {
+        // Nighttime: 7 PM to 6 AM
+        body.setAttribute('data-theme', 'dark');
+    } else {
+        // Day time: 6 AM to 7 PM
+        body.removeAttribute('data-theme');
+    }
+}
+
+setThemeBasedOnTime();
+

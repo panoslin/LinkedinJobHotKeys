@@ -2,160 +2,222 @@
 <html>
 	<head>
 		<title>LinkedIn Job Helper Settings</title>
+		<!-- Include Font Awesome for icons -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+		<!-- Include Google Fonts -->
+		<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 		<style>
-            body {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                padding: 15px;
-                min-width: 380px;
-                background-color: #f5f5f5;
-                margin: 0;
-                height: auto;
+            :root {
+                --primary-color: #0073b1;
+                --primary-hover-color: #005f8d;
+                --background-color: #f0f0f0;
+                --text-color: #333;
+                --form-background: rgba(255, 255, 255, 0.25);
+                --input-border-color: #ccc;
+                --input-focus-border-color: var(--primary-color);
+                --font-family: 'Poppins', sans-serif;
+                --border-radius: 16px;
+                --box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+                --backdrop-filter: blur(10px);
             }
 
-            h2 {
-                color: #333;
-                text-align: center;
-                margin-bottom: 15px;
+            /* Dark Mode Variables */
+            [data-theme="dark"] {
+                --background-color: #1e1e1e;
+                --text-color: #f0f0f0;
+                --form-background: rgba(255, 255, 255, 0.1);
+                --input-border-color: #555;
+                --input-focus-border-color: #1e90ff;
+                --box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+            }
+
+            body {
+                font-family: var(--font-family);
+                padding: 15px;
+                min-width: 500px;
+                background-color: var(--background-color);
+                margin: 0;
+                color: var(--text-color);
+                transition: background-color 0.3s, color 0.3s;
+            }
+
+            .header {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 25px;
+                animation: fadeIn 0.5s ease-in-out;
+            }
+
+            .logo {
+                margin-right: 12px;
+                width: 50px;
+                height: 50px;
             }
 
             form {
-                background-color: #fff;
-                padding: 15px;
-                border-radius: 8px;
+                background: var(--form-background);
+                padding: 30px;
+                border-radius: var(--border-radius);
+                box-shadow: var(--box-shadow);
+                backdrop-filter: var(--backdrop-filter);
+                -webkit-backdrop-filter: var(--backdrop-filter);
+                min-width: 17rem;
+                max-width: 100%;
+                animation: fadeIn 0.5s ease-in-out;
             }
 
             .form-group {
                 position: relative;
-                margin-top: 15px;
-            }
-
-            label {
-                display: block;
-                color: #555;
-                font-weight: bold;
-                margin-bottom: 5px;
+                margin-top: 25px;
             }
 
             .form-group input {
                 width: 100%;
-                padding: 10px 10px 10px 10px;
+                padding: 14px 12px;
                 box-sizing: border-box;
-                border: 1px solid #ccc;
-                border-radius: 4px;
+                border: 1px solid var(--input-border-color);
+                border-radius: 8px;
+                background: transparent;
+                color: var(--text-color);
+                transition: border-color 0.3s, box-shadow 0.3s;
             }
 
             .form-group input:focus {
                 outline: none;
-                border-color: #0073b1;
-                box-shadow: 0 0 5px rgba(0, 115, 177, 0.3);
+                border-color: var(--input-focus-border-color);
+                box-shadow: 0 0 8px rgba(0, 115, 177, 0.2);
+            }
+
+            .form-group label {
+                position: absolute;
+                top: 14px;
+                left: 12px;
+                pointer-events: none;
+                font-size: 16px;
+                color: #aaa;
+                transition: all 0.2s ease-out;
+                background-color: transparent;
+            }
+
+            .form-group input:focus + label,
+            .form-group input:not(:placeholder-shown) + label {
+                top: -8px;
+                left: 10px;
+                font-size: 12px;
+                color: var(--primary-color);
             }
 
             .form-group .icon {
                 position: absolute;
-                top: 35px;
-                left: 10px;
-                font-size: 18px;
+                top: 16px;
+                right: 12px;
+                font-size: 20px;
                 color: #aaa;
+                transition: color 0.3s;
+            }
+
+            .form-group input:focus ~ .icon {
+                color: var(--primary-color);
             }
 
             button {
-                margin-top: 20px;
-                padding: 12px;
+                margin-top: 30px;
+                padding: 14px;
                 width: 100%;
-                background-color: #0073b1;
+                background: linear-gradient(135deg, var(--primary-color), var(--primary-hover-color));
                 color: #fff;
                 border: none;
-                border-radius: 4px;
-                font-size: 16px;
+                border-radius: 8px;
+                font-size: 18px;
+                font-weight: 600;
                 cursor: pointer;
-                transition: background-color 0.3s ease;
+                transition: background 0.3s ease;
+                box-shadow: 0 4px 6px rgba(0, 115, 177, 0.3);
             }
 
             button:hover {
-                background-color: #005f8d;
+                background: linear-gradient(135deg, var(--primary-hover-color), var(--primary-color));
             }
 
-            #status {
-                margin-top: 20px;
-                text-align: center;
-                color: #0073b1;
-                font-weight: bold;
+            /* Animations */
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
             }
 
             /* Responsive adjustments */
-            @media (max-width: 440px) {
+            @media (max-width: 540px) {
                 body {
-                    width: auto;
+                    min-width: auto;
+                    padding: 10px;
                 }
-            }
-            h2 {
-                color: #333;
-                text-align: center;
-                margin-bottom: 15px;
-            }
-            .logo {
-				margin-right: 1rem;
-                width: 37px;
-                height: 37px;
             }
 		</style>
 	</head>
 	<body>
 
-		<div style="display: flex; align-items: center; justify-content: center;">
+		<div class="header">
 			<img src="icons/img.png" alt="Logo" class="logo">
-			<h2>Personal Information</h2>
+			<h2>LinkedIn Job Turbo</h2>
 		</div>
 		<form id="personalInfoForm">
 			<div class="form-group">
+				<input type="text" id="name" name="name" aria-label="Name" required placeholder=" ">
 				<label for="name">Name</label>
 				<i class="fas fa-user icon"></i>
-				<input type="text" id="name" name="name" aria-label="Name" required>
 			</div>
 			<div class="form-group">
+				<input type="url" id="linkedin" name="linkedin" aria-label="LinkedIn URL" placeholder=" ">
 				<label for="linkedin">LinkedIn URL</label>
 				<i class="fab fa-linkedin icon"></i>
-				<input type="url" id="linkedin" name="linkedin" aria-label="LinkedIn URL">
 			</div>
 			<div class="form-group">
+				<input type="text" id="location" name="location" aria-label="Location" placeholder=" ">
 				<label for="location">Location</label>
 				<i class="fas fa-map-marker-alt icon"></i>
-				<input type="text" id="location" name="location" aria-label="Location">
 			</div>
 			<div class="form-group">
+				<input type="text" id="company" name="company" aria-label="Current Company" placeholder=" ">
 				<label for="company">Current Company</label>
 				<i class="fas fa-building icon"></i>
-				<input type="text" id="company" name="company" aria-label="Current Company">
 			</div>
 			<div class="form-group">
+				<input type="url" id="github" name="github" aria-label="GitHub URL" placeholder=" ">
 				<label for="github">GitHub URL</label>
 				<i class="fab fa-github icon"></i>
-				<input type="url" id="github" name="github" aria-label="GitHub URL">
 			</div>
 			<div class="form-group">
+				<input type="email" id="email" name="email" aria-label="Email" placeholder=" ">
 				<label for="email">Email</label>
-				<i class="fab fa-github icon"></i>
-				<input type="email" id="email" name="email" aria-label="Email">
+				<i class="fas fa-envelope icon"></i>
 			</div>
 			<div class="form-group">
+				<input type="tel" id="phone" name="phone" aria-label="Phone" placeholder=" ">
 				<label for="phone">Phone</label>
-				<i class="fab fa-github icon"></i>
-				<input type="tel" id="phone" name="phone" aria-label="Phone">
+				<i class="fas fa-phone icon"></i>
 			</div>
 			<div class="form-group">
+				<input type="text" id="preferred_name" name="preferred_name" aria-label="Preferred Name" placeholder=" ">
 				<label for="preferred_name">Preferred Name</label>
-				<i class="fab fa-github icon"></i>
-				<input type="text" id="preferred_name" name="preferred_name" aria-label="Preferred Name">
+				<i class="fas fa-id-badge icon"></i>
 			</div>
-			<div class="form-group">
+			<div class="form-group tooltip">
+				<input type="file" id="resume" name="resume" accept="application/pdf" aria-label="Upload Resume" placeholder=" ">
 				<label for="resume">Upload Resume (PDF)</label>
 				<i class="fas fa-file-pdf icon"></i>
-				<input type="file" id="resume" name="resume" accept="application/pdf" aria-label="Upload Resume">
+				<span class="tooltiptext">Please upload your resume in PDF format.</span>
 			</div>
 			<button type="submit">Save</button>
-
 		</form>
 		<p id="status"></p>
+
 
 		<script src="pdf.js"></script>
 		<script src="popup.js"></script>
