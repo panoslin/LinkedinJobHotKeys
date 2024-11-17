@@ -1,13 +1,15 @@
-# LinkedIn Job Page Button Clicker
+# LinkedIn Job Turbo
 
-The LinkedIn Job Page Button Clicker is a Chrome extension 
+The LinkedIn Job Turbo is a Chrome extension 
 designed to streamline and accelerate your job search on LinkedIn 
 by automating repetitive tasks and enhancing your application workflow. 
 
 With features like 
-- auto-filling application forms
-- navigating seamlessly between job postings
-- automatically downloading job descriptions (JD)
+- Auto-filling application forms
+- Navigating seamlessly between job postings with Hotkeys
+- Automatically downloading job descriptions (JD)
+
+[//]: # (- Compatibility prediction of JD with your resume)
 
 this extension enables you to apply for jobs efficiently and keep organized records of each position.
 ## 🚀 1. Getting Started
