@@ -1,0 +1,156 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap');
+
+/* Toast Container */
+.extension-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 220px;
+    height: 100px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease, box-shadow 0.3s ease;
+}
+
+.extension-toast.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.extension-toast.hide {
+    opacity: 0;
+    transform: translateX(100%);
+}
+
+.extension-toast:hover {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4), 0 6px 12px rgba(0, 0, 0, 0.3);
+    transform: scale(1.05);
+}
+
+/* Toast Content */
+.toast-content {
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    color: white;
+    font-size: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    gap: 8px;
+}
+
+/* Combined Spin and Pulse Animation */
+@keyframes Pulse {
+    0% {
+        box-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+    }
+    100% {
+        box-shadow: 0 0 24px rgba(255, 255, 255, 0.8);
+    }
+}
+
+/* Success Toast */
+.extension-toast.success {
+    background: linear-gradient(145deg, #4CAF50, #81C784); /* Green gradient */
+    box-shadow: 0 10px 30px rgba(76, 175, 80, 0.5), 0 4px 8px rgba(0, 0, 0, 0.2);
+    animation: glowSuccess 0.8s infinite alternate;
+}
+
+/* Error Toast */
+.extension-toast.error {
+    background: linear-gradient(145deg, #F44336, #E57373); /* Red gradient */
+    box-shadow: 0 10px 30px rgba(244, 67, 54, 0.5), 0 4px 8px rgba(0, 0, 0, 0.2);
+    animation: glowError 0.8s infinite alternate;
+}
+
+/* Loading Toast */
+.extension-toast.loading {
+    background: linear-gradient(145deg, #2196F3, #64B5F6); /* Blue gradient */
+    box-shadow: 0 10px 30px rgba(33, 150, 243, 0.5), 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Custom Message Toast */
+.extension-toast.message {
+    background: linear-gradient(145deg, #2196F3, #64B5F6); /* Blue gradient */
+    box-shadow: 0 10px 30px rgba(33, 150, 243, 0.5), 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #333;
+}
+
+/* Glow Animations */
+@keyframes glowSuccess {
+    0% {
+        box-shadow: 0 10px 30px rgba(76, 175, 80, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    100% {
+        box-shadow: 0 15px 40px rgba(76, 175, 80, 0.6), 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+}
+
+@keyframes glowError {
+    0% {
+        box-shadow: 0 10px 30px rgba(244, 67, 54, 0.4), 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    100% {
+        box-shadow: 0 15px 40px rgba(244, 67, 54, 0.6), 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+}
+
+/* Spinner for Loading */
+.toast-spinner {
+    width: 24px;
+    height: 24px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spinAndPulse 0.8s linear infinite;
+}
+
+/* Combined Spin and Pulse Animation */
+@keyframes spinAndPulse {
+    0% {
+        transform: rotate(0deg) scale(1); /* Start spinning and at normal scale */
+        box-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
+    }
+    50% {
+        transform: rotate(180deg) scale(1.2); /* Mid-spin with a slight pulse */
+        box-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+    }
+    100% {
+        transform: rotate(360deg) scale(1); /* Full spin back to normal scale */
+        box-shadow: 0 0 24px rgba(255, 255, 255, 0.8);
+    }
+}
+
+/* Spinner Animation */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Pulsating Dot Animation */
+@keyframes pulse {
+    0% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}

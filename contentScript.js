@@ -2,6 +2,7 @@
     let personalInfo = null;
     let curJid = null;
     let resumeText = null;
+    let inspectMode = false;
 
     // Fetch personal information once and start the observer after it's loaded
     (async function fetchPersonalInfo() {
@@ -88,7 +89,7 @@
             console.log("LinkedIn URL filled automatically.");
         } else if (
             ['location', 'city', 'home address'].some(term => labelText.includes(term)) &&
-            !inputBox.classList.contains('jobs-search-box__input-icon')
+            !inputBox.classList.contains('jobs-search-box__text-input')
         ) {
             inputBox.value = personalInfo.location;
             console.log("Location filled automatically.");
@@ -107,7 +108,7 @@
         } else if (labelText.includes('preferred name') && personalInfo.preferred_name) {
             inputBox.value = personalInfo.preferred_name;
             console.log("Preferred name filled automatically.");
-        } else if (labelText.includes('name') && personalInfo.name) {
+        } else if (labelText === 'name' && personalInfo.name) {
             inputBox.value = personalInfo.name;
             console.log("Name filled automatically.");
         } else if (labelText.includes('how did you hear about this job?')) {
@@ -294,6 +295,16 @@
             event.preventDefault();
             let activeLi = document.querySelector('.jobs-search-results-list__list-item--active');
             activeLi.scrollIntoView({behavior: 'smooth', block: 'center'});
+        } else if (ctrlKey && code === 'KeyC') {
+            event.preventDefault();
+            if (inspectMode) {
+                inspector.disableInspectMode();
+            } else {
+                inspector.enableInspectMode();
+            }
+        } else if (inspectMode && code === 'Escape') {
+            event.preventDefault();
+            inspector.disableInspectMode();
         } else if (ctrlKey && !shiftKey && code === 'KeyX') {
             event.preventDefault();
 
@@ -362,7 +373,6 @@
                         compatibleButton.disabled = response.predicted_class !== 1;
                         compatibleButton.querySelector('span').textContent = response.predicted_class === 1 ? 'Compatible 🎉' : 'Incompatible 🙁';
                     }).catch(error => {
-                        console.error('Error:', error);
                         compatibleButton.querySelector('span').textContent = error.message;
                     })
                 }
@@ -396,6 +406,159 @@
         }
 
         return await response.json();
+    }
+
+    // Function to toggle the inspect mode
+    function enableInspectMode() {
+        let style, selectedElement = null;
+
+        function addHighlightStyle() {
+            style = document.createElement('link');
+            style.rel = 'stylesheet';
+            style.href = chrome.runtime.getURL('styles/inspection_mode.css');
+            document.head.appendChild(style);
+        }
+
+        function removeHighlightStyle() {
+            if (style) style.remove();
+            if (selectedElement) {
+                selectedElement.classList.remove('highlight');
+            }
+        }
+
+        function onMouseOver(event) {
+            if (selectedElement) return;
+            event.target.classList.add('highlight');
+        }
+
+        function onMouseOut(event) {
+            if (selectedElement) return;
+            event.target.classList.remove('highlight');
+        }
+
+        function onClick(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (selectedElement) {
+                selectedElement.classList.remove('highlight');
+            }
+            selectedElement = event.target;
+            selectedElement.classList.add('highlight');
+
+            // Show loading toast
+            displayToast('loading');
+            makePredictionRequest(resumeText, '', selectedElement.innerText)
+                .then(response => {
+                    displayToast(response.predicted_class === 1);
+                })
+                .catch(error => {
+                    displayToast(error.message || 'An unexpected error occurred.');
+                    console.error('Error:', error);
+                });
+
+            disableInspectMode();
+
+        }
+
+        function enableInspectMode() {
+            console.log('Inspect Mode Enabled');
+            addHighlightStyle();
+            document.addEventListener('mouseover', onMouseOver);
+            document.addEventListener('mouseout', onMouseOut);
+            document.addEventListener('click', onClick);
+            inspectMode = true;
+        }
+
+        function disableInspectMode() {
+            console.log('Inspect Mode Disabled');
+            removeHighlightStyle();
+            document.removeEventListener('mouseover', onMouseOver);
+            document.removeEventListener('mouseout', onMouseOut);
+            document.removeEventListener('click', onClick);
+            inspectMode = false;
+            selectedElement = null;
+        }
+
+        return {enableInspectMode, disableInspectMode};
+    }
+
+    const inspector = enableInspectMode();
+    function displayToast(status) {
+        let toast = document.getElementById('extension-toast');
+        let style = document.getElementById('extension-toast-style');
+
+        // Create toast container if not already present
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'extension-toast';
+            toast.className = 'extension-toast';
+            document.body.appendChild(toast);
+        }
+
+        // Inject the stylesheet if not already added
+        if (!style) {
+            style = document.createElement('link');
+            style.rel = 'stylesheet';
+            style.id = 'extension-toast-style';
+            style.href = chrome.runtime.getURL('styles/modal.css'); // Ensure this matches your CSS file location
+            document.head.appendChild(style);
+        }
+
+        // Set toast content and style based on status
+        if (status === true) {
+            toast.innerHTML = `
+            <div class="toast-content">MATCH 🎉</div>
+        `;
+            toast.className = 'extension-toast success';
+            hideToastAfterDelay(toast, style);
+        } else if (status === false) {
+            toast.innerHTML = `
+            <div class="toast-content">MISMATCH 🙁</div>
+        `;
+            toast.className = 'extension-toast error';
+            hideToastAfterDelay(toast, style);
+        } else if (status === 'loading') {
+            toast.innerHTML = `
+            <div class="toast-content">
+                <div class="toast-spinner"></div>
+                <div>Loading...</div>
+            </div>
+        `;
+            toast.className = 'extension-toast loading';
+        } else if (typeof status === 'string') {
+            toast.innerHTML = `
+            <div class="toast-content">${status}</div>
+        `;
+            toast.className = 'extension-toast message';
+            hideToastAfterDelay(toast, style);
+        } else {
+            console.error('Invalid status for toast');
+        }
+
+        // Show the toast with animation
+        toast.classList.remove('hide');
+        toast.classList.add('show');
+
+        // Allow manual dismissal on click
+        toast.addEventListener('click', () => {
+            toast.classList.remove('show');
+            toast.classList.add('hide');
+            setTimeout(() => {
+                toast.remove();
+                style.remove();
+            }, 400);
+        });
+    }
+
+    function hideToastAfterDelay(toast, style, delay = 3000) {
+        setTimeout(() => {
+            toast.classList.remove('show');
+            toast.classList.add('hide');
+            setTimeout(() => {
+                toast.remove();
+                style.remove();
+            }, 400); // Match this to the fadeOut animation duration
+        }, delay);
     }
 
 })();

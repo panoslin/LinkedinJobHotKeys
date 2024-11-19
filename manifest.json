@@ -8,7 +8,7 @@
     "storage"
   ],
   "host_permissions": [
-    "https://*.linkedin.com/*"
+    "<all_urls>"
   ],
   "icons": {
     "16": "icons/img.png",
@@ -29,8 +29,14 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["pdf.worker.js"],
-      "matches": ["https://*.linkedin.com/*"]
+      "resources": [
+        "pdf.worker.js",
+        "styles/inspection_mode.css",
+        "styles/modal.css"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ],
   "content_security_policy": {
@@ -39,7 +45,7 @@
   "content_scripts": [
     {
       "matches": [
-        "https://*.linkedin.com/*"
+        "<all_urls>"
       ],
       "js": [
         "contentScript.js",
