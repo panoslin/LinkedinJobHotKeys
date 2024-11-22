@@ -252,9 +252,10 @@
         }
         if (count <= 2) {
             const element = document.querySelector('.jobs-search-results-list');
-            if (!element) return;
-            // Scroll to the bottom of the element
-            element.scrollTop = element.scrollHeight;
+            if (element) {
+                // Scroll to the bottom of the element
+                element.scrollTop = element.scrollHeight;
+            }
         }
 
         nextLi = activeLi ? activeLi.closest('li').nextElementSibling : null;
@@ -289,7 +290,11 @@
             downloadJD(false);
         } else if (ctrlKey && shiftKey && code === 'KeyX') {
             event.preventDefault();
-            downloadJD(false);
+            if (document.querySelector('.jobs-s-apply a.jobs-s-apply__application-link')) {
+                // downloadJD(true);
+            } else {
+                downloadJD(false);
+            }
             selectAndClickNextLi();
         } else if (ctrlKey && code === 'KeyZ') {
             event.preventDefault();
@@ -356,7 +361,7 @@
                 jobsApplyDiv.classList.add('jobs-s-apply', 'inline-flex', 'ml2');
                 jobsApplyDiv.innerHTML = `
                         <div class="jobs-apply-button--top-card">
-                            <button class="jobs-apply-button artdeco-button artdeco-button--3 artdeco-button--premium ember-view evaluation" disabled>
+                            <button class="artdeco-button artdeco-button--3 artdeco-button--premium ember-view evaluation" disabled>
                                 <span class="artdeco-button__text">Evaluating ☕️</span>
                             </button>
                         </div>
