@@ -77,7 +77,7 @@
                 }
             });
         } catch (error) {
-            console.error('Error in fillForm:', error);
+            console.log('Error in fillForm:', error);
         }
     }
 
@@ -216,21 +216,16 @@
         observer.observe(document.body, {childList: true, subtree: true});
     }
 
-    function downloadJD(applied = false) {
+    function downloadJD(applied = false, jd) {
         // Download the job description to local
-        const text = extractTextFromElement('.jobs-box__html-content .mt4');
-        if (text) {
-            const blob = new Blob([text], {type: 'text/plain'});
-            const url = URL.createObjectURL(blob);
+        const blob = new Blob([jd], {type: 'text/plain'});
+        const url = URL.createObjectURL(blob);
 
-            const currentJobId = new URL(window.location.href).searchParams.get("currentJobId");
+        const currentJobId = new URL(window.location.href).searchParams.get("currentJobId");
 
-            chrome.runtime.sendMessage({
-                action: 'download',
-                url: url,
-                filename: `LinkedinJD-${applied}-${currentJobId}.txt`
-            });
-        }
+        chrome.runtime.sendMessage({
+            action: 'download', url: url, filename: `LinkedinJD-${applied}-${currentJobId}.txt`
+        });
     }
 
     function selectAndClickNextLi() {
@@ -287,13 +282,13 @@
         const {ctrlKey, shiftKey, code} = event;
         if (ctrlKey && code === 'KeyD') {
             event.preventDefault();
-            downloadJD(false);
+            makeRecord(false);
         } else if (ctrlKey && shiftKey && code === 'KeyX') {
             event.preventDefault();
             if (document.querySelector('.jobs-s-apply a.jobs-s-apply__application-link')) {
-                // downloadJD(true);
+                // makeRecord(true);
             } else {
-                downloadJD(false);
+                makeRecord(false);
             }
             selectAndClickNextLi();
         } else if (ctrlKey && code === 'KeyZ') {
@@ -326,7 +321,7 @@
                 const button = document.querySelector(selector);
                 if (button) {
                     if (selector.includes('.jobs-apply-button')) {
-                        downloadJD(true);
+                        makeRecord(true);
                     }
                     button.click();
                     break;
@@ -390,15 +385,14 @@
     }
 
     async function makePredictionRequest(resumeText, resumePdfPath, jobDescriptionText) {
-        const url = CONFIG.API_URL;
-
+        const url = CONFIG.API_ENDPOINT;
         const data = {
             "resume_text": resumeText,
             "resume_pdf_path": resumePdfPath,
             "job_description_text": jobDescriptionText
         };
 
-        const response = await fetch(url, {
+        const response = await fetch(`${url}/predict`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -488,6 +482,7 @@
     }
 
     const inspector = enableInspectMode();
+
     function displayToast(status) {
         let toast = document.getElementById('extension-toast');
         let style = document.getElementById('extension-toast-style');
@@ -564,6 +559,49 @@
                 style.remove();
             }, 400); // Match this to the fadeOut animation duration
         }, delay);
+    }
+
+    function makeRecord(applied) {
+        const jd = extractTextFromElement('.jobs-box__html-content .mt4');
+        if (jd) {
+            downloadJD(applied, jd);
+            const payload = {
+                resume_text: resumeText,
+                job_description: jd,
+                applied: applied,
+                link: document.location.href,
+                source: document.location.hostname,
+                user: null,
+                job_id: window.location.href.match(/(\d+)/)[1] || null,
+            };
+            createApplication(payload)
+                .then((data) => {
+                    console.log("Response from server:", data);
+                })
+                .catch((error) => {
+                    console.error("Upload failed:", error.message);
+                });
+        }
+    }
+
+    async function createApplication(payload) {
+        const url = CONFIG.API_ENDPOINT;
+        const response = await fetch(`${url}/applications`, {
+            method: "POST", headers: {
+                "Content-Type": "application/json"
+            }, body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            // Handle HTTP errors
+            const errorData = await response.json();
+            throw new Error(`Error ${response.status}: ${errorData.detail || "Unknown error"}`);
+        }
+
+        // Parse and return JSON response
+        const data = await response.json();
+        console.log("File uploaded successfully:", data);
+        return data;
     }
 
 })();

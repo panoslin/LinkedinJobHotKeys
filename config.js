@@ -1,3 +1,3 @@
 const CONFIG = {
-    API_URL: 'http://localhost:8000/predict'
+    API_ENDPOINT: 'http://localhost:8000'
 };
