@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "LinkedIn Job Turbo",
-  "version": "1.1",
+  "version": "2.0",
   "description": "Streamline and accelerate your job search on LinkedIn",
   "permissions": [
     "downloads",
