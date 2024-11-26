@@ -46,6 +46,60 @@ async function extractPersonalInfo(apiToken, userPrompt, model = "gpt-4o") {
     return await sendPrompt(apiToken, userPrompt, systemPrompt, model, response_format);
 }
 
+/**
+ * Extracts keywords from resume and JD using OpenAI's model.
+ *
+ * @param {string} apiToken - Your OpenAI API token.
+ * @param {string} userPrompt - The user's input prompt.
+ * @param {string} [model="gpt-4"] - The OpenAI model to use.
+ * @returns {Promise<Object[]>} - A promise that resolves to the parsed JSON response or an empty array on failure.
+ */
+async function extractKeywords(apiToken, userPrompt, model = "gpt-4o") {
+    const systemPrompt = "Base on this JD, my resume and additional information. " +
+        "Give me a json telling me the match, mismatch keywords between my resume and the JD, " +
+        "and a boolean indicating to apply or not, and a one sentence concise summary. " +
+        "List all of the important keywords from the JD, " +
+        "each keyword should be a pair, the first one is the keyword, the second one should be the exact original text from the JD. " +
+        "each keywords should be within 10 words, for both the text in the pair"
+
+    const response_format = {
+        type: "json_schema",
+        json_schema: {
+            name: "resume_jd_keywords_extraction_schema",
+            schema: {
+                type: "object",
+                properties: {
+                    match: {
+                        type: "array",
+                        items: {
+                            type: "array",
+                            items: {type: "string"}
+                        }
+                    },
+                    mismatch: {
+                        type: "array",
+                        items: {
+                            type: "array",
+                            items: {type: "string"}
+                        }
+                    },
+                    summary: {type: "string"},
+                    apply: {type: "boolean"},
+                },
+                required: [
+                    "match",
+                    "mismatch",
+                    "summary",
+                    "apply"
+                ],
+                additionalProperties: false
+            },
+            strict: true
+        }
+    }
+    return await sendPrompt(apiToken, userPrompt, systemPrompt, model, response_format);
+}
+
 
 /**
  * Sends a prompt to the OpenAI Chat Completion API and returns the parsed response.
@@ -63,7 +117,7 @@ async function sendPrompt(
     systemPrompt,
     model =
         "gpt-4o",
-    response_format={}
+    response_format = {}
 ) {
     const API_URL = 'https://api.openai.com/v1/chat/completions';
 

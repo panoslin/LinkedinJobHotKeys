@@ -1,6 +1,8 @@
 (function () {
     let personalInfo = null;
     let resumeText = null;
+    let chatGPTAccessToken = null;
+    let curJid = null;
 
     // Fetch personal information once and start the observer after it's loaded
     (async function fetchPersonalInfo() {
@@ -17,14 +19,46 @@
                 resumeText = result.resumeText;
                 if (!resumeText) {
                     console.warn('resumeText not found. Please set it in the extension popup.');
-                    return;
                 }
-                startObserver();
+            });
+            chrome.storage.local.get('chatGPTAccessToken', (result) => {
+                chatGPTAccessToken = result.chatGPTAccessToken;
+                if (!chatGPTAccessToken) {
+                    console.warn('chatGPTAccessToken not found. Please set it in the extension popup.');
+                }
             });
         } catch (error) {
             console.error('Failed to load personal information:', error);
         }
     })();
+
+    (async function insertKeywordStyle() {
+        // insert styles/keywords.css to head
+        const styleElement = document.createElement('link');
+        styleElement.rel = 'stylesheet';
+        styleElement.href = chrome.runtime.getURL('styles/keywords.css');
+        document.head.appendChild(styleElement);
+    })();
+
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        console.log(request);
+        if (request.action === 'updatePersonalInfo') {
+            chrome.storage.local.get('personalInfo', (result) => {
+                personalInfo = result.personalInfo;
+                if (!personalInfo) {
+                    console.warn('Personal info not found. Please set it in the extension popup.');
+                    return;
+                }
+                startObserver();
+            });
+            chrome.storage.local.get('resumeText', (result) => {
+                resumeText = result.resumeText;
+                if (!resumeText) {
+                    console.warn('resumeText not found. Please set it in the extension popup.');
+                }
+            });
+        }
+    });
 
     function dismissApplicationSentModal() {
 
@@ -183,6 +217,107 @@
         }
     }
 
+    function analyzeKeyword(mutation) {
+        const jobId = new URL(window.location.href).searchParams.get("currentJobId");
+        // 1. get keywords
+        const jd = extractTextFromElement('.jobs-search__job-details--wrapper');
+        if (jd && resumeText && chatGPTAccessToken && jobId !== curJid && jd.length >= 4000) {
+            const chatGPTContainer = document.querySelector('.chat-gpt-container');
+            if (chatGPTContainer) {
+                chatGPTContainer.remove();
+            }
+            const jd = extractTextFromElement('.jobs-search__job-details--wrapper');
+            const r = '{"TechnicalQualifications": {"ProgrammingLanguages": ["Python", "Java", "C++", "SQL", "JavaScript", "Shell scripting", "HTML/CSS"], "FrameworksAndLibraries": ["Django", "Angular", "Spring Boot", "Flask", "Pytest", "Celery", "ELK", "Pandas", "NumPy", "Selenium", "Exchangelib"], "DeveloperTools": ["Docker", "Google Cloud Platform (GCP)", "Jenkins", "Git", "PyCharm", "IntelliJ IDEA", "VS Code"], "CloudAndInfrastructure": ["GCP (Google Kubernetes Engine)", "Docker Swarm", "Docker Containers", "ELK Stack"], "SoftwareDevelopmentExpertise": ["REST API development", "full-stack web applications", "object-oriented design", "distributed systems"], "SecurityPractices": ["SSO (Single Sign-On)", "OAuth", "LDAP", "CSRF protection", "CORS protection"], "AutomationAndOptimization": ["Automated payment affirmation and email processing", "Developed distributed transcoding and data crawling systems"], "DataManagement": ["PostgreSQL", "MySQL", "Pandas for data processing and analysis"], "TestingAndDebugging": ["Pytest", "pytest-mock", "achieving 80%+ test coverage", "Custom middleware and logging solutions"]}, "NonTechnicalQualifications": {"ProjectLeadership": "Led projects from ideation to deployment, including backend architecture and frontend integration.", "TeamCollaboration": "Worked in cross-functional teams at HSBC and TVCBOOK.com.", "ProblemSolvingSkills": "Simplified codebases and improved scalability of systems.", "CommunicationSkills": "Clear documentation and ability to explain complex systems, evident in professional roles and projects.", "Adaptability": "Migrated legacy systems to modern infrastructures like Docker and GCP.", "WorkEfficiency": "Successfully reduced manual costs and log sizes through automation and optimization.", "EducationBackground": ["Bachelor\'s in Financial Mathematics complements technical problem-solving skills.", "Currently pursuing a Master\'s in Computer Science, enhancing knowledge base and expertise."], "GoalOriented": "Consistently focused on process improvement, productivity enhancement, and delivering measurable results."}}'
+
+            const userPrompt = `
+                \nAdditional information: ${personalInfo.additional_info}
+                \n\nResume: ${r}
+                \n\nJD: ${jd}
+            `
+            extractKeywords(chatGPTAccessToken, userPrompt).then((response) => {
+                console.log(response)
+                // 2. insert to '.job-details-jobs-unified-top-card__container--two-pane div'
+                const container = document.querySelector('.job-details-jobs-unified-top-card__container--two-pane div');
+                if (container) {
+                    const match = response.match
+                    const mismatch = response.mismatch
+                    const summary = response.summary
+                    // const apply = response.apply
+                    const chatGPTContainer = document.createElement('div');
+                    chatGPTContainer.classList.add('chat-gpt-container');
+
+                    const keywordsContainer = document.createElement('div');
+                    keywordsContainer.classList.add('keywords');
+                    match.forEach((keyword) => {
+                        const keywordSpan = document.createElement('span');
+                        keywordSpan.classList.add('keyword', 'match');
+                        keywordSpan.textContent = keyword[0];
+                        // Create a tooltip
+                        const tooltip = document.createElement('div');
+                        tooltip.classList.add('tooltip');
+                        tooltip.textContent = keyword[1];
+                        keywordSpan.appendChild(tooltip);
+
+                        // Show and hide tooltip on hover
+                        keywordSpan.addEventListener('mouseover', () => {
+                            tooltip.style.visibility = 'visible';
+                            tooltip.style.opacity = '1';
+                        });
+                        keywordSpan.addEventListener('mouseout', () => {
+                            tooltip.style.visibility = 'hidden';
+                            tooltip.style.opacity = '0';
+                        });
+                        keywordSpan.addEventListener('click', () => {
+                            highlightKeywordInDiv(keyword[1]);
+                        });
+                        keywordsContainer.appendChild(keywordSpan);
+                    });
+                    mismatch.forEach((keyword) => {
+                        const keywordSpan = document.createElement('span');
+                        keywordSpan.classList.add('keyword', 'mismatch');
+                        keywordSpan.textContent = keyword[0];
+                        // Create a tooltip
+                        const tooltip = document.createElement('div');
+                        tooltip.classList.add('tooltip');
+                        tooltip.textContent = keyword[1];
+                        keywordSpan.appendChild(tooltip);
+
+                        // Show and hide tooltip on hover
+                        keywordSpan.addEventListener('mouseover', () => {
+                            tooltip.style.visibility = 'visible';
+                            tooltip.style.opacity = '1';
+                        });
+                        keywordSpan.addEventListener('mouseout', () => {
+                            tooltip.style.visibility = 'hidden';
+                            tooltip.style.opacity = '0';
+                        });
+                        keywordSpan.addEventListener('click', () => {
+                            highlightKeywordInDiv(keyword[1]);
+                        });
+                        keywordsContainer.appendChild(keywordSpan);
+                    });
+
+                    const summaryContainer = document.createElement('div');
+                    summaryContainer.classList.add('summary');
+                    summaryContainer.innerHTML = `<strong>Summary:</strong> ${summary}`;
+
+                    // const applyContainer = document.createElement('div');
+                    // applyContainer.classList.add('apply');
+                    // applyContainer.innerHTML = `<a href="#" class="apply-link"><span class="apply-text">✔ Apply Decision:</span> <strong>${apply ? 'Yes' : 'No'}</strong></a>`;
+
+                    chatGPTContainer.appendChild(keywordsContainer)
+                    chatGPTContainer.appendChild(summaryContainer)
+                    // chatGPTcontainer.appendChild(applyContainer)
+
+                    container.appendChild(chatGPTContainer)
+
+                }
+
+            })
+            curJid = jobId
+        }
+    }
+
     function startObserver() {
         // Custom throttle function
         function throttle(func, delay) {
@@ -203,6 +338,7 @@
                     uncheckFollowCompanyCheckbox();
                     dismissApplicationSentModal();
                     fillForm();
+                    analyzeKeyword(mutation);
                     // Exit after handling the first relevant mutation
                     break;
                 }

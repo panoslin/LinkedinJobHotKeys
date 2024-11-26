@@ -30,7 +30,8 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "pdf.worker.js"
+        "pdf.worker.js",
+        "styles/keywords.css"
       ],
       "matches": [
         "*://*.linkedin.com/*"
@@ -47,7 +48,9 @@
       ],
       "js": [
         "contentScript.js",
-        "config.js"
+        "config.js",
+        "chatGPT.js",
+        "analyzeKeyword.js"
       ],
       "run_at": "document_end"
     }

@@ -63,5 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             fileReader.readAsArrayBuffer(file);
         }
+
+        chrome.runtime.sendMessage({
+            action: 'updatePersonalInfo',
+        });
     });
 });
