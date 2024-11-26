@@ -227,11 +227,10 @@
                 chatGPTContainer.remove();
             }
             const jd = extractTextFromElement('.jobs-search__job-details--wrapper');
-            const r = '{"TechnicalQualifications": {"ProgrammingLanguages": ["Python", "Java", "C++", "SQL", "JavaScript", "Shell scripting", "HTML/CSS"], "FrameworksAndLibraries": ["Django", "Angular", "Spring Boot", "Flask", "Pytest", "Celery", "ELK", "Pandas", "NumPy", "Selenium", "Exchangelib"], "DeveloperTools": ["Docker", "Google Cloud Platform (GCP)", "Jenkins", "Git", "PyCharm", "IntelliJ IDEA", "VS Code"], "CloudAndInfrastructure": ["GCP (Google Kubernetes Engine)", "Docker Swarm", "Docker Containers", "ELK Stack"], "SoftwareDevelopmentExpertise": ["REST API development", "full-stack web applications", "object-oriented design", "distributed systems"], "SecurityPractices": ["SSO (Single Sign-On)", "OAuth", "LDAP", "CSRF protection", "CORS protection"], "AutomationAndOptimization": ["Automated payment affirmation and email processing", "Developed distributed transcoding and data crawling systems"], "DataManagement": ["PostgreSQL", "MySQL", "Pandas for data processing and analysis"], "TestingAndDebugging": ["Pytest", "pytest-mock", "achieving 80%+ test coverage", "Custom middleware and logging solutions"]}, "NonTechnicalQualifications": {"ProjectLeadership": "Led projects from ideation to deployment, including backend architecture and frontend integration.", "TeamCollaboration": "Worked in cross-functional teams at HSBC and TVCBOOK.com.", "ProblemSolvingSkills": "Simplified codebases and improved scalability of systems.", "CommunicationSkills": "Clear documentation and ability to explain complex systems, evident in professional roles and projects.", "Adaptability": "Migrated legacy systems to modern infrastructures like Docker and GCP.", "WorkEfficiency": "Successfully reduced manual costs and log sizes through automation and optimization.", "EducationBackground": ["Bachelor\'s in Financial Mathematics complements technical problem-solving skills.", "Currently pursuing a Master\'s in Computer Science, enhancing knowledge base and expertise."], "GoalOriented": "Consistently focused on process improvement, productivity enhancement, and delivering measurable results."}}'
-
+            const resume = personalInfo.summarizedResume || resumeText;
             const userPrompt = `
                 \nAdditional information: ${personalInfo.additional_info}
-                \n\nResume: ${r}
+                \n\nResume: ${resume}
                 \n\nJD: ${jd}
             `
             extractKeywords(chatGPTAccessToken, userPrompt).then((response) => {

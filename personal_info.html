@@ -15,7 +15,7 @@
 			</div>
 			<div class="header-right">
 				<i class="fas fa-home header-icon" id="homeIcon" title="Go to Home"></i>
-<!--				<i class="fas fa-cog header-icon" id="settingsIcon" title="Settings"></i>-->
+				<!--				<i class="fas fa-cog header-icon" id="settingsIcon" title="Settings"></i>-->
 			</div>
 		</div>
 		<div class="container">
@@ -63,7 +63,8 @@
 				<div class="form-group">
 					<textarea id="additional_info" name="additional_info" aria-label="Additional Info" placeholder=" " rows="5" cols="50"></textarea>
 					<label for="additional_info">
-						Any additional information about yourself, such as required sponsorships, desired salary range, clearance levels, or any other relevant details.
+						Any additional information about yourself, such as required sponsorships, desired salary range,
+						clearance levels, or any other relevant details.
 					</label>
 					<i class="fas fa-info icon"></i>
 				</div>
@@ -71,7 +72,8 @@
 					<input type="file" id="resume" name="resume" accept="application/pdf" aria-label="Upload Resume" placeholder=" ">
 					<label for="resume">Upload Resume (PDF)</label>
 					<i class="fas fa-file-pdf icon"></i>
-					<span class="tooltiptext">Please upload your resume in PDF format.</span>
+					<span class="tooltiptext" id="uploadResumeText">Please upload your resume in PDF format.</span>
+					<span id="uploadResumeSpinner" class="spinner" style="display: none"></span>
 				</div>
 				<button type="submit">Save</button>
 			</form>
@@ -82,5 +84,6 @@
 		<script src="pdf.js"></script>
 		<script src="personal_info.js"></script>
 		<script src="popup.js"></script>
+		<script src="chatGPT.js"></script>
 	</body>
 </html>

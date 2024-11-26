@@ -45,14 +45,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const token = chatGPTTokenInput.value.trim();
 
         if (token) {
-            chrome.storage.local.set({ chatGPTAccessToken: token }, () => {
+            chrome.storage.local.set({chatGPTAccessToken: token}, () => {
                 uploadResume.disabled = false;
                 uploadResume.style.color = '';
                 status.textContent = 'chatGPT Access Token saved!';
                 setTimeout(() => {
                     status.textContent = '';
                 }, 3000);
-                uploadResume.scrollIntoView({ behavior: 'smooth' });
+                uploadResume.scrollIntoView({behavior: 'smooth'});
             });
         } else {
             alert('Please enter a valid access token.');
@@ -64,33 +64,74 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('resumeInput').click();
     });
 
-    document.getElementById('resumeInput').addEventListener('change', (event) => {
+    document.getElementById('resumeInput').addEventListener('change', async (event) => {
         const file = event.target.files[0];
         if (file) {
             // Validate that the file is a PDF
             if (file.type === 'application/pdf') {
-                let personalInfo = {};
-                const fileReader = new FileReader();
-                fileReader.onload = function () {
-                    const typedarray = new Uint8Array(this.result);
-                    try {
-                        extractTextFromPDF(typedarray).then((resumeText) => {
+                // Show the spinner
+                const uploadResumeSpinner = document.getElementById('uploadResumeSpinner');
+                const uploadResumeText = document.getElementById('uploadResumeText');
+                uploadResumeSpinner.style.display = 'inline-block';
+                uploadResumeText.textContent = 'Uploading...';
+                try {
+                    const personalInfo = await new Promise((resolve) => {
+                        chrome.storage.local.get('personalInfo', (result) => {
+                            resolve(result.personalInfo || {});
+                        });
+                    });
+
+                    const fileReader = new FileReader();
+                    fileReader.onload = async function () {
+                        const typedarray = new Uint8Array(this.result);
+                        try {
+                            const resumeText = await extractTextFromPDF(typedarray);
+
                             if (!chatGPTAccessToken) {
                                 alert('Please enter a valid access token.');
                                 return;
                             }
-                            const redactedResumeText = redactSensitiveInfo(resumeText, personalInfo);
-                            extractPersonalInfo(chatGPTAccessToken, resumeText).then((response) => {
-                                chrome.storage.local.set({personalInfo: response});
-                            })
-                            chrome.storage.local.set({resumeText: redactedResumeText});
-                        });
-                    } catch (error) {
-                        alert(error.message);
-                    }
-                };
 
-                fileReader.readAsArrayBuffer(file);
+                            uploadResumeText.textContent = 'Extracting Information 🤖 ...';
+                            const [summarizedResume, extractedInfo] = await Promise.all([
+                                summarizeResume(chatGPTAccessToken, resumeText),
+                                extractPersonalInfo(chatGPTAccessToken, resumeText)
+                            ]);
+
+                            personalInfo.summarizedResume = JSON.stringify(summarizedResume);
+
+                            for (const [key, value] of Object.entries(extractedInfo)) {
+                                personalInfo[key] = value || personalInfo[key];
+                            }
+
+                            await new Promise((resolve) => {
+                                chrome.storage.local.set({personalInfo: personalInfo}, resolve);
+                            });
+
+                            const redactedResumeText = redactSensitiveInfo(resumeText, personalInfo);
+                            await new Promise((resolve) => {
+                                chrome.storage.local.set({resumeText: redactedResumeText}, resolve);
+                            });
+
+                            // Redirect to 'personal_info.html' after all operations are complete
+                            window.location.href = 'personal_info.html';
+
+                        } catch (error) {
+                            alert(error.message);
+                        } finally {
+                            // Hide the spinner
+                            uploadResumeSpinner.style.display = 'none';
+                            uploadResumeText.textContent = 'Upload Resume';
+                        }
+                    };
+
+                    fileReader.readAsArrayBuffer(file);
+                } catch (error) {
+                    alert('An error occurred while processing the file.');
+                    // Hide the spinner in case of error
+                    uploadResumeSpinner.style.display = 'none';
+                    uploadResumeText.textContent = 'Upload Resume';
+                }
             } else {
                 alert('Please upload a valid PDF file.');
             }

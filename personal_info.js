@@ -1,15 +1,15 @@
-
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('personalInfoForm');
     const status = document.getElementById('status');
     const resumeInput = document.getElementById('resume');
+    let chatGPTAccessToken = '';
 
     document.getElementById('homeIcon').addEventListener('click', () => {
         window.location.href = chrome.runtime.getURL('landing.html?fromHome=true');
     });
 
     // Load saved data and populate the form
-    chrome.storage.local.get('personalInfo', (result) => {
+    chrome.storage.local.get(['personalInfo', 'chatGPTAccessToken'], (result) => {
         if (result.personalInfo) {
             Object.entries(result.personalInfo).forEach(([key, value]) => {
                 if (key !== 'resume') {
@@ -18,54 +18,90 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
+        chatGPTAccessToken = result.chatGPTAccessToken;
     });
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        let formData = new FormData(form);
-        let personalInfo = {};
-        formData.forEach((value, key) => {
-            if (key === 'resume') {
-                // personalInfo[key] = resumeInput.files[0].name;
-            } else {
-                personalInfo[key] = value;
-            }
-        });
+        const uploadResumeSpinner = document.getElementById('uploadResumeSpinner');
+        const uploadResumeText = document.getElementById('uploadResumeText');
+        uploadResumeSpinner.style.display = 'inline-block';
+        uploadResumeText.textContent = 'Uploading...';
 
-        chrome.storage.local.set({personalInfo}, () => {
-            status.textContent = 'Personal information saved!';
-            setTimeout(() => {
-                status.textContent = '';
-            }, 3000);
-        });
+        try {
+            let formData = new FormData(form);
+            let personalInfo = {};
 
-        if (resumeInput.files.length > 0) {
-            const file = resumeInput.files[0];
+            // Populate personalInfo from the form
+            formData.forEach((value, key) => {
+                if (key === 'resume') {
+                    // Skip processing for the resume field here
+                } else {
+                    personalInfo[key] = value;
+                }
+            });
 
-            if (file.type !== 'application/pdf') {
-                alert('Please upload a PDF file.');
-                return;
-            }
+            if (resumeInput.files.length > 0) {
+                const file = resumeInput.files[0];
 
-            const fileReader = new FileReader();
+                if (file.type !== 'application/pdf') {
+                    alert('Please upload a PDF file.');
+                    throw new Error('Invalid file type');
+                }
 
-            fileReader.onload = function () {
-                const typedarray = new Uint8Array(this.result);
+                const fileReader = new FileReader();
 
-                extractTextFromPDF(typedarray).then((resumeText) => {
-                    const reductedResumeText = redactSensitiveInfo(resumeText, personalInfo);
-                    chrome.storage.local.set({resumeText: reductedResumeText}, function () {
-                        console.log(reductedResumeText);
-                    });
+                // Read the file as an ArrayBuffer
+                const typedarray = await new Promise((resolve, reject) => {
+                    fileReader.onload = function () {
+                        resolve(new Uint8Array(this.result));
+                    };
+                    fileReader.onerror = function () {
+                        reject(new Error('Error reading the file.'));
+                    };
+                    fileReader.readAsArrayBuffer(file);
                 });
-            };
 
-            fileReader.readAsArrayBuffer(file);
+                // Extract text from the PDF
+                uploadResumeText.textContent = 'Extracting Information ...';
+                const resumeText = await extractTextFromPDF(typedarray);
+
+                // Summarize the resume text
+                const summarizedResume = await summarizeResume(chatGPTAccessToken, resumeText);
+                personalInfo.summarizedResume = JSON.stringify(summarizedResume);
+
+                // Redact sensitive information
+                const redactedResumeText = redactSensitiveInfo(resumeText, personalInfo);
+
+                // Save data to local storage
+                await new Promise((resolve) => {
+                    chrome.storage.local.set(
+                        {
+                            resumeText: redactedResumeText,
+                            personalInfo: personalInfo
+                        },
+                        resolve
+                    );
+                });
+
+                status.textContent = 'Personal information saved!';
+                setTimeout(() => {
+                    status.textContent = '';
+                }, 3000);
+            }
+
+            // Notify the extension of the update
+            chrome.runtime.sendMessage({
+                action: 'updatePersonalInfo',
+            });
+
+        } catch (error) {
+            console.error('An error occurred:', error.message);
+        } finally {
+            // Hide the spinner
+            uploadResumeSpinner.style.display = 'none';
+            uploadResumeText.textContent = 'Extraction Completed';
         }
-
-        chrome.runtime.sendMessage({
-            action: 'updatePersonalInfo',
-        });
     });
 });
