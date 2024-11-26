@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+    let chatGPTAccessToken = null;
+
     const urlParams = new URLSearchParams(window.location.search);
     const fromHome = urlParams.get('fromHome');
     // Only redirect when click on the Home button
@@ -12,8 +14,42 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         })
     }
+    const manualButton = document.getElementById('go-to-manual');
+    manualButton.addEventListener('click', () => {
+        window.location.href = 'personal_info.html';
+    });
 
-    document.getElementById('uploadResume').addEventListener('click', () => {
+    const form = document.getElementById('chatGPTTokenForm');
+    const chatGPTTokenInput = document.getElementById('chatGPTToken');
+    const status = document.getElementById('status');
+    const uploadResume = document.getElementById('uploadResume');
+
+    // Load any saved token on page load
+    chrome.storage.local.get(['chatGPTAccessToken'], (result) => {
+        if (result.chatGPTAccessToken) {
+            chatGPTTokenInput.value = result.chatGPTAccessToken;
+            chatGPTAccessToken = result.chatGPTAccessToken;
+        }
+    });
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault(); // Prevent page reload
+        const token = chatGPTTokenInput.value.trim();
+
+        if (token) {
+            chrome.storage.local.set({ chatGPTAccessToken: token }, () => {
+                status.textContent = 'chatGPT Access Token saved!';
+                setTimeout(() => {
+                    status.textContent = '';
+                }, 3000);
+                uploadResume.scrollIntoView({ behavior: 'smooth' });
+            });
+        } else {
+            alert('Please enter a valid access token.');
+        }
+    });
+
+    uploadResume.addEventListener('click', () => {
         // Trigger the hidden file input
         document.getElementById('resumeInput').click();
     });
@@ -29,16 +65,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     const typedarray = new Uint8Array(this.result);
                     try {
                         extractTextFromPDF(typedarray).then((resumeText) => {
+                            if (!chatGPTAccessToken) {
+                                alert('Please enter a valid access token.');
+                                return;
+                            }
                             const redactedResumeText = redactSensitiveInfo(resumeText, personalInfo);
-                            chrome.storage.local.set({resumeText: redactedResumeText}, function () {
-                                alert(redactedResumeText);
-                            });
+                            extractPersonalInfo(chatGPTAccessToken, resumeText).then((response) => {
+                                chrome.storage.local.set({personalInfo: response});
+                            })
+                            chrome.storage.local.set({resumeText: redactedResumeText});
                         });
                     } catch (error) {
                         alert(error.message);
                     }
-
-                    
                 };
 
                 fileReader.readAsArrayBuffer(file);

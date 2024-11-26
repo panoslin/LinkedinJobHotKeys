@@ -13,16 +13,32 @@
 				<img src="icons/img.png" alt="Logo" class="logo">
 				<div class="header-title">LinkedIn Job Turbo</div>
 			</div>
-			<div class="header-right">
-				<i class="fas fa-cog header-icon" id="settingsIcon" title="Settings"></i>
-			</div>
+			<!--			<div class="header-right">-->
+			<!--				<i class="fas fa-cog header-icon" id="settingsIcon" title="Settings"></i>-->
+			<!--			</div>-->
 		</div>
 
-		<div class="container">
-			<h2>Choose an Option to Continue</h2>
-			<button id="go-to-manual">Enter Information Manually</button>
-			<button id="uploadResume">Upload Resume</button>
-			<input type="file" id="resumeInput" accept="application/pdf" style="display: none;">
+		<div class="container-wrapper">
+
+			<div class="container">
+				<h2>1. Enter Your ChatGPT Access Token</h2>
+				<form id="chatGPTTokenForm">
+					<div class="form-group">
+						<input type="password" id="chatGPTToken" required aria-label="ChatGPT Token" placeholder=" ">
+						<label for="chatGPTToken">Access Token:</label>
+						<i class="fas fa-key icon"></i>
+					</div>
+					<button id="saveToken">Save Token</button>
+				</form>
+				<p id="status"></p>
+			</div>
+
+			<div class="container">
+				<h2>2. Choose an Option to Continue</h2>
+				<button id="go-to-manual">Enter Information Manually</button>
+				<button id="uploadResume">Upload Resume</button>
+				<input type="file" id="resumeInput" accept="application/pdf" style="display: none;">
+			</div>
 		</div>
 
 		<script src="pdf.js"></script>

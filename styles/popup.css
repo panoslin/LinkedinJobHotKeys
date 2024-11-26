@@ -28,7 +28,6 @@ body {
     margin: 0;
     padding: 15px;
     text-align: center;
-    min-width: 17rem;
     transition: background-color 0.3s, color 0.3s;
 }
 
@@ -46,6 +45,7 @@ body {
     margin: 20px auto;
     position: relative;
     overflow: hidden;
+    min-width: 25rem;
 }
 
 .header-left {
@@ -186,6 +186,13 @@ button:hover {
     }
 }
 
+.container-wrapper {
+    display: flex;
+    flex-direction: column; /* Stack items vertically */
+    gap: 20px; /* Add spacing between rows */
+    align-items: center; /* Center-align containers horizontally */
+}
+
 .container {
     background: var(--form-background);
     padding: 30px;
@@ -197,7 +204,7 @@ button:hover {
     text-align: center;
     margin: 20px auto;
     max-width: 500px;
-    min-width: 17rem;
+    min-width: 25rem;
     animation: container-fade-in 0.8s ease-in-out;
     overflow: hidden;
     position: relative;
@@ -229,4 +236,59 @@ button:hover {
         padding: 10px;
         min-width: auto;
     }
+}
+
+
+.form-group {
+    position: relative;
+    margin-top: 25px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 14px 12px;
+    box-sizing: border-box;
+    border: 1px solid var(--input-border-color);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-color);
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--input-focus-border-color);
+    box-shadow: 0 0 8px rgba(0, 115, 177, 0.2);
+}
+
+.form-group label {
+    position: absolute;
+    top: 14px;
+    left: 12px;
+    pointer-events: none;
+    font-size: 16px;
+    color: #aaa;
+    transition: all 0.2s ease-out;
+    background-color: transparent;
+}
+
+.form-group input:focus + label,
+.form-group input:not(:placeholder-shown) + label {
+    top: -8px;
+    left: 10px;
+    font-size: 12px;
+    color: var(--primary-color);
+}
+
+.form-group .icon {
+    position: absolute;
+    top: 16px;
+    right: 12px;
+    font-size: 20px;
+    color: #aaa;
+    transition: color 0.3s;
+}
+
+.form-group input:focus ~ .icon {
+    color: var(--primary-color);
 }
