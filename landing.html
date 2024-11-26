@@ -21,7 +21,16 @@
 		<div class="container-wrapper">
 
 			<div class="container">
-				<h2>1. Enter Your ChatGPT Access Token</h2>
+				<h2>
+					1. Enter Your ChatGPT Access Token (Optional)
+					<div class="tooltip-container">
+						<i class="fas fa-question-circle" id="infoIcon" aria-label="Why is this needed?"></i>
+						<div class="tooltip" id="tooltip">
+							This token is used to enable integration with ChatGPT, allowing advanced features such as personalized AI-driven suggestions and automation. You can skip this step if you do not wish to use ChatGPT-related functionalities.
+						</div>
+					</div>
+				</h2>
+
 				<form id="chatGPTTokenForm">
 					<div class="form-group">
 						<input type="password" id="chatGPTToken" required aria-label="ChatGPT Token" placeholder=" ">

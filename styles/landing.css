@@ -1,0 +1,36 @@
+.tooltip-container {
+    position: relative;
+    display: inline-block;
+}
+
+#infoIcon {
+    font-size: 18px;
+    color: var(--primary-color);
+    cursor: pointer;
+}
+
+#infoIcon:hover {
+    color: var(--primary-hover-color);
+}
+
+.tooltip {
+    display: none;
+    position: absolute;
+    top: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    max-width: 300px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    width: 40rem;
+    text-align: center;
+}
+
+.tooltip-container:hover .tooltip {
+    display: block;
+}
