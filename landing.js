@@ -29,6 +29,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (result.chatGPTAccessToken) {
             chatGPTTokenInput.value = result.chatGPTAccessToken;
             chatGPTAccessToken = result.chatGPTAccessToken;
+            if (!(result.chatGPTAccessToken && result.chatGPTAccessToken.trim() !== '')) {
+                uploadResume.disabled = true;
+                // add grey color to upload resume button
+                uploadResume.style.color = '#808080';
+            } else {
+                uploadResume.disabled = false;
+                uploadResume.style.color = '';
+            }
         }
     });
 
@@ -38,6 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (token) {
             chrome.storage.local.set({ chatGPTAccessToken: token }, () => {
+                uploadResume.disabled = false;
+                uploadResume.style.color = '';
                 status.textContent = 'chatGPT Access Token saved!';
                 setTimeout(() => {
                     status.textContent = '';
