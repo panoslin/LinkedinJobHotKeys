@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>LinkedIn Job Helper</title>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+		<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+		<link rel="stylesheet" href="styles/landing.css">
+		<link rel="stylesheet" href="styles/popup.css">
+	</head>
+	<body>
+		<div class="header">
+			<div class="header-left">
+				<img src="icons/img.png" alt="Logo" class="logo">
+				<div class="header-title">LinkedIn Job Turbo</div>
+			</div>
+			<div class="header-right">
+				<i class="fas fa-cog header-icon" id="settingsIcon" title="Settings"></i>
+			</div>
+		</div>
+
+		<div class="container">
+			<h2>Choose an Option to Continue</h2>
+			<button id="go-to-manual">Enter Information Manually</button>
+			<button id="uploadResume">Upload Resume</button>
+			<input type="file" id="resumeInput" accept="application/pdf" style="display: none;">
+		</div>
+
+		<script src="pdf.js"></script>
+		<script src="landing.js"></script>
+		<script src="popup.js"></script>
+		<script src="chatGPT.js"></script>
+	</body>
+
+</html>

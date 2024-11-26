@@ -16,7 +16,7 @@
     "128": "icons/img.png"
   },
   "action": {
-    "default_popup": "popup.html",
+    "default_popup": "landing.html",
     "default_title": "LinkedIn Job Turbo",
     "default_icon": {
       "16": "icons/img.png",

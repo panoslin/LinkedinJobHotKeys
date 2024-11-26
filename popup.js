@@ -1,66 +1,18 @@
 pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL('pdf.worker.js');
 
-
 document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('personalInfoForm');
-    const status = document.getElementById('status');
-    const resumeInput = document.getElementById('resume');
-
-    // Load saved data and populate the form
-    chrome.storage.local.get('personalInfo', (result) => {
-        if (result.personalInfo) {
-            Object.entries(result.personalInfo).forEach(([key, value]) => {
-                if (key !== 'resume') {
-                    const input = document.getElementById(key);
-                    if (input) input.value = value;
-                }
-            });
-        }
-    });
-
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-
-        let formData = new FormData(form);
-        let personalInfo = {};
-        formData.forEach((value, key) => {
-            if (key === 'resume') {
-                // personalInfo[key] = resumeInput.files[0].name;
-            } else {
-                personalInfo[key] = value;
-            }
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach(button => {
+        button.addEventListener('click', function (e) {
+            const ripple = document.createElement('span');
+            const rect = button.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            ripple.style.width = ripple.style.height = `${size}px`;
+            ripple.style.left = `${e.clientX - rect.left - size / 2}px`;
+            ripple.style.top = `${e.clientY - rect.top - size / 2}px`;
+            ripple.className = 'ripple';
+            button.appendChild(ripple);
         });
-
-        chrome.storage.local.set({personalInfo}, () => {
-            status.textContent = 'Personal information saved!';
-            setTimeout(() => {
-                status.textContent = '';
-            }, 3000);
-        });
-
-        if (resumeInput.files.length > 0) {
-            const file = resumeInput.files[0];
-
-            if (file.type !== 'application/pdf') {
-                alert('Please upload a PDF file.');
-                return;
-            }
-
-            const fileReader = new FileReader();
-
-            fileReader.onload = function () {
-                const typedarray = new Uint8Array(this.result);
-
-                extractTextFromPDF(typedarray).then((resumeText) => {
-                    const reductedResumeText = redactSensitiveInfo(resumeText, personalInfo);
-                    chrome.storage.local.set({resumeText: reductedResumeText}, function () {
-                        console.log(reductedResumeText);
-                    });
-                });
-            };
-
-            fileReader.readAsArrayBuffer(file);
-        }
     });
 });
 
@@ -78,7 +30,6 @@ async function extractTextFromPDF(typedarray) {
 
     return fullText;
 }
-
 
 function redactSensitiveInfo(text, userInfo) {
     const regexPatterns = {
@@ -120,7 +71,6 @@ function escapeRegExp(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-
 function setThemeBasedOnTime() {
     const body = document.body;
     const hour = new Date().getHours();
@@ -134,4 +84,3 @@ function setThemeBasedOnTime() {
 }
 
 setThemeBasedOnTime();
-
