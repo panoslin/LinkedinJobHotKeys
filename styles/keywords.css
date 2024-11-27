@@ -1,3 +1,7 @@
+.chat-gpt-suggested-keywords-container {
+
+}
+
 .keywords {
     display: flex;
     flex-wrap: wrap;
@@ -20,12 +24,10 @@
     opacity: 0;
     transition: opacity 0.3s ease, transform 0.3s ease;
     white-space: normal; /* Allow text wrapping */
-    max-width: 21rem; /* Increased max width */
-    min-width: 10rem;
+    width: 21rem;
     word-wrap: break-word; /* Ensure long words are wrapped */
-    font-size: 0.95rem; /* Adjusted font size for readability */
+    font-size: 1.4rem; /* Adjusted font size for readability */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for a floating effect */
-    z-index: 9999;
     cursor: pointer;
 }
 
@@ -45,7 +47,7 @@
     position: relative;
     display: inline-block;
     padding: 10px 20px;
-    font-size: 1.32rem;
+    font-size: 1.5rem;
     border-radius: 50px;
     font-weight: 500;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -65,9 +67,9 @@
 }
 
 .mismatch {
-    background-color: #fff7e6;
-    color: #c79300;
-    border: 1px solid #ffc107;
+    background-color: #ffe5e5; /* Light red background for warning */
+    color: #d32f2f; /* Bright red text for emphasis */
+    border: 1px solid #d32f2f; /* Matching border color for consistency */
 }
 
 .summary {
@@ -76,7 +78,7 @@
     background-color: #eef3f8;
     border-left: 6px solid #005582;
     border-radius: 10px;
-    font-size: 1.32rem;
+    font-size: 1.5rem;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
 }
 
@@ -123,4 +125,51 @@
     font-weight: bold;
     padding: 0 2px;
     border-radius: 3px;
+}
+.loading-status {
+    font-size: 1.5rem; /* Slightly larger font for readability */
+    color: #005582; /* LinkedIn blue */
+    text-align: center;
+    margin: 15px 0;
+    font-weight: 600; /* Bold text for emphasis */
+    position: relative;
+    padding: 10px 0;
+    animation: pulse 1.5s infinite ease-in-out; /* Smooth pulsing effect */
+}
+
+/* Add a spinner animation next to the text */
+.loading-status::before {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 8px;
+    border: 2px solid #005582; /* Spinner border color */
+    border-top: 2px solid transparent; /* Creates the spinning effect */
+    border-radius: 50%; /* Circular spinner */
+    animation: spin 1s linear infinite;
+    vertical-align: middle;
+}
+
+/* Spinner animation */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Pulse animation for the text */
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+    100% {
+        opacity: 1;
+    }
 }

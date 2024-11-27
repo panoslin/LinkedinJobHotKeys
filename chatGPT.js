@@ -97,8 +97,8 @@ async function extractPersonalInfo(apiToken, userPrompt, model = "gpt-4o") {
 async function extractKeywords(apiToken, userPrompt, model = "gpt-4o") {
     const systemPrompt = "Base on this JD, my resume and additional information. " +
         "Give me a json telling me the match, mismatch keywords between my resume and the JD, " +
-        "and a boolean indicating to apply or not, and a one sentence concise summary. " +
-        "List all of the important keywords from the JD, " +
+        "and a boolean indicating to apply or not, and a one sentence concise summary (should be HTML highlight keywords). " +
+        "List not less than 10 important keywords from the JD, " +
         "each keyword should be a pair, the first one is the keyword, the second one should be the exact original text from the JD. " +
         "each keywords should be within 10 words, for both the text in the pair"
 
@@ -219,7 +219,7 @@ async function sendPrompt(
 
     } catch (error) {
         console.error("An error occurred while sending the prompt:", error);
-        alert(error.message);
+        // alert(error.message);
         return [];
     }
 }

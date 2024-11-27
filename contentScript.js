@@ -221,10 +221,13 @@
         const jobId = new URL(window.location.href).searchParams.get("currentJobId");
         // 1. get keywords
         const jd = extractTextFromElement('.jobs-search__job-details--wrapper');
-        if (jd && resumeText && chatGPTAccessToken && jobId !== curJid && jd.length >= 4000) {
-            const chatGPTContainer = document.querySelector('.chat-gpt-container');
-            if (chatGPTContainer) {
-                chatGPTContainer.remove();
+        if (jd && resumeText && chatGPTAccessToken && jobId !== curJid) {
+            curJid = jobId;
+            const chatGPTContainers = document.querySelectorAll('.chat-gpt-suggested-keywords-container');
+            if (chatGPTContainers) {
+                chatGPTContainers.forEach((chatGPTContainer) => {
+                    chatGPTContainer.remove();
+                })
             }
             const jd = extractTextFromElement('.jobs-search__job-details--wrapper');
             const resume = personalInfo.summarizedResume || resumeText;
@@ -233,67 +236,43 @@
                 \n\nResume: ${resume}
                 \n\nJD: ${jd}
             `
-            extractKeywords(chatGPTAccessToken, userPrompt).then((response) => {
-                console.log(response)
-                // 2. insert to '.job-details-jobs-unified-top-card__container--two-pane div'
-                const container = document.querySelector('.job-details-jobs-unified-top-card__container--two-pane div');
-                if (container) {
+            const container = document.querySelector('.job-details-jobs-unified-top-card__container--two-pane div');
+            if (container) {
+                const chatGPTContainer = document.createElement('div');
+                chatGPTContainer.classList.add('chat-gpt-suggested-keywords-container');
+
+                // Add a loading spinner or message
+                const loadingStatus = document.createElement('div');
+                loadingStatus.classList.add('loading-status');
+                loadingStatus.textContent = 'Job Turbo Loading keywords...';
+                chatGPTContainer.appendChild(loadingStatus);
+                container.appendChild(chatGPTContainer)
+
+                extractKeywords(chatGPTAccessToken, userPrompt).then((response) => {
+                    console.log(response)
+
+                    // Remove the loading status
+                    loadingStatus.remove();
+
+                    // 2. insert to '.job-details-jobs-unified-top-card__container--two-pane div'
                     const match = response.match
                     const mismatch = response.mismatch
                     const summary = response.summary
                     // const apply = response.apply
-                    const chatGPTContainer = document.createElement('div');
-                    chatGPTContainer.classList.add('chat-gpt-container');
 
                     const keywordsContainer = document.createElement('div');
                     keywordsContainer.classList.add('keywords');
                     match.forEach((keyword) => {
-                        const keywordSpan = document.createElement('span');
-                        keywordSpan.classList.add('keyword', 'match');
-                        keywordSpan.textContent = keyword[0];
-                        // Create a tooltip
-                        const tooltip = document.createElement('div');
-                        tooltip.classList.add('tooltip');
-                        tooltip.textContent = keyword[1];
-                        keywordSpan.appendChild(tooltip);
-
-                        // Show and hide tooltip on hover
-                        keywordSpan.addEventListener('mouseover', () => {
-                            tooltip.style.visibility = 'visible';
-                            tooltip.style.opacity = '1';
-                        });
-                        keywordSpan.addEventListener('mouseout', () => {
-                            tooltip.style.visibility = 'hidden';
-                            tooltip.style.opacity = '0';
-                        });
-                        keywordSpan.addEventListener('click', () => {
-                            highlightKeywordInDiv(keyword[1]);
-                        });
-                        keywordsContainer.appendChild(keywordSpan);
+                        const keywordSpan = createKeyword(keyword, true);
+                        if (keywordSpan) {
+                            keywordsContainer.appendChild(keywordSpan);
+                        }
                     });
                     mismatch.forEach((keyword) => {
-                        const keywordSpan = document.createElement('span');
-                        keywordSpan.classList.add('keyword', 'mismatch');
-                        keywordSpan.textContent = keyword[0];
-                        // Create a tooltip
-                        const tooltip = document.createElement('div');
-                        tooltip.classList.add('tooltip');
-                        tooltip.textContent = keyword[1];
-                        keywordSpan.appendChild(tooltip);
-
-                        // Show and hide tooltip on hover
-                        keywordSpan.addEventListener('mouseover', () => {
-                            tooltip.style.visibility = 'visible';
-                            tooltip.style.opacity = '1';
-                        });
-                        keywordSpan.addEventListener('mouseout', () => {
-                            tooltip.style.visibility = 'hidden';
-                            tooltip.style.opacity = '0';
-                        });
-                        keywordSpan.addEventListener('click', () => {
-                            highlightKeywordInDiv(keyword[1]);
-                        });
-                        keywordsContainer.appendChild(keywordSpan);
+                        const keywordSpan = createKeyword(keyword, false);
+                        if (keywordSpan) {
+                            keywordsContainer.appendChild(keywordSpan);
+                        }
                     });
 
                     const summaryContainer = document.createElement('div');
@@ -304,16 +283,14 @@
                     // applyContainer.classList.add('apply');
                     // applyContainer.innerHTML = `<a href="#" class="apply-link"><span class="apply-text">✔ Apply Decision:</span> <strong>${apply ? 'Yes' : 'No'}</strong></a>`;
 
-                    chatGPTContainer.appendChild(keywordsContainer)
                     chatGPTContainer.appendChild(summaryContainer)
+                    chatGPTContainer.appendChild(keywordsContainer)
                     // chatGPTcontainer.appendChild(applyContainer)
 
-                    container.appendChild(chatGPTContainer)
 
-                }
+                })
+            }
 
-            })
-            curJid = jobId
         }
     }
 
@@ -461,7 +438,7 @@
         if (jobTitle && element) {
             return `${jobTitle}\n${element.innerText.trim()}`;
         } else {
-            console.error('Element not found');
+            // console.error('Element not found');
             return '';
         }
     }
@@ -507,6 +484,35 @@
         const data = await response.json();
         console.log("File uploaded successfully:", data);
         return data;
+    }
+
+    function createKeyword(keyword, isMatch) {
+        const keywordSpan = document.createElement('span');
+        keywordSpan.classList.add('keyword', isMatch ? 'match' : 'mismatch');
+        if (keyword[0].length > 60) {
+            // too long, not valid keyword
+            return null;
+        }
+        keywordSpan.textContent = keyword[0];
+        // Create a tooltip
+        const tooltip = document.createElement('div');
+        tooltip.classList.add('tooltip');
+        tooltip.textContent = keyword[1];
+        keywordSpan.appendChild(tooltip);
+
+        // Show and hide tooltip on hover
+        keywordSpan.addEventListener('mouseover', () => {
+            tooltip.style.visibility = 'visible';
+            tooltip.style.opacity = '1';
+        });
+        keywordSpan.addEventListener('mouseout', () => {
+            tooltip.style.visibility = 'hidden';
+            tooltip.style.opacity = '0';
+        });
+        keywordSpan.addEventListener('click', () => {
+            highlightKeywordInDiv(keyword[1]);
+        });
+        return keywordSpan;
     }
 
 })();
