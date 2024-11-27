@@ -7,20 +7,64 @@ function highlightKeywordInDiv(keyword) {
     }
 
     // Remove existing highlights
-    document.querySelectorAll('.highlighted').forEach((el) => {
-        el.classList.remove('highlighted');
-    });
+    const removeHighlights = (node) => {
+        if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('highlighted')) {
+            const parent = node.parentNode;
+            while (node.firstChild) {
+                parent.insertBefore(node.firstChild, node);
+            }
+            parent.removeChild(node);
+        } else if (node.nodeType === Node.ELEMENT_NODE || node.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+            Array.from(node.childNodes).forEach(removeHighlights);
+        }
+    };
+    removeHighlights(targetDiv);
 
-    // Find and highlight the text
-    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape special characters
+    // Escape special characters in the keyword
+    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(`(${escapedKeyword})`, 'gi'); // Case-insensitive match
-    targetDiv.innerHTML = targetDiv.innerHTML.replace(regex, '<span class="highlighted">$1</span>');
+
+    // Highlight matches in text nodes
+    const highlightMatches = (node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+            const matches = node.textContent.match(regex);
+            if (matches) {
+                const fragment = document.createDocumentFragment();
+                let lastIndex = 0;
+
+                matches.forEach((match) => {
+                    const matchIndex = node.textContent.toLowerCase().indexOf(match.toLowerCase(), lastIndex);
+                    if (matchIndex >= lastIndex) {
+                        // Append text before the match
+                        fragment.appendChild(document.createTextNode(node.textContent.substring(lastIndex, matchIndex)));
+
+                        // Create a span for the match
+                        const span = document.createElement('span');
+                        span.className = 'highlighted';
+                        span.textContent = node.textContent.substring(matchIndex, matchIndex + match.length);
+                        fragment.appendChild(span);
+
+                        lastIndex = matchIndex + match.length;
+                    }
+                });
+
+                // Append remaining text
+                fragment.appendChild(document.createTextNode(node.textContent.substring(lastIndex)));
+
+                // Replace the original text node with the fragment
+                node.replaceWith(fragment);
+            }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+            Array.from(node.childNodes).forEach(highlightMatches);
+        }
+    };
+    highlightMatches(targetDiv);
 
     // Scroll to the first match
     const matches = targetDiv.querySelectorAll('.highlighted');
     for (let i = 0; i < matches.length; i++) {
         if (!matches[i].classList.contains('keyword')) {
-            matches[i].scrollIntoView({behavior: 'smooth', block: 'center'});
+            matches[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
             break;
         }
     }

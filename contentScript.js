@@ -250,9 +250,11 @@
 
                 extractKeywords(chatGPTAccessToken, userPrompt).then((response) => {
                     console.log(response)
-
                     // Remove the loading status
                     loadingStatus.remove();
+
+                    document.querySelector('.upsell-premium-custom-section-card__container')?.remove();
+                    document.querySelector('#how-you-match-card-container')?.remove();
 
                     // 2. insert to '.job-details-jobs-unified-top-card__container--two-pane div'
                     const match = response.match
@@ -381,9 +383,7 @@
         // Move to the next pagination page if no unviewed job is found
         const activePaginationLi = document.querySelector('.artdeco-pagination__indicator.active');
         const nextPaginationLi = activePaginationLi?.nextElementSibling;
-        if (nextPaginationLi) {
-            nextPaginationLi.querySelector('button').click();
-        }
+        nextPaginationLi?.querySelector('button')?.click();
     }
 
     // Combined event listener for keydown events
@@ -443,7 +443,7 @@
         }
     }
 
-    function makeRecord(applied) {
+    async function makeRecord(applied) {
         const jd = extractTextFromElement('.jobs-box__html-content .mt4');
         if (jd) {
             downloadJD(applied, jd);
@@ -456,13 +456,14 @@
                 user: null,
                 job_id: window.location.href.match(/(\d+)/)[1] || null,
             };
-            createApplication(payload)
-                .then((data) => {
-                    console.log("Response from server:", data);
-                })
-                .catch((error) => {
-                    console.error("Upload failed:", error.message);
-                });
+            
+            try {
+                // Wait for createApplication to finish
+                const data = await createApplication(payload);
+                console.log("Response from server:", data);
+            } catch (error) {
+                console.error("Upload failed:", error.message);
+            }
         }
     }
 
@@ -494,21 +495,26 @@
             return null;
         }
         keywordSpan.textContent = keyword[0];
-        // Create a tooltip
-        const tooltip = document.createElement('div');
-        tooltip.classList.add('tooltip');
-        tooltip.textContent = keyword[1];
-        keywordSpan.appendChild(tooltip);
 
-        // Show and hide tooltip on hover
-        keywordSpan.addEventListener('mouseover', () => {
-            tooltip.style.visibility = 'visible';
-            tooltip.style.opacity = '1';
-        });
-        keywordSpan.addEventListener('mouseout', () => {
-            tooltip.style.visibility = 'hidden';
-            tooltip.style.opacity = '0';
-        });
+        // Create a tooltip
+        if (keyword[1] && keyword[1].length <= 200) {
+            const tooltip = document.createElement('div');
+            tooltip.classList.add('tooltip');
+            tooltip.textContent = keyword[1];
+
+            keywordSpan.appendChild(tooltip);
+            // Show and hide tooltip on hover
+            keywordSpan.addEventListener('mouseover', () => {
+                tooltip.style.visibility = 'visible';
+                tooltip.style.opacity = '1';
+            });
+            keywordSpan.addEventListener('mouseout', () => {
+                tooltip.style.visibility = 'hidden';
+                tooltip.style.opacity = '0';
+            });
+
+        }
+
         keywordSpan.addEventListener('click', () => {
             highlightKeywordInDiv(keyword[1]);
         });

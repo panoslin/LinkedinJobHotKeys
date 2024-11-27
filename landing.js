@@ -44,19 +44,18 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault(); // Prevent page reload
         const token = chatGPTTokenInput.value.trim();
 
-        if (token) {
-            chrome.storage.local.set({chatGPTAccessToken: token}, () => {
+        chrome.storage.local.set({chatGPTAccessToken: token}, () => {
+            status.textContent = 'chatGPT Access Token saved!';
+            setTimeout(() => {
+                status.textContent = '';
+            }, 3000);
+            if (token) {
                 uploadResume.disabled = false;
                 uploadResume.style.color = '';
-                status.textContent = 'chatGPT Access Token saved!';
-                setTimeout(() => {
-                    status.textContent = '';
-                }, 3000);
-                uploadResume.scrollIntoView({behavior: 'smooth'});
-            });
-        } else {
-            alert('Please enter a valid access token.');
-        }
+            }
+            uploadResume.scrollIntoView({behavior: 'smooth'});
+
+        });
     });
 
     uploadResume.addEventListener('click', () => {

@@ -84,15 +84,25 @@ document.addEventListener('DOMContentLoaded', () => {
                         resolve
                     );
                 });
-
-                status.textContent = 'Personal information saved!';
-                setTimeout(() => {
-                    status.textContent = '';
-                }, 3000);
+            } else {
+                // save personal info to local storage
+                await new Promise((resolve) => {
+                    chrome.storage.local.set(
+                        {
+                            personalInfo: personalInfo
+                        },
+                        resolve
+                    );
+                });
             }
 
+            status.textContent = 'Personal information saved!';
+            setTimeout(() => {
+                status.textContent = '';
+            }, 3000);
+
             // Notify the extension of the update
-            chrome.runtime.sendMessage({
+            await chrome.runtime.sendMessage({
                 action: 'updatePersonalInfo',
             });
 

@@ -7,7 +7,7 @@
     flex-wrap: wrap;
     gap: 12px;
     justify-content: center;
-    margin: 20px 0;
+    margin: 3rem;
 }
 
 .tooltip {
@@ -24,9 +24,9 @@
     opacity: 0;
     transition: opacity 0.3s ease, transform 0.3s ease;
     white-space: normal; /* Allow text wrapping */
-    width: 21rem;
+    width: 23rem;
     word-wrap: break-word; /* Ensure long words are wrapped */
-    font-size: 1.4rem; /* Adjusted font size for readability */
+    font-size: 1.75rem; /* Adjusted font size for readability */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for a floating effect */
     cursor: pointer;
 }
@@ -47,7 +47,7 @@
     position: relative;
     display: inline-block;
     padding: 10px 20px;
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     border-radius: 50px;
     font-weight: 500;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -78,7 +78,7 @@
     background-color: #eef3f8;
     border-left: 6px solid #005582;
     border-radius: 10px;
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
 }
 
@@ -126,29 +126,64 @@
     padding: 0 2px;
     border-radius: 3px;
 }
+
 .loading-status {
-    font-size: 1.5rem; /* Slightly larger font for readability */
+    font-size: 1.75rem; /* Larger, bold text */
     color: #005582; /* LinkedIn blue */
     text-align: center;
-    margin: 15px 0;
-    font-weight: 600; /* Bold text for emphasis */
+    margin: 20px 0;
+    font-weight: 700; /* Extra emphasis */
     position: relative;
-    padding: 10px 0;
-    animation: pulse 1.5s infinite ease-in-out; /* Smooth pulsing effect */
+    padding: 15px 20px;
+    border: 2px solid #005582; /* Subtle border to frame the text */
+    border-radius: 12px; /* Smooth rounded edges */
+    background: linear-gradient(135deg, #e8f4fc, #ffffff); /* Soft gradient for depth */
+    overflow: hidden;
+    animation: pulse 1.5s infinite ease-in-out; /* Smooth glowing effect */
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15); /* Shadow for depth */
 }
 
-/* Add a spinner animation next to the text */
+/* Add a glowing animated border */
+.loading-status::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    background: linear-gradient(45deg, #005582, #6dd5fa, #005582);
+    background-size: 400% 400%;
+    z-index: -1;
+    animation: gradient-border 3s infinite ease;
+}
+
+/* Spinner animation next to text */
 .loading-status::before {
     content: '';
     display: inline-block;
-    width: 12px;
-    height: 12px;
-    margin-right: 8px;
-    border: 2px solid #005582; /* Spinner border color */
-    border-top: 2px solid transparent; /* Creates the spinning effect */
+    width: 16px;
+    height: 16px;
+    margin-right: 10px;
+    border: 3px solid #005582; /* Spinner border */
+    border-top: 3px solid transparent; /* Creates the spinning effect */
     border-radius: 50%; /* Circular spinner */
     animation: spin 1s linear infinite;
     vertical-align: middle;
+}
+
+/* Gradient border animation */
+@keyframes gradient-border {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 /* Spinner animation */
@@ -164,12 +199,17 @@
 /* Pulse animation for the text */
 @keyframes pulse {
     0% {
-        opacity: 1;
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
     }
     50% {
-        opacity: 0.6;
+        box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
     }
     100% {
-        opacity: 1;
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
     }
+}
+
+/* overwrite :root --scaffold-layout-xl-max-width to be 90 vw*/
+:root {
+    --scaffold-layout-xl-max-width: 99vw;
 }
