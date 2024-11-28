@@ -67,10 +67,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Extract text from the PDF
                 uploadResumeText.textContent = 'Extracting Information ...';
                 const resumeText = await extractTextFromPDF(typedarray);
-
-                // Summarize the resume text
-                const summarizedResume = await summarizeResume(chatGPTAccessToken, resumeText);
-                personalInfo.summarizedResume = JSON.stringify(summarizedResume);
+                chrome.runtime.sendMessage({
+                    action: 'forwardToContentScript',
+                    message: {action: 'summarizeResume', chatGPTAccessToken: chatGPTAccessToken, resumeText: resumeText}
+                });
 
                 // Redact sensitive information
                 const redactedResumeText = redactSensitiveInfo(resumeText, personalInfo);
@@ -104,7 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Notify the extension of the update
             await chrome.runtime.sendMessage({
-                action: 'updatePersonalInfo',
+                action: 'forwardToContentScript',
+                message: {action: 'updatePersonalInfo'}
             });
 
         } catch (error) {

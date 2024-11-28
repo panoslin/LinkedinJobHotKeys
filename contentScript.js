@@ -40,7 +40,7 @@
         document.head.appendChild(styleElement);
     })();
 
-    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         console.log(request);
         if (request.action === 'updatePersonalInfo') {
             chrome.storage.local.get('personalInfo', (result) => {
@@ -57,6 +57,17 @@
                     console.warn('resumeText not found. Please set it in the extension popup.');
                 }
             });
+        } else if (request.action === 'summarizeResume') {
+            const chatGPTAccessToken = request.chatGPTAccessToken;
+            const resumeText = request.resumeText;
+            // Summarize the resume text
+            const summarizedResume = await summarizeResume(chatGPTAccessToken, resumeText);
+            let response = await chrome.storage.local.get('personalInfo');
+            let personalInfo = response.personalInfo;
+            personalInfo.summarizedResume = JSON.stringify(summarizedResume);
+            personalInfo.testMessage = 'Summarization completed.';
+            await chrome.storage.local.set({personalInfo: personalInfo});
+
         }
     });
 
@@ -465,7 +476,7 @@
                 user: null,
                 job_id: window.location.href.match(/(\d+)/)[1] || null,
             };
-            
+
             try {
                 // Wait for createApplication to finish
                 const data = await createApplication(payload);
