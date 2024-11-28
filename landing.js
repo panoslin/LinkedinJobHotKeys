@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', (event) => {
         event.preventDefault(); // Prevent page reload
         const token = chatGPTTokenInput.value.trim();
-
+        chatGPTAccessToken = token;
         chrome.storage.local.set({chatGPTAccessToken: token}, () => {
             status.textContent = 'chatGPT Access Token saved!';
             setTimeout(() => {
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 return;
                             }
 
-                            uploadResumeText.textContent = 'Extracting Information 🤖 ...';
+                            uploadResumeText.textContent = 'Extracting Information ...';
                             const [summarizedResume, extractedInfo] = await Promise.all([
                                 summarizeResume(chatGPTAccessToken, resumeText),
                                 extractPersonalInfo(chatGPTAccessToken, resumeText)

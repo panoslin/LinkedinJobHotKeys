@@ -129,7 +129,7 @@
 
 .loading-status {
     font-size: 1.75rem; /* Larger, bold text */
-    color: #005582; /* LinkedIn blue */
+    /*color: #005582; !* LinkedIn blue *!*/
     text-align: center;
     margin: 20px 0;
     font-weight: 700; /* Extra emphasis */
@@ -137,7 +137,7 @@
     padding: 15px 20px;
     border: 2px solid #005582; /* Subtle border to frame the text */
     border-radius: 12px; /* Smooth rounded edges */
-    background: linear-gradient(135deg, #e8f4fc, #ffffff); /* Soft gradient for depth */
+    /*background: linear-gradient(135deg, #e8f4fc, #ffffff); !* Soft gradient for depth *!*/
     overflow: hidden;
     animation: pulse 1.5s infinite ease-in-out; /* Smooth glowing effect */
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15); /* Shadow for depth */

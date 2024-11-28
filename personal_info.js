@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const status = document.getElementById('status');
     const resumeInput = document.getElementById('resume');
     let chatGPTAccessToken = '';
+    let personalInfo;
 
     document.getElementById('homeIcon').addEventListener('click', () => {
         window.location.href = chrome.runtime.getURL('landing.html?fromHome=true');
@@ -11,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load saved data and populate the form
     chrome.storage.local.get(['personalInfo', 'chatGPTAccessToken'], (result) => {
         if (result.personalInfo) {
+            personalInfo = result.personalInfo;
             Object.entries(result.personalInfo).forEach(([key, value]) => {
                 if (key !== 'resume') {
                     const input = document.getElementById(key);
@@ -31,7 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             let formData = new FormData(form);
-            let personalInfo = {};
 
             // Populate personalInfo from the form
             formData.forEach((value, key) => {

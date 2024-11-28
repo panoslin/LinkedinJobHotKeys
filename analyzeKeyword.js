@@ -1,5 +1,5 @@
 function highlightKeywordInDiv(keyword) {
-    const targetDiv = document.querySelector('.jobs-box__html-content .mt4'); // Replace with your actual target div's class or ID
+    const targetDiv = document.querySelector('.jobs-search__job-details--wrapper'); // Replace with your actual target div's class or ID
 
     if (!targetDiv) {
         console.warn('Target div not found.');
@@ -55,6 +55,9 @@ function highlightKeywordInDiv(keyword) {
                 node.replaceWith(fragment);
             }
         } else if (node.nodeType === Node.ELEMENT_NODE) {
+            if (node.classList.contains('keyword') || node.classList.contains('tooltip') || node.classList.contains('summary')) {
+                return;
+            }
             Array.from(node.childNodes).forEach(highlightMatches);
         }
     };
@@ -63,7 +66,11 @@ function highlightKeywordInDiv(keyword) {
     // Scroll to the first match
     const matches = targetDiv.querySelectorAll('.highlighted');
     for (let i = 0; i < matches.length; i++) {
-        if (!matches[i].classList.contains('keyword')) {
+        if (
+            !matches[i].classList.contains('keyword') &&
+            !matches[i].classList.contains('tooltip') &&
+            !matches[i].classList.contains('summary')
+        ) {
             matches[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
             break;
         }

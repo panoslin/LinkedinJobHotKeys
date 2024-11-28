@@ -221,7 +221,8 @@
         const jobId = new URL(window.location.href).searchParams.get("currentJobId");
         // 1. get keywords
         const jd = extractTextFromElement('.jobs-search__job-details--wrapper');
-        if (jd && resumeText && chatGPTAccessToken && jobId !== curJid) {
+        const applied = document.querySelector('.jobs-s-apply a.jobs-s-apply__application-link')
+        if (jd && resumeText && chatGPTAccessToken && jobId !== curJid && !applied && jd.length > 300) {
             curJid = jobId;
             const chatGPTContainers = document.querySelectorAll('.chat-gpt-suggested-keywords-container');
             if (chatGPTContainers) {
@@ -229,6 +230,9 @@
                     chatGPTContainer.remove();
                 })
             }
+
+            document.querySelector('.upsell-premium-custom-section-card__container')?.remove();
+            document.querySelector('#how-you-match-card-container')?.remove();
             const jd = extractTextFromElement('.jobs-search__job-details--wrapper');
             const resume = personalInfo.summarizedResume || resumeText;
             const userPrompt = `
@@ -253,8 +257,6 @@
                     // Remove the loading status
                     loadingStatus.remove();
 
-                    document.querySelector('.upsell-premium-custom-section-card__container')?.remove();
-                    document.querySelector('#how-you-match-card-container')?.remove();
 
                     // 2. insert to '.job-details-jobs-unified-top-card__container--two-pane div'
                     const match = response.match
@@ -288,6 +290,13 @@
                     chatGPTContainer.appendChild(summaryContainer)
                     chatGPTContainer.appendChild(keywordsContainer)
                     // chatGPTcontainer.appendChild(applyContainer)
+
+
+                }).catch((error) => {
+                    console.error('Error:', error);
+                    loadingStatus.textContent = 'Error: ' + error.message;
+                    // remote the animation from .loading-status::after
+                    loadingStatus.style.animation = '';
 
 
                 })

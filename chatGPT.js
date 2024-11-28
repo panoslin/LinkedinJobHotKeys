@@ -19,14 +19,14 @@ async function summarizeResume(apiToken, userPrompt, model = "gpt-4o") {
                         type: "object",
                         additionalProperties: {
                             type: "array",
-                            items: { type: "string" }
+                            items: {type: "string"}
                         }
                     },
                     Non_Technical_Qualifications: {
                         type: "object",
                         additionalProperties: {
                             type: "array",
-                            items: { type: "string" }
+                            items: {type: "string"}
                         }
                     }
                 },
@@ -95,12 +95,10 @@ async function extractPersonalInfo(apiToken, userPrompt, model = "gpt-4o") {
  * @returns {Promise<Object[]>} - A promise that resolves to the parsed JSON response or an empty array on failure.
  */
 async function extractKeywords(apiToken, userPrompt, model = "gpt-4o") {
-    const systemPrompt = "Base on this JD, my resume and additional information. " +
-        "Give me a json telling me the match, mismatch keywords between my resume and the JD, " +
-        "and a boolean indicating to apply or not, and a one sentence concise summary (should be HTML highlight keywords). " +
-        "List not less than 10 important keywords from the JD, " +
-        "each keyword should be a pair, the first one is the keyword, the second one should be the exact original text from the JD. " +
-        "each keywords should be within 10 words, for both the text in the pair"
+    const systemPrompt = "Extract all of the important keywords (at least 10) from the given job description. " +
+        "Return the keywords as a pair (keyword (less than 5 words), original text from job description (less than 5 words)). " +
+        "After finding the keywords from the job description, tell me match/mismatch with the resume" +
+        "Also gimme me a summary (in HTML style, less then 25 words) and apply decision (true or false). ";
 
     const response_format = {
         type: "json_schema",
@@ -188,38 +186,32 @@ async function sendPrompt(
         'Content-Type': 'application/json'
     };
 
-    try {
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(requestBody)
-        });
+    const response = await fetch(API_URL, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(requestBody)
+    });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`API request failed with status ${response.status}: ${errorText}`);
-        }
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API request failed with status ${response.status}: ${errorText}`);
+    }
 
-        const completion = await response.json();
+    const completion = await response.json();
 
-        const choice = completion.choices?.[0];
-        if (!choice) {
-            console.error("No choices found in the API response.");
-            return [];
-        }
-
-        if (choice.finish_reason === 'length') {
-            console.warn("Completion finished with incomplete output. Please try again with more context.");
-            console.warn(choice.message?.content || "No content returned.");
-            return [];
-        }
-
-        const parsedContent = JSON.parse(choice.message?.content || '{}');
-        return parsedContent || [];
-
-    } catch (error) {
-        console.error("An error occurred while sending the prompt:", error);
-        // alert(error.message);
+    const choice = completion.choices?.[0];
+    if (!choice) {
+        console.error("No choices found in the API response.");
         return [];
     }
+
+    if (choice.finish_reason === 'length') {
+        console.warn("Completion finished with incomplete output. Please try again with more context.");
+        console.warn(choice.message?.content || "No content returned.");
+        return [];
+    }
+
+    const parsedContent = JSON.parse(choice.message?.content || '{}');
+    return parsedContent || [];
+
 }
