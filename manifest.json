@@ -50,7 +50,8 @@
         "contentScript.js",
         "config.js",
         "chatGPT.js",
-        "analyzeKeyword.js"
+        "analyzeKeyword.js",
+        "autoFormFill.js"
       ],
       "run_at": "document_end"
     }

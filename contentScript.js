@@ -3,6 +3,7 @@
     let resumeText = null;
     let chatGPTAccessToken = null;
     let curJid = null;
+    let filledForms = new Set();
 
     // Fetch personal information once and start the observer after it's loaded
     (async function fetchPersonalInfo() {
@@ -89,134 +90,10 @@
                 console.log("Dismiss button clicked for modal.");
                 // Select and click the next li element
                 selectAndClickNextLi();
+                return true;
             }
         }
-    }
-
-    function fillForm() {
-        if (!personalInfo) {
-            console.warn('Personal info not loaded yet.');
-            return;
-        }
-
-        try {
-            const labels = document.querySelectorAll('label');
-
-            labels.forEach(label => {
-                const labelText = label.textContent.trim().replace('*', '').toLowerCase();
-                const inputBoxId = label.getAttribute('for');
-                const inputBox = document.getElementById(inputBoxId);
-
-                if (inputBox && !inputBox.dataset.autofilled) {
-                    const inputType = inputBox.type.toLowerCase();
-
-                    if (['text', 'email', 'number', 'tel', 'url', 'password'].includes(inputType)) {
-                        processTextInput(inputBox, labelText);
-                    } else if (['checkbox', 'radio'].includes(inputType)) {
-                        processCheckboxInput(inputBox, labelText);
-                    } else if (inputBox.tagName.toLowerCase() === 'select') {
-                        processSelectInput(inputBox, labelText);
-                    }
-                }
-            });
-        } catch (error) {
-            console.log('Error in fillForm:', error);
-        }
-    }
-
-    function processTextInput(inputBox, labelText) {
-        if (inputBox.value !== '') return;
-
-        if (labelText.includes('linkedin') && personalInfo.linkedin) {
-            inputBox.value = personalInfo.linkedin;
-            console.log("LinkedIn URL filled automatically.");
-        } else if (
-            ['location', 'city', 'home address'].some(term => labelText.includes(term)) &&
-            !inputBox.classList.contains('jobs-search-box__text-input')
-        ) {
-            inputBox.value = personalInfo.location;
-            console.log("Location filled automatically.");
-        } else if (labelText.includes('current company') && personalInfo.company) {
-            inputBox.value = personalInfo.company;
-            console.log("Current company filled automatically.");
-        } else if (labelText.includes('github') && personalInfo.github) {
-            inputBox.value = personalInfo.github;
-            console.log("GitHub URL filled automatically.");
-        } else if (labelText.includes('first name') && personalInfo.name) {
-            inputBox.value = personalInfo.name.split(' ')[0];
-            console.log("First name filled automatically.");
-        } else if (labelText.includes('last name') && personalInfo.name) {
-            inputBox.value = personalInfo.name.split(' ')[1];
-            console.log("Last name filled automatically.");
-        } else if (labelText.includes('preferred name') && personalInfo.preferred_name) {
-            inputBox.value = personalInfo.preferred_name;
-            console.log("Preferred name filled automatically.");
-        } else if (labelText === 'name' && personalInfo.name) {
-            inputBox.value = personalInfo.name;
-            console.log("Name filled automatically.");
-        } else if (labelText.includes('how did you hear about this job?')) {
-            inputBox.value = 'LinkedIn';
-            console.log("Source filled automatically.");
-        } else if (labelText.includes('email') && personalInfo.email) {
-            inputBox.value = personalInfo.email;
-            console.log("Email filled automatically.");
-        } else if (
-            ['phone', 'mobile', 'phone number', 'mobile number'].some(term => labelText.includes(term)) &&
-            personalInfo.phone
-        ) {
-            inputBox.value = personalInfo.phone;
-            console.log("Phone number filled automatically.");
-        } else {
-            return;
-        }
-
-        inputBox.dataset.autofilled = 'true';
-        inputBox.dispatchEvent(new Event('input', {bubbles: true, cancelable: true}));
-    }
-
-    function processCheckboxInput(inputBox, labelText) {
-        if (inputBox.checked) return;
-
-        if (
-            (labelText.includes('prefer') && labelText.includes('not')) ||
-            (labelText.includes("don't") && labelText.includes('answer')) ||
-            (labelText.includes("do not") && labelText.includes('answer')) ||
-            labelText === 'decline to self identify'
-        ) {
-            inputBox.checked = true;
-            inputBox.dispatchEvent(new Event('change', {bubbles: true}));
-            console.log("Checkbox for 'Prefer not to disclose' checked automatically.");
-            inputBox.dataset.autofilled = 'true';
-        }
-    }
-
-    function processSelectInput(inputBox, labelText) {
-        if (inputBox.value !== '') return;
-
-        if (
-            ["legally", "authorized", "work"].every(keyword => labelText.includes(keyword)) ||
-            ["lawfully", "authorized", "work"].every(keyword => labelText.includes(keyword))
-        ) {
-            inputBox.value = 'Yes';
-            console.log("Selected 'Yes' for authorization to work.");
-        } else if (["now", "future", "sponsor"].every(keyword => labelText.includes(keyword))) {
-            inputBox.value = 'Yes';
-            console.log("Selected 'Yes' for future sponsorship requirement.");
-        } else if (["non-compete", "restrictions"].every(keyword => labelText.includes(keyword))) {
-            inputBox.value = 'No';
-            console.log("Selected 'No' for non-compete restrictions.");
-        } else if (["currently", "employed", "by"].every(keyword => labelText.includes(keyword))) {
-            inputBox.value = 'No';
-            console.log("Selected 'No' for current employment status.");
-        } else if (["ever", "been", "employed", "by"].every(keyword => labelText.includes(keyword))) {
-            inputBox.value = 'No';
-            console.log("Selected 'No' for previous employment history.");
-        } else {
-            return;
-        }
-
-        inputBox.dataset.autofilled = 'true';
-        inputBox.dispatchEvent(new Event('change', {bubbles: true}));
+        return false;
     }
 
     function uncheckFollowCompanyCheckbox() {
@@ -267,6 +144,8 @@
                     console.log(response)
                     // Remove the loading status
                     loadingStatus.remove();
+                    document.querySelector('.upsell-premium-custom-section-card__container')?.remove();
+                    document.querySelector('#how-you-match-card-container')?.remove();
 
 
                     // 2. insert to '.job-details-jobs-unified-top-card__container--two-pane div'
@@ -334,8 +213,10 @@
             for (const mutation of mutationsList) {
                 if (mutation.type === 'childList') {
                     uncheckFollowCompanyCheckbox();
-                    dismissApplicationSentModal();
-                    fillForm();
+                    if (dismissApplicationSentModal()) {
+                        filledForms = new Set();
+                    }
+                    fillForm(personalInfo, filledForms, chatGPTAccessToken);
                     analyzeKeyword(mutation);
                     // Exit after handling the first relevant mutation
                     break;
@@ -479,8 +360,9 @@
 
             try {
                 // Wait for createApplication to finish
-                const data = await createApplication(payload);
-                console.log("Response from server:", data);
+                createApplication(payload).then(response => {
+                    console.log("Response from server:", response);
+                })
             } catch (error) {
                 console.error("Upload failed:", error.message);
             }
@@ -510,7 +392,7 @@
     function createKeyword(keyword, isMatch) {
         const keywordSpan = document.createElement('span');
         keywordSpan.classList.add('keyword', isMatch ? 'match' : 'mismatch');
-        if (keyword[0].length > 60) {
+        if (keyword.length === 0 || keyword[0].length > 60) {
             // too long, not valid keyword
             return null;
         }

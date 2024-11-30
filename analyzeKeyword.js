@@ -1,5 +1,5 @@
 function highlightKeywordInDiv(keyword) {
-    const targetDiv = document.querySelector('.jobs-search__job-details--wrapper'); // Replace with your actual target div's class or ID
+    const targetDiv = document.querySelector('.jobs-box__html-content .mt4');
 
     if (!targetDiv) {
         console.warn('Target div not found.');

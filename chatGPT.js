@@ -1,4 +1,56 @@
 /**
+ * Extracts input fields and values to fill from a web form using OpenAI's model.
+ *
+ * @param {string} apiToken - Your OpenAI API token.
+ * @param {string} userPrompt - The user's input prompt.
+ * @param {string} [model="gpt-4"] - The OpenAI model to use.
+ * @returns {Promise<Object[]>} - A promise that resolves to the parsed JSON response or an empty array on failure.
+ */
+async function extractForm(apiToken, userPrompt, model = "gpt-4o") {
+    const systemPrompt = `
+        Fill in this form with my information. 
+        Return a json with the query selector of each field, and value to fill in the element. 
+        
+        The query selector should be in raw string format, i.e. don't try to escape special characters.
+        
+        For example, to select the following ID:
+        "urn:li:fsd_formElement:urn:li:jobs_applyformcommon_easyApplyFormElement:(4084622606,13028506484,multipleChoice)-0"
+        
+        Should return as is, DO NOT return the below:
+        "urn\\:li\\:fsd_formElement\\:urn\\:li\\:jobs_applyformcommon_easyApplyFormElement\\:\\(4084622606\\,13028506484\\,multipleChoice\\)-0"
+    `
+
+    const response_format = {
+        type: "json_schema",
+        json_schema: {
+            name: "web_form_extraction_schema",
+            schema: {
+                type: "object",
+                properties: {
+                    fields: {
+                        type: "array",
+                        items: {
+                            type: "object",
+                            properties: {
+                                querySelector: {type: "string"},
+                                value: {type: "string"}
+                            },
+                            required: ["querySelector", "value"],
+                            additionalProperties: false
+                        }
+                    },
+
+                },
+                required: ["fields"],
+                additionalProperties: false
+            },
+            strict: true
+        }
+    }
+    return await sendPrompt(apiToken, userPrompt, systemPrompt, model, response_format);
+}
+
+/**
  * Summarize resume using OpenAI's model.
  *
  * @param {string} apiToken - Your OpenAI API token.
@@ -96,8 +148,8 @@ async function extractPersonalInfo(apiToken, userPrompt, model = "gpt-4o") {
  */
 async function extractKeywords(apiToken, userPrompt, model = "gpt-4o") {
     const systemPrompt = "Extract all of the important keywords (at least 10) from the given job description. " +
-        "Return the keywords as a pair (keyword (less than 5 words), original text from job description (less than 5 words)). " +
-        "After finding the keywords from the job description, tell me match/mismatch with the resume" +
+        "Return the keywords as a pair (keyword, original text from job description), both should less than 5 words. " +
+        "After finding the keywords from the job description, tell me match/mismatch with the resume for each keyword" +
         "Also gimme me a summary (in HTML style, less then 25 words) and apply decision (true or false). ";
 
     const response_format = {
