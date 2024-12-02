@@ -31,7 +31,9 @@
     {
       "resources": [
         "pdf.worker.js",
-        "styles/keywords.css"
+        "styles/keywords.css",
+        "styles/inspection_mode.css",
+        "styles/modal.css"
       ],
       "matches": [
         "*://*.linkedin.com/*"

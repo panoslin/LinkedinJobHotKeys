@@ -211,7 +211,7 @@
 
 /* overwrite :root --scaffold-layout-xl-max-width to be 90 vw*/
 :root {
-    --scaffold-layout-xl-max-width: 99vw;
+    --scaffold-layout-xl-max-width: 98.9vw;
 }
 
 /* Add a glowing animated border */
