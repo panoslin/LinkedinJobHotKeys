@@ -213,3 +213,67 @@
 :root {
     --scaffold-layout-xl-max-width: 99vw;
 }
+
+/* Add a glowing animated border */
+.auto-fill-button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    background: linear-gradient(45deg, #005582, #6dd5fa, #005582);
+    background-size: 400% 400%;
+    z-index: -1;
+    animation: gradient-border 3s infinite ease;
+}
+
+/* Spinner animation next to button text */
+.auto-fill-button::before {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 10px;
+    border: 3px solid #fff; /* Spinner matches text color */
+    border-top: 3px solid transparent; /* Creates the spinning effect */
+    border-radius: 50%; /* Circular spinner */
+    animation: spin 1s linear infinite;
+    vertical-align: middle;
+}
+
+/* Optional: Hover effect for the button */
+.auto-fill-button:hover {
+    color: #005582;
+    background-color: #fff; /* Invert colors for hover */
+}
+
+/* Disable spinner when class is removed */
+.auto-fill-button.no-spinner::before {
+    content: none; /* Hides the pseudo-element */
+}
+
+/* Enhanced shortcut styling */
+.shortcut {
+    display: inline-block;
+    margin-left: 10px; /* Space between button text and shortcut */
+    padding: 4px 8px; /* Larger padding for better readability */
+    font-size: 1rem; /* Slightly smaller than the button text */
+    font-weight: 700; /* Bold for emphasis */
+    color: #005582; /* Match the button border color */
+    background: linear-gradient(135deg, #e8f4fc, #ffffff); /* Soft gradient for depth */
+    border: 1px solid #005582; /* Outline for emphasis */
+    border-radius: 6px; /* Rounded edges */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    text-transform: uppercase; /* Uppercase text for consistency */
+    white-space: nowrap; /* Prevent wrapping */
+    transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth hover effect */
+}
+
+/* Hover effect for the shortcut */
+.shortcut:hover {
+    transform: scale(1.1); /* Slight zoom on hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Enhanced shadow */
+}

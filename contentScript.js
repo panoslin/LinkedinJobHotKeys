@@ -5,6 +5,16 @@
     let curJid = null;
     let filledForms = new Set();
 
+    const ctrlZButtonSelectors = [
+        'button[aria-label="Continue to next step"]',
+        'button[aria-label="Review your application"]',
+        'button[aria-label="Submit application"]',
+        '.jobs-s-apply button.jobs-apply-button.artdeco-button--3[data-job-id][aria-label]',
+        '.jobs-apply-button--top-card .jobs-apply-button',
+        // 'button[aria-label="Dismiss"]',
+    ];
+
+
     // Fetch personal information once and start the observer after it's loaded
     (async function fetchPersonalInfo() {
         try {
@@ -163,6 +173,14 @@
         }
     }
 
+    function addShortBadge() {
+        // for moving on to
+        addShortcutText(ctrlZButtonSelectors, 'Ctrl + X');
+        // for positioning current job posting
+        addShortcutText(['.jobs-search-results-list__list-item--active .job-card-container__link strong'], 'Ctrl + Z');
+        addShortcutText(['.job-details-jobs-unified-top-card__job-title h1 a'], 'Ctrl + D(ownload JD)');
+    }
+
     function startObserver() {
         function throttle(func, delay) {
             let lastCall = 0;
@@ -179,6 +197,7 @@
             for (const mutation of mutationsList) {
                 if (mutation.type === 'childList') {
                     uncheckFollowCompanyCheckbox();
+                    addShortBadge();
                     if (dismissApplicationSentModal()) {
                         filledForms = new Set();
                     }
@@ -202,6 +221,28 @@
             action: 'download',
             url: url,
             filename: `LinkedinJD-${applied}-${currentJobId}.txt`,
+        });
+    }
+
+    // Add shortcut text (Ctrl + X) to each button
+    function addShortcutText(selectors, shortcutText) {
+        selectors.forEach(selector => {
+            // Find all matching buttons for the current selector
+            const buttons = document.querySelectorAll(selector);
+
+            buttons.forEach(button => {
+                // Avoid adding the shortcut text multiple times
+                if (!button.querySelector('.shortcut')) {
+                    // Create the shortcut span
+                    const shortcutSpan = document.createElement('span');
+                    // add .shortcut and mr2 to the button
+                    shortcutSpan.classList.add('shortcut', 'mr2', 'ml2');
+                    shortcutSpan.textContent = ` ${shortcutText}`; // Add space before shortcut text
+
+                    // Append the shortcut span to the button
+                    button.appendChild(shortcutSpan);
+                }
+            });
         });
     }
 
@@ -268,16 +309,7 @@
         } else if (ctrlKey && !shiftKey && code === 'KeyX') {
             event.preventDefault();
 
-            const buttonSelectors = [
-                'button[aria-label="Continue to next step"]',
-                'button[aria-label="Review your application"]',
-                'button[aria-label="Submit application"]',
-                '.jobs-s-apply button.jobs-apply-button.artdeco-button--3[data-job-id][aria-label]',
-                '.jobs-apply-button--top-card .jobs-apply-button',
-                'button[aria-label="Dismiss"]',
-            ];
-
-            for (const selector of buttonSelectors) {
+            for (const selector of ctrlZButtonSelectors) {
                 const button = document.querySelector(selector);
                 if (button) {
                     if (selector.includes('.jobs-apply-button')) {

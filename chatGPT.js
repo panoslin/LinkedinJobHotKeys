@@ -246,6 +246,10 @@ async function sendPrompt(
 
     if (!response.ok) {
         const errorText = await response.text();
+        if (errorText.includes("rate_limit_exceeded")) {
+            console.error("Rate limit reached. Please wait and try again.");
+            return [];
+        }
         throw new Error(`API request failed with status ${response.status}: ${errorText}`);
     }
 
