@@ -162,7 +162,8 @@ function fillForm(personalInfo, filledForms, chatGPTAccessToken, force = false) 
             (
                 // not all fields are processed
                 !Array.from(labels).every(label => filledForms.has(label.attributes['for']?.value)) &&
-                !areAllFieldsFilled(form)) ||
+                !areAllFieldsFilled(form)
+            ) ||
             force
         )
     ) {
@@ -172,9 +173,13 @@ function fillForm(personalInfo, filledForms, chatGPTAccessToken, force = false) 
         labels.forEach(label => filledForms.add(label.attributes['for']?.value));
         const forms = document.querySelectorAll('.jobs-easy-apply-modal__content form .ph5 div div div.fb-dash-form-element');
 
-        const formPromises = Array.from(forms).map(form => {
-            console.log(form);
-            const userPrompt = `
+        const formPromises = Array.from(forms)
+            .filter(form => {
+                return !isFieldFilled(form.querySelector('input, select, textarea'))
+            })
+            .map(form => {
+                console.log(form);
+                const userPrompt = `
                 INFORMATION:
                 ${JSON.stringify(personalInfo)}
     
@@ -183,15 +188,15 @@ function fillForm(personalInfo, filledForms, chatGPTAccessToken, force = false) 
                 ${form.innerHTML}
             `;
 
-            return extractForm(chatGPTAccessToken, userPrompt)
-                .then(response => {
-                    console.log(response);
-                    fillFormFields(response);
-                })
-                .catch(error => {
-                    console.error("Error processing form:", error);
-                });
-        });
+                return extractForm(chatGPTAccessToken, userPrompt)
+                    .then(response => {
+                        console.log(response);
+                        fillFormFields(response);
+                    })
+                    .catch(error => {
+                        console.error("Error processing form:", error);
+                    });
+            });
 
         // Wait for all form requests to complete
         Promise.all(formPromises)
