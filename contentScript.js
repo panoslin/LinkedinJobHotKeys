@@ -1,4 +1,4 @@
-(function () {
+(() => {
     let personalInfo = null;
     let resumeText = null;
     let chatGPTAccessToken = null;
@@ -8,33 +8,30 @@
     // Fetch personal information once and start the observer after it's loaded
     (async function fetchPersonalInfo() {
         try {
-            chrome.storage.local.get('personalInfo', (result) => {
-                personalInfo = result.personalInfo;
-                if (!personalInfo) {
-                    console.warn('Personal info not found. Please set it in the extension popup.');
-                    return;
-                }
-                startObserver();
-            });
-            chrome.storage.local.get('resumeText', (result) => {
-                resumeText = result.resumeText;
-                if (!resumeText) {
-                    console.warn('resumeText not found. Please set it in the extension popup.');
-                }
-            });
-            chrome.storage.local.get('chatGPTAccessToken', (result) => {
-                chatGPTAccessToken = result.chatGPTAccessToken;
-                if (!chatGPTAccessToken) {
-                    console.warn('chatGPTAccessToken not found. Please set it in the extension popup.');
-                }
-            });
+            const result = await chrome.storage.local.get(['personalInfo', 'resumeText', 'chatGPTAccessToken']);
+            personalInfo = result.personalInfo;
+            resumeText = result.resumeText;
+            chatGPTAccessToken = result.chatGPTAccessToken;
+
+            if (!personalInfo) {
+                console.warn('Personal info not found. Please set it in the extension popup.');
+                return;
+            }
+            if (!resumeText) {
+                console.warn('Resume text not found. Please set it in the extension popup.');
+            }
+            if (!chatGPTAccessToken) {
+                console.warn('ChatGPT Access Token not found. Please set it in the extension popup.');
+            }
+
+            startObserver();
         } catch (error) {
             console.error('Failed to load personal information:', error);
         }
     })();
 
-    (async function insertKeywordStyle() {
-        // insert styles/keywords.css to head
+    // Insert styles/keywords.css into head
+    (function insertKeywordStyle() {
         const styleElement = document.createElement('link');
         styleElement.rel = 'stylesheet';
         styleElement.href = chrome.runtime.getURL('styles/keywords.css');
@@ -44,51 +41,51 @@
     chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         console.log(request);
         if (request.action === 'updatePersonalInfo') {
-            chrome.storage.local.get('personalInfo', (result) => {
+            try {
+                const result = await chrome.storage.local.get(['personalInfo', 'resumeText']);
                 personalInfo = result.personalInfo;
+                resumeText = result.resumeText;
+
                 if (!personalInfo) {
                     console.warn('Personal info not found. Please set it in the extension popup.');
                     return;
                 }
-                startObserver();
-            });
-            chrome.storage.local.get('resumeText', (result) => {
-                resumeText = result.resumeText;
                 if (!resumeText) {
-                    console.warn('resumeText not found. Please set it in the extension popup.');
+                    console.warn('Resume text not found. Please set it in the extension popup.');
                 }
-            });
+                startObserver();
+            } catch (error) {
+                console.error('Failed to update personal information:', error);
+            }
         } else if (request.action === 'summarizeResume') {
-            const chatGPTAccessToken = request.chatGPTAccessToken;
-            const resumeText = request.resumeText;
-            // Summarize the resume text
-            const summarizedResume = await summarizeResume(chatGPTAccessToken, resumeText);
-            let response = await chrome.storage.local.get('personalInfo');
-            let personalInfo = response.personalInfo;
-            personalInfo.summarizedResume = JSON.stringify(summarizedResume);
-            personalInfo.testMessage = 'Summarization completed.';
-            await chrome.storage.local.set({personalInfo: personalInfo});
-
+            const {chatGPTAccessToken, resumeText} = request;
+            try {
+                const summarizedResume = await summarizeResume(chatGPTAccessToken, resumeText);
+                const response = await chrome.storage.local.get('personalInfo');
+                const personalInfo = response.personalInfo || {};
+                personalInfo.summarizedResume = JSON.stringify(summarizedResume);
+                await chrome.storage.local.set({personalInfo});
+            } catch (error) {
+                console.error('Failed to summarize resume:', error);
+            }
         }
     });
 
     function dismissApplicationSentModal() {
-
         const modalHeading = document.querySelector('.artdeco-modal h2');
         const modalText = modalHeading?.textContent.trim();
 
-        if (modalText && (
-            ['Application sent', 'Premium', 'Top Choice', 'Added to your applied jobs'].includes(modalText) ||
-            modalText.includes('Your application was sent')
-        )) {
-            // Find the dismiss button inside the same modal
+        if (
+            modalText &&
+            (
+                ['Application sent', 'Premium', 'Top Choice', 'Added to your applied jobs'].includes(modalText) ||
+                modalText.includes('Your application was sent')
+            )
+        ) {
             const dismissButton = document.querySelector('.artdeco-modal button[aria-label="Dismiss"]');
-
-            // If the dismiss button exists, click it
             if (dismissButton) {
                 dismissButton.click();
-                console.log("Dismiss button clicked for modal.");
-                // Select and click the next li element
+                console.log('Dismiss button clicked for modal.');
                 selectAndClickNextLi();
                 return true;
             }
@@ -100,103 +97,73 @@
         const followCheckbox = document.getElementById('follow-company-checkbox');
         if (followCheckbox && followCheckbox.checked) {
             followCheckbox.checked = false;
-            // Dispatch a change event to notify any listeners
             followCheckbox.dispatchEvent(new Event('change', {bubbles: true}));
         }
     }
 
-    function analyzeKeyword(mutation) {
-        const jobId = new URL(window.location.href).searchParams.get("currentJobId");
-        // 1. get keywords
+    async function analyzeKeyword(mutation) {
+        const jobId = new URL(window.location.href).searchParams.get('currentJobId');
         const jd = extractTextFromElement('.jobs-search__job-details--wrapper');
-        const applied = document.querySelector('.jobs-s-apply a.jobs-s-apply__application-link')
+        const applied = document.querySelector('.jobs-s-apply a.jobs-s-apply__application-link');
         if (jd && resumeText && chatGPTAccessToken && jobId !== curJid && !applied && jd.length > 300) {
             curJid = jobId;
-            const chatGPTContainers = document.querySelectorAll('.chat-gpt-suggested-keywords-container');
-            if (chatGPTContainers) {
-                chatGPTContainers.forEach((chatGPTContainer) => {
-                    chatGPTContainer.remove();
-                })
-            }
 
+            document.querySelectorAll('.chat-gpt-suggested-keywords-container').forEach((el) => el.remove());
             document.querySelector('.upsell-premium-custom-section-card__container')?.remove();
             document.querySelector('#how-you-match-card-container')?.remove();
-            const jd = extractTextFromElement('.jobs-search__job-details--wrapper');
+
             const resume = personalInfo.summarizedResume || resumeText;
             const userPrompt = `
                 \nAdditional information: ${personalInfo.additional_info}
                 \n\nResume: ${resume}
                 \n\nJD: ${jd}
-            `
+            `;
             const container = document.querySelector('.job-details-jobs-unified-top-card__container--two-pane div');
             if (container) {
                 const chatGPTContainer = document.createElement('div');
                 chatGPTContainer.classList.add('chat-gpt-suggested-keywords-container');
 
-                // Add a loading spinner or message
                 const loadingStatus = document.createElement('div');
                 loadingStatus.classList.add('loading-status');
                 loadingStatus.textContent = 'Job Turbo Loading keywords...';
                 chatGPTContainer.appendChild(loadingStatus);
-                container.appendChild(chatGPTContainer)
+                container.appendChild(chatGPTContainer);
 
-                extractKeywords(chatGPTAccessToken, userPrompt).then((response) => {
-                    console.log(response)
-                    // Remove the loading status
+                try {
+                    const response = await extractKeywords(chatGPTAccessToken, userPrompt);
                     loadingStatus.remove();
                     document.querySelector('.upsell-premium-custom-section-card__container')?.remove();
                     document.querySelector('#how-you-match-card-container')?.remove();
 
-
-                    // 2. insert to '.job-details-jobs-unified-top-card__container--two-pane div'
-                    const match = response.match
-                    const mismatch = response.mismatch
-                    const summary = response.summary
-                    // const apply = response.apply
+                    const {match, mismatch, summary} = response;
 
                     const keywordsContainer = document.createElement('div');
                     keywordsContainer.classList.add('keywords');
                     match.forEach((keyword) => {
                         const keywordSpan = createKeyword(keyword, true);
-                        if (keywordSpan) {
-                            keywordsContainer.appendChild(keywordSpan);
-                        }
+                        if (keywordSpan) keywordsContainer.appendChild(keywordSpan);
                     });
                     mismatch.forEach((keyword) => {
                         const keywordSpan = createKeyword(keyword, false);
-                        if (keywordSpan) {
-                            keywordsContainer.appendChild(keywordSpan);
-                        }
+                        if (keywordSpan) keywordsContainer.appendChild(keywordSpan);
                     });
 
                     const summaryContainer = document.createElement('div');
                     summaryContainer.classList.add('summary');
                     summaryContainer.innerHTML = `<strong>Summary:</strong> ${summary}`;
 
-                    // const applyContainer = document.createElement('div');
-                    // applyContainer.classList.add('apply');
-                    // applyContainer.innerHTML = `<a href="#" class="apply-link"><span class="apply-text">✔ Apply Decision:</span> <strong>${apply ? 'Yes' : 'No'}</strong></a>`;
-
-                    chatGPTContainer.appendChild(summaryContainer)
-                    chatGPTContainer.appendChild(keywordsContainer)
-                    // chatGPTcontainer.appendChild(applyContainer)
-
-
-                }).catch((error) => {
+                    chatGPTContainer.appendChild(summaryContainer);
+                    chatGPTContainer.appendChild(keywordsContainer);
+                } catch (error) {
                     console.error('Error:', error);
                     loadingStatus.textContent = 'Error: ' + error.message;
-                    // remote the animation from .loading-status::after
                     loadingStatus.style.animation = '';
-
-
-                })
+                }
             }
-
         }
     }
 
     function startObserver() {
-        // Custom throttle function
         function throttle(func, delay) {
             let lastCall = 0;
             return function (...args) {
@@ -208,8 +175,7 @@
             };
         }
 
-        // Apply throttle to your MutationObserver callback
-        const throttledCallback = throttle(function (mutationsList) {
+        const throttledCallback = throttle(async (mutationsList) => {
             for (const mutation of mutationsList) {
                 if (mutation.type === 'childList') {
                     uncheckFollowCompanyCheckbox();
@@ -217,8 +183,7 @@
                         filledForms = new Set();
                     }
                     fillForm(personalInfo, filledForms, chatGPTAccessToken);
-                    analyzeKeyword(mutation);
-                    // Exit after handling the first relevant mutation
+                    await analyzeKeyword(mutation);
                     break;
                 }
             }
@@ -229,82 +194,77 @@
     }
 
     function downloadJD(applied = false, jd) {
-        // Download the job description to local
         const blob = new Blob([jd], {type: 'text/plain'});
         const url = URL.createObjectURL(blob);
-
-        const currentJobId = new URL(window.location.href).searchParams.get("currentJobId");
+        const currentJobId = new URL(window.location.href).searchParams.get('currentJobId');
 
         chrome.runtime.sendMessage({
-            action: 'download', url: url, filename: `LinkedinJD-${applied}-${currentJobId}.txt`
+            action: 'download',
+            url: url,
+            filename: `LinkedinJD-${applied}-${currentJobId}.txt`,
         });
     }
 
     function selectAndClickNextLi() {
-
         let activeLi = document.querySelector('.jobs-search-results-list__list-item--active');
         if (!activeLi) {
             document.querySelector('.job-card-list').click();
             return;
         }
-        let nextLi = activeLi ? activeLi.closest('li').nextElementSibling : null;
+
+        let nextLi = activeLi.closest('li').nextElementSibling;
         let count = 0;
-        while (nextLi) {
-            const viewedElement = nextLi.querySelector('.job-card-container__footer-job-state');
+
+        let li = nextLi;
+        while (li) {
+            const viewedElement = li.querySelector('.job-card-container__footer-job-state');
             const text = viewedElement?.textContent.trim();
             if (!viewedElement || !['Viewed', 'Applied'].includes(text)) {
                 count += 1;
             }
-            nextLi = nextLi.nextElementSibling;
+            li = li.nextElementSibling;
         }
         if (count <= 2) {
             const element = document.querySelector('.jobs-search-results-list');
-            if (element) {
-                // Scroll to the bottom of the element
-                element.scrollTop = element.scrollHeight;
-            }
+            element?.scrollTo({top: element.scrollHeight, behavior: 'smooth'});
         }
 
-        nextLi = activeLi ? activeLi.closest('li').nextElementSibling : null;
-        while (nextLi) {
-            const viewedElement = nextLi.querySelector('.job-card-container__footer-job-state');
+        li = nextLi;
+        while (li) {
+            const viewedElement = li.querySelector('.job-card-container__footer-job-state');
             const text = viewedElement?.textContent.trim();
 
             if (!viewedElement || !['Viewed', 'Applied'].includes(text)) {
-                nextLi.scrollIntoView({behavior: 'smooth', block: 'center'});
-                const clickableElement = nextLi.querySelector('.job-card-container--clickable');
+                li.scrollIntoView({behavior: 'smooth', block: 'center'});
+                const clickableElement = li.querySelector('.job-card-container--clickable');
                 if (clickableElement) {
                     clickableElement.click();
                     return;
                 }
             }
-            nextLi = nextLi.nextElementSibling;
+            li = li.nextElementSibling;
         }
 
-        // Move to the next pagination page if no unviewed job is found
         const activePaginationLi = document.querySelector('.artdeco-pagination__indicator.active');
         const nextPaginationLi = activePaginationLi?.nextElementSibling;
         nextPaginationLi?.querySelector('button')?.click();
     }
 
-    // Combined event listener for keydown events
-    document.addEventListener('keydown', function (event) {
+    document.addEventListener('keydown', (event) => {
         const {ctrlKey, shiftKey, code} = event;
         if (ctrlKey && code === 'KeyD') {
             event.preventDefault();
             makeRecord(false);
         } else if (ctrlKey && shiftKey && code === 'KeyX') {
             event.preventDefault();
-            if (document.querySelector('.jobs-s-apply a.jobs-s-apply__application-link')) {
-                // makeRecord(true);
-            } else {
+            if (!document.querySelector('.jobs-s-apply a.jobs-s-apply__application-link')) {
                 makeRecord(false);
             }
             selectAndClickNextLi();
         } else if (ctrlKey && code === 'KeyZ') {
             event.preventDefault();
-            let activeLi = document.querySelector('.jobs-search-results-list__list-item--active');
-            activeLi.scrollIntoView({behavior: 'smooth', block: 'center'});
+            const activeLi = document.querySelector('.jobs-search-results-list__list-item--active');
+            activeLi?.scrollIntoView({behavior: 'smooth', block: 'center'});
         } else if (ctrlKey && !shiftKey && code === 'KeyX') {
             event.preventDefault();
 
@@ -331,15 +291,12 @@
     });
 
     function extractTextFromElement(selector) {
-        // Get job title from .job-details-jobs-unified-top-card__job-title a
         const jobTitleElement = document.querySelector('.job-details-jobs-unified-top-card__job-title a');
         const jobTitle = jobTitleElement?.textContent.trim();
-
         const element = document.querySelector(selector);
         if (jobTitle && element) {
             return `${jobTitle}\n${element.innerText.trim()}`;
         } else {
-            // console.error('Element not found');
             return '';
         }
     }
@@ -359,12 +316,10 @@
             };
 
             try {
-                // Wait for createApplication to finish
-                createApplication(payload).then(response => {
-                    console.log("Response from server:", response);
-                })
+                const response = await createApplication(payload);
+                console.log('Response from server:', response);
             } catch (error) {
-                console.error("Upload failed:", error.message);
+                console.error('Upload failed:', error.message);
             }
         }
     }
@@ -372,55 +327,20 @@
     async function createApplication(payload) {
         const url = CONFIG.API_ENDPOINT;
         const response = await fetch(`${url}/applications`, {
-            method: "POST", headers: {
-                "Content-Type": "application/json"
-            }, body: JSON.stringify(payload)
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
         });
 
         if (!response.ok) {
-            // Handle HTTP errors
             const errorData = await response.json();
-            throw new Error(`Error ${response.status}: ${errorData.detail || "Unknown error"}`);
+            throw new Error(`Error ${response.status}: ${errorData.detail || 'Unknown error'}`);
         }
 
-        // Parse and return JSON response
         const data = await response.json();
-        console.log("File uploaded successfully:", data);
+        console.log('File uploaded successfully:', data);
         return data;
     }
-
-    function createKeyword(keyword, isMatch) {
-        const keywordSpan = document.createElement('span');
-        keywordSpan.classList.add('keyword', isMatch ? 'match' : 'mismatch');
-        if (keyword.length === 0 || keyword[0].length > 60) {
-            // too long, not valid keyword
-            return null;
-        }
-        keywordSpan.textContent = keyword[0];
-
-        // Create a tooltip
-        if (keyword[1] && keyword[1].length <= 200) {
-            const tooltip = document.createElement('div');
-            tooltip.classList.add('tooltip');
-            tooltip.textContent = keyword[1];
-
-            keywordSpan.appendChild(tooltip);
-            // Show and hide tooltip on hover
-            keywordSpan.addEventListener('mouseover', () => {
-                tooltip.style.visibility = 'visible';
-                tooltip.style.opacity = '1';
-            });
-            keywordSpan.addEventListener('mouseout', () => {
-                tooltip.style.visibility = 'hidden';
-                tooltip.style.opacity = '0';
-            });
-
-        }
-
-        keywordSpan.addEventListener('click', () => {
-            highlightKeywordInDiv(keyword[1]);
-        });
-        return keywordSpan;
-    }
-
 })();

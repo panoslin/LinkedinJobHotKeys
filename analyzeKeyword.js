@@ -71,8 +71,43 @@ function highlightKeywordInDiv(keyword) {
             !matches[i].classList.contains('tooltip') &&
             !matches[i].classList.contains('summary')
         ) {
-            matches[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            matches[i].scrollIntoView({behavior: 'smooth', block: 'center'});
             break;
         }
     }
+}
+
+
+function createKeyword(keyword, isMatch) {
+    const keywordSpan = document.createElement('span');
+    keywordSpan.classList.add('keyword', isMatch ? 'match' : 'mismatch');
+    if (keyword.length === 0 || keyword[0].length > 60) {
+        // too long, not valid keyword
+        return null;
+    }
+    keywordSpan.textContent = keyword[0];
+
+    // Create a tooltip
+    if (keyword[1] && keyword[1].length <= 200) {
+        const tooltip = document.createElement('div');
+        tooltip.classList.add('tooltip');
+        tooltip.textContent = keyword[1];
+
+        keywordSpan.appendChild(tooltip);
+        // Show and hide tooltip on hover
+        keywordSpan.addEventListener('mouseover', () => {
+            tooltip.style.visibility = 'visible';
+            tooltip.style.opacity = '1';
+        });
+        keywordSpan.addEventListener('mouseout', () => {
+            tooltip.style.visibility = 'hidden';
+            tooltip.style.opacity = '0';
+        });
+
+    }
+
+    keywordSpan.addEventListener('click', () => {
+        highlightKeywordInDiv(keyword[1]);
+    });
+    return keywordSpan;
 }

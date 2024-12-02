@@ -8,14 +8,14 @@
  */
 async function extractForm(apiToken, userPrompt, model = "gpt-4o") {
     const systemPrompt = `
-        Fill in this form with my information. 
-        Return a json with the query selector of each field, and value to fill in the element. 
-        
+        Fill in this form with my information.
+        Return a json with the query selector of each field, and value to fill in the element.
+
         The query selector should be in raw string format, i.e. don't try to escape special characters.
-        
+
         For example, to select the following ID:
         "urn:li:fsd_formElement:urn:li:jobs_applyformcommon_easyApplyFormElement:(4084622606,13028506484,multipleChoice)-0"
-        
+
         Should return as is, DO NOT return the below:
         "urn\\:li\\:fsd_formElement\\:urn\\:li\\:jobs_applyformcommon_easyApplyFormElement\\:\\(4084622606\\,13028506484\\,multipleChoice\\)-0"
     `
