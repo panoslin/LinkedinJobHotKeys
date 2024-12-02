@@ -133,41 +133,75 @@ function areAllFieldsFilled(form) {
 }
 
 
-function fillForm(personalInfo, filledForms, chatGPTAccessToken) {
+function fillForm(personalInfo, filledForms, chatGPTAccessToken, force = false) {
     if (!personalInfo) {
         console.warn('Personal info not loaded yet.');
         return;
     }
+
+    let autoFillButton = document.querySelector('.auto-fill-button');
+    // add auto fill button
+    const footer = document.querySelector('footer[role="presentation"] .display-flex')
+    if (footer && !autoFillButton) {
+        autoFillButton = document.createElement('button');
+        autoFillButton.classList.add('artdeco-button', 'artdeco-button--premium', 'ml2', 'auto-fill-button', 'no-spinner');
+        autoFillButton.type = 'button';
+        autoFillButton.innerHTML = 'Auto Fill<span class="shortcut mr2 ml2">Ctrl + F</span>';
+        footer.appendChild(autoFillButton);
+        autoFillButton.addEventListener('click', () => {
+            fillForm(personalInfo, filledForms, chatGPTAccessToken, true);
+        })
+    }
+
     const labels = document.querySelectorAll('.jobs-easy-apply-modal__content form .ph5 div div div.fb-dash-form-element label');
     const form = document.querySelector('.jobs-easy-apply-modal__content form');
     // none of the id is found in filledForms
     if (
         labels.length > 0 &&
-        // not all fields are processed
-        !Array.from(labels).every(label => filledForms.has(label.attributes['for']?.value)) &&
-        !areAllFieldsFilled(form)
+        (
+            (
+                // not all fields are processed
+                !Array.from(labels).every(label => filledForms.has(label.attributes['for']?.value)) &&
+                !areAllFieldsFilled(form)) ||
+            force
+        )
     ) {
+        autoFillButton.textContent = 'Auto Filling...';
+        autoFillButton.classList.remove("no-spinner");
         // add all id's to filledForms
         labels.forEach(label => filledForms.add(label.attributes['for']?.value));
         const forms = document.querySelectorAll('.jobs-easy-apply-modal__content form .ph5 div div div.fb-dash-form-element');
 
-        forms.forEach(form => {
-            console.log(form)
-
+        const formPromises = Array.from(forms).map(form => {
+            console.log(form);
             const userPrompt = `
                 INFORMATION:
                 ${JSON.stringify(personalInfo)}
-
-
+    
+    
                 FORM:
                 ${form.innerHTML}
-                `
-            extractForm(chatGPTAccessToken, userPrompt).then(response => {
-                console.log(response);
-                fillFormFields(response);
-            })
-        })
+            `;
 
+            return extractForm(chatGPTAccessToken, userPrompt)
+                .then(response => {
+                    console.log(response);
+                    fillFormFields(response);
+                })
+                .catch(error => {
+                    console.error("Error processing form:", error);
+                });
+        });
+
+        // Wait for all form requests to complete
+        Promise.all(formPromises)
+            .then(() => {
+                console.log("All forms processed!");
+            })
+            .finally(() => {
+                autoFillButton.innerHTML = 'Auto Fill<span class="shortcut mr2 ml2">Ctrl + F</span>';
+                autoFillButton.classList.add("no-spinner");
+            });
     }
 }
 
