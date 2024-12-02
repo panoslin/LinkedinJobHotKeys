@@ -215,7 +215,7 @@
         const throttledCallback = throttle(async (mutationsList) => {
             for (const mutation of mutationsList) {
                 if (mutation.type === 'childList') {
-                    predictCompatibility();
+                    // predictCompatibility();
                     uncheckFollowCompanyCheckbox();
                     addShortBadge();
                     if (dismissApplicationSentModal()) {
