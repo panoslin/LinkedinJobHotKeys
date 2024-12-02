@@ -16,7 +16,7 @@
     "128": "icons/img.png"
   },
   "action": {
-    "default_popup": "landing.html",
+    "default_popup": "landing/landing.html",
     "default_title": "LinkedIn Job Turbo",
     "default_icon": {
       "16": "icons/img.png",
@@ -30,10 +30,10 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "pdf.worker.js",
-        "styles/keywords.css",
-        "styles/inspection_mode.css",
-        "styles/modal.css"
+        "scripts/pdf.worker.js",
+        "popup/keywords.css",
+        "content/inspection_mode.css",
+        "content/modal.css"
       ],
       "matches": [
         "*://*.linkedin.com/*"
@@ -49,11 +49,11 @@
         "*://*.linkedin.com/*"
       ],
       "js": [
-        "contentScript.js",
-        "config.js",
-        "chatGPT.js",
-        "analyzeKeyword.js",
-        "autoFormFill.js"
+        "content/contentScript.js",
+        "scripts/config.js",
+        "scripts/chatGPT.js",
+        "content/analyzeKeyword.js",
+        "content/autoFormFill.js"
       ],
       "run_at": "document_end"
     }

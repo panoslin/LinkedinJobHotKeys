@@ -10,13 +10,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const personalInfo = result.personalInfo;
             const condition = personalInfo ? 'true' : 'false';
             if (condition === 'true') {
-                window.location.href = 'personal_info.html';
+                window.location.href = '../personal-info/personal_info.html';
             }
         })
     }
     const manualButton = document.getElementById('go-to-manual');
     manualButton.addEventListener('click', () => {
-        window.location.href = 'personal_info.html';
+        window.location.href = '../personal-info/personal_info.html';
     });
 
     const form = document.getElementById('chatGPTTokenForm');
@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             });
 
                             // Redirect to 'personal_info.html' after all operations are complete
-                            window.location.href = 'personal_info.html';
+                            window.location.href = '../personal-info/personal_info.html';
 
                         } catch (error) {
                             alert(error.message);

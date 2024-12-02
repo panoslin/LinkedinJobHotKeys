@@ -1,4 +1,4 @@
-pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL('pdf.worker.js');
+pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL('scripts/pdf.worker.js');
 
 document.addEventListener('DOMContentLoaded', () => {
     const buttons = document.querySelectorAll('button');

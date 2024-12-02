@@ -44,9 +44,19 @@
 
     // Insert styles/keywords.css into head
     (function insertKeywordStyle() {
-        const styleElement = document.createElement('link');
+        let styleElement = document.createElement('link');
         styleElement.rel = 'stylesheet';
-        styleElement.href = chrome.runtime.getURL('styles/keywords.css');
+        styleElement.href = chrome.runtime.getURL('popup/keywords.css');
+        document.head.appendChild(styleElement);
+
+        styleElement = document.createElement('link');
+        styleElement.rel = 'stylesheet';
+        styleElement.href = chrome.runtime.getURL('content/inspection_mode.css');
+        document.head.appendChild(styleElement);
+
+        styleElement = document.createElement('link');
+        styleElement.rel = 'stylesheet';
+        styleElement.href = chrome.runtime.getURL('content/modal.css');
         document.head.appendChild(styleElement);
     })();
 
@@ -117,7 +127,11 @@
         const jobId = new URL(window.location.href).searchParams.get('currentJobId');
         const jd = extractTextFromElement('.jobs-search__job-details--wrapper');
         const applied = document.querySelector('.jobs-s-apply a.jobs-s-apply__application-link');
-        if (jd && resumeText && chatGPTAccessToken && jobId !== curKeywordJid && !applied && jd.length > 300) {
+        if (applied) {
+            document.querySelectorAll('.chat-gpt-suggested-keywords-container').forEach((el) => el.remove());
+            document.querySelector('.upsell-premium-custom-section-card__container')?.remove();
+            document.querySelector('#how-you-match-card-container')?.remove();
+        } else if (jd && resumeText && chatGPTAccessToken && jobId !== curKeywordJid && !applied && jd.length > 300) {
             curKeywordJid = jobId;
 
             document.querySelectorAll('.chat-gpt-suggested-keywords-container').forEach((el) => el.remove());
@@ -176,11 +190,14 @@
     }
 
     function addShortBadge() {
+        // remove all .shortcut
+        document.querySelectorAll('.shortcut').forEach((el) => el.remove());
         // for moving on to
         addShortcutText(ctrlZButtonSelectors, 'Ctrl + X');
         // for positioning current job posting
-        addShortcutText(['.jobs-search-results-list__list-item--active .job-card-container__link strong'], 'Ctrl + Z');
+        addShortcutText(['.jobs-search-results-list__list-item--active .job-card-container__link strong'], 'Ctrl + Z(oning)');
         addShortcutText(['.job-details-jobs-unified-top-card__job-title h1 a'], 'Ctrl + D(ownload JD)');
+        addShortcutText(['footer[role="presentation"] .display-flex .auto-fill-button'], 'Ctrl + F(ill)');
     }
 
     function startObserver() {
@@ -414,17 +431,9 @@
 
     // Function to toggle the inspect mode
     function enableInspectMode() {
-        let style, selectedElement = null;
-
-        function addHighlightStyle() {
-            style = document.createElement('link');
-            style.rel = 'stylesheet';
-            style.href = chrome.runtime.getURL('styles/inspection_mode.css');
-            document.head.appendChild(style);
-        }
+        let selectedElement = null;
 
         function removeHighlightStyle() {
-            if (style) style.remove();
             if (selectedElement) {
                 selectedElement.classList.remove('highlight');
             }
@@ -466,7 +475,6 @@
 
         function enableInspectMode() {
             console.log('Inspect Mode Enabled');
-            addHighlightStyle();
             document.addEventListener('mouseover', onMouseOver);
             document.addEventListener('mouseout', onMouseOut);
             document.addEventListener('click', onClick);
@@ -490,7 +498,6 @@
 
     function displayToast(status) {
         let toast = document.getElementById('extension-toast');
-        let style = document.getElementById('extension-toast-style');
 
         // Create toast container if not already present
         if (!toast) {
@@ -500,42 +507,33 @@
             document.body.appendChild(toast);
         }
 
-        // Inject the stylesheet if not already added
-        if (!style) {
-            style = document.createElement('link');
-            style.rel = 'stylesheet';
-            style.id = 'extension-toast-style';
-            style.href = chrome.runtime.getURL('styles/modal.css'); // Ensure this matches your CSS file location
-            document.head.appendChild(style);
-        }
-
         // Set toast content and style based on status
         if (status === true) {
             toast.innerHTML = `
-            <div class="toast-content">MATCH 🎉</div>
-        `;
+                <div class="toast-content">MATCH 🎉</div>
+            `;
             toast.className = 'extension-toast success';
-            hideToastAfterDelay(toast, style);
+            hideToastAfterDelay(toast);
         } else if (status === false) {
             toast.innerHTML = `
-            <div class="toast-content">MISMATCH 🙁</div>
-        `;
+                <div class="toast-content">MISMATCH 🙁</div>
+            `;
             toast.className = 'extension-toast error';
-            hideToastAfterDelay(toast, style);
+            hideToastAfterDelay(toast);
         } else if (status === 'loading') {
             toast.innerHTML = `
-            <div class="toast-content">
-                <div class="toast-spinner"></div>
-                <div>Loading...</div>
-            </div>
-        `;
+                <div class="toast-content">
+                    <div class="toast-spinner"></div>
+                    <div>Loading...</div>
+                </div>
+            `;
             toast.className = 'extension-toast loading';
         } else if (typeof status === 'string') {
             toast.innerHTML = `
-            <div class="toast-content">${status}</div>
-        `;
+                <div class="toast-content">${status}</div>
+            `;
             toast.className = 'extension-toast message';
-            hideToastAfterDelay(toast, style);
+            hideToastAfterDelay(toast);
         } else {
             console.error('Invalid status for toast');
         }
@@ -550,18 +548,16 @@
             toast.classList.add('hide');
             setTimeout(() => {
                 toast.remove();
-                style.remove();
             }, 400);
         });
     }
 
-    function hideToastAfterDelay(toast, style, delay = 3000) {
+    function hideToastAfterDelay(toast, delay = 3000) {
         setTimeout(() => {
             toast.classList.remove('show');
             toast.classList.add('hide');
             setTimeout(() => {
                 toast.remove();
-                style.remove();
             }, 400); // Match this to the fadeOut animation duration
         }, delay);
     }

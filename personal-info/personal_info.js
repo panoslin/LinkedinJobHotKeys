@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let personalInfo;
 
     document.getElementById('homeIcon').addEventListener('click', () => {
-        window.location.href = chrome.runtime.getURL('landing.html?fromHome=true');
+        window.location.href = chrome.runtime.getURL('landing/landing.html?fromHome=true');
     });
 
     // Load saved data and populate the form

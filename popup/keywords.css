@@ -139,7 +139,7 @@
     border-radius: 12px; /* Smooth rounded edges */
     /*background: linear-gradient(135deg, #e8f4fc, #ffffff); !* Soft gradient for depth *!*/
     overflow: hidden;
-    animation: pulse 1.5s infinite ease-in-out; /* Smooth glowing effect */
+    /*animation: pulse 1.5s infinite ease-in-out; !* Smooth glowing effect *!*/
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15); /* Shadow for depth */
 }
 
@@ -259,7 +259,7 @@
 .shortcut {
     display: inline-block;
     margin-left: 10px; /* Space between button text and shortcut */
-    padding: 4px 8px; /* Larger padding for better readability */
+    padding: 0 8px; /* Larger padding for better readability */
     font-size: 1rem; /* Slightly smaller than the button text */
     font-weight: 700; /* Bold for emphasis */
     color: #005582; /* Match the button border color */

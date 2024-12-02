@@ -146,7 +146,7 @@ function fillForm(personalInfo, filledForms, chatGPTAccessToken, force = false) 
         autoFillButton = document.createElement('button');
         autoFillButton.classList.add('artdeco-button', 'artdeco-button--premium', 'ml2', 'auto-fill-button', 'no-spinner');
         autoFillButton.type = 'button';
-        autoFillButton.innerHTML = 'Auto Fill<span class="shortcut mr2 ml2">Ctrl + F</span>';
+        autoFillButton.innerHTML = 'Auto Fill<span class="shortcut mr2 ml2">Ctrl + F(ill)</span>';
         footer.appendChild(autoFillButton);
         autoFillButton.addEventListener('click', () => {
             fillForm(personalInfo, filledForms, chatGPTAccessToken, true);
@@ -204,7 +204,7 @@ function fillForm(personalInfo, filledForms, chatGPTAccessToken, force = false) 
                 console.log("All forms processed!");
             })
             .finally(() => {
-                autoFillButton.innerHTML = 'Auto Fill<span class="shortcut mr2 ml2">Ctrl + F</span>';
+                autoFillButton.innerHTML = 'Auto Fill<span class="shortcut mr2 ml2">Ctrl + F(ill)</span>';
                 autoFillButton.classList.add("no-spinner");
             });
     }
