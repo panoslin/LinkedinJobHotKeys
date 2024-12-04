@@ -4,7 +4,12 @@ function fillFormFields(fieldData) {
         // Select the form element using the querySelector
         let element;
         try {
-            element = document.querySelector(`#${CSS.escape(field.querySelector)}`) || document.querySelector(field.querySelector);
+            element = (
+                document.querySelector(`#${CSS.escape(field.querySelector)}`) ||
+                document.querySelector(field.querySelector) ||
+                [...document.querySelectorAll('input, select, textarea')]
+                    .filter(el => Array.from(el.attributes).some(attr => attr.value === field.querySelector))[0]
+            );
         } catch (error) {
             console.error(`Error selecting element with querySelector: ${field.querySelector}`);
             return; // Skip to the next field if the querySelector is invalid
@@ -27,7 +32,10 @@ function fillFormFields(fieldData) {
                 break;
 
             case 'radio': // Radio buttons
-                if (element.value === field.value) {
+                if (
+                    element.value === field.value ||
+                    document.querySelector(`label[for="${element.id}"]`).textContent.trim() === field.value
+                ) {
                     element.checked = true;
                 }
                 break;
@@ -117,7 +125,7 @@ function isFieldFilled(field) {
  * @returns {boolean} - Returns true if all required fields are filled, false otherwise.
  */
 function areAllFieldsFilled(form) {
-    if (!form || !(form instanceof HTMLFormElement)) {
+    if (!form) {
         throw new Error("Invalid form element provided.");
     }
 
@@ -133,45 +141,50 @@ function areAllFieldsFilled(form) {
 }
 
 
-function fillForm(personalInfo, filledForms, chatGPTAccessToken, force = false) {
+function fillForm(personalInfo, filledForms, chatGPTAccessToken, force = false, root = document) {
     if (!personalInfo) {
         console.warn('Personal info not loaded yet.');
         return;
     }
 
-    let autoFillButton = document.querySelector('.auto-fill-button');
+    let autoFillStatus = document.querySelector('.auto-fill-button');
     // add auto fill button
     const footer = document.querySelector('footer[role="presentation"] .display-flex')
-    if (footer && !autoFillButton) {
-        autoFillButton = document.createElement('button');
-        autoFillButton.classList.add('artdeco-button', 'artdeco-button--premium', 'ml2', 'auto-fill-button', 'no-spinner');
-        autoFillButton.type = 'button';
-        autoFillButton.innerHTML = 'Auto Fill<span class="shortcut mr2 ml2">Ctrl + F(ill)</span>';
-        footer.appendChild(autoFillButton);
-        autoFillButton.addEventListener('click', () => {
+    if (footer && !autoFillStatus) {
+        autoFillStatus = document.createElement('button');
+        autoFillStatus.classList.add('artdeco-button', 'artdeco-button--premium', 'ml2', 'auto-fill-button', 'no-spinner');
+        autoFillStatus.type = 'button';
+        autoFillStatus.innerHTML = 'Auto Fill<span class="shortcut mr2 ml2">Ctrl + F(ill)</span>';
+        footer.appendChild(autoFillStatus);
+        autoFillStatus.addEventListener('click', () => {
             fillForm(personalInfo, filledForms, chatGPTAccessToken, true);
         })
+    } else {
+        // use modal
     }
 
-    const labels = document.querySelectorAll('.jobs-easy-apply-modal__content form .ph5 div div div.fb-dash-form-element label');
-    const form = document.querySelector('.jobs-easy-apply-modal__content form');
+    const labels = root.querySelectorAll('label');
+    const form = root.querySelector('form');
     // none of the id is found in filledForms
     if (
         labels.length > 0 &&
         (
+            force ||
             (
                 // not all fields are processed
                 !Array.from(labels).every(label => filledForms.has(label.attributes['for']?.value)) &&
                 !areAllFieldsFilled(form)
-            ) ||
-            force
+            )
         )
     ) {
-        autoFillButton.textContent = 'Auto Filling...';
-        autoFillButton.classList.remove("no-spinner");
+        if (autoFillStatus) {
+            autoFillStatus.textContent = 'Auto Filling...';
+            autoFillStatus.classList.remove("no-spinner");
+        }
+
         // add all id's to filledForms
         labels.forEach(label => filledForms.add(label.attributes['for']?.value));
-        const forms = document.querySelectorAll('.jobs-easy-apply-modal__content form .ph5 div div div.fb-dash-form-element');
+        const forms = findLCAElements(labels);
 
         const formPromises = Array.from(forms)
             .filter(form => {
@@ -204,9 +217,13 @@ function fillForm(personalInfo, filledForms, chatGPTAccessToken, force = false) 
                 console.log("All forms processed!");
             })
             .finally(() => {
-                autoFillButton.innerHTML = 'Auto Fill<span class="shortcut mr2 ml2">Ctrl + F(ill)</span>';
-                autoFillButton.classList.add("no-spinner");
+                if (autoFillStatus) {
+                    autoFillStatus.innerHTML = 'Auto Fill<span class="shortcut mr2 ml2">Ctrl + F(ill)</span>';
+                    autoFillStatus.classList.add("no-spinner");
+                }
             });
+    } else {
+        console.log("No forms to process.");
     }
 }
 

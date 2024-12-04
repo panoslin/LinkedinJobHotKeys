@@ -1,4 +1,11 @@
 (() => {
+
+    if (window.__contentScriptInjected) {
+        console.log("contentScript.js already injected.");
+        return;
+    }
+    window.__contentScriptInjected = true;
+
     let personalInfo = null;
     let resumeText = null;
     let chatGPTAccessToken = null;
@@ -56,7 +63,7 @@
 
         styleElement = document.createElement('link');
         styleElement.rel = 'stylesheet';
-        styleElement.href = chrome.runtime.getURL('content/modal.css');
+        styleElement.href = chrome.runtime.getURL('content/toast.css');
         document.head.appendChild(styleElement);
     })();
 
@@ -90,6 +97,15 @@
             } catch (error) {
                 console.error('Failed to summarize resume:', error);
             }
+        } else if (request.action === "fill-form") {
+            console.log("fillForm action triggered!");
+            fillForm(personalInfo, filledForms, chatGPTAccessToken, true);
+        } else if (request.action === "fill-form-select") {
+            console.log("fillForm action with select triggered!");
+            inspector.setDynamicFunction((selectedElement) => {
+                fillForm(personalInfo, filledForms, chatGPTAccessToken, true, selectedElement);
+            })
+            inspector.enableInspectMode();
         }
     });
 
@@ -326,9 +342,6 @@
             event.preventDefault();
             const activeLi = document.querySelector('.jobs-search-results-list__list-item--active');
             activeLi?.scrollIntoView({behavior: 'smooth', block: 'center'});
-        } else if (ctrlKey && code === 'KeyF') {
-            event.preventDefault();
-            fillForm(personalInfo, filledForms, chatGPTAccessToken, true);
         } else if (ctrlKey && !shiftKey && code === 'KeyX') {
             event.preventDefault();
 
@@ -347,6 +360,17 @@
             if (inspectMode) {
                 inspector.disableInspectMode();
             } else {
+                inspector.setDynamicFunction((selectedElement) => {
+                    displayToast('loading');
+                    makePredictionRequest(resumeText, '', selectedElement.innerText)
+                        .then(response => {
+                            displayToast(response.predicted_class === 1);
+                        })
+                        .catch(error => {
+                            displayToast(error.message || 'An unexpected error occurred.');
+                            console.error('Error:', error);
+                        });
+                })
                 inspector.enableInspectMode();
             }
         } else if (inspectMode && code === 'Escape') {
@@ -429,138 +453,7 @@
         return await response.json();
     }
 
-    // Function to toggle the inspect mode
-    function enableInspectMode() {
-        let selectedElement = null;
-
-        function removeHighlightStyle() {
-            if (selectedElement) {
-                selectedElement.classList.remove('highlight');
-            }
-        }
-
-        function onMouseOver(event) {
-            if (selectedElement) return;
-            event.target.classList.add('highlight');
-        }
-
-        function onMouseOut(event) {
-            if (selectedElement) return;
-            event.target.classList.remove('highlight');
-        }
-
-        function onClick(event) {
-            event.preventDefault();
-            event.stopPropagation();
-            if (selectedElement) {
-                selectedElement.classList.remove('highlight');
-            }
-            selectedElement = event.target;
-            selectedElement.classList.add('highlight');
-
-            // Show loading toast
-            displayToast('loading');
-            makePredictionRequest(resumeText, '', selectedElement.innerText)
-                .then(response => {
-                    displayToast(response.predicted_class === 1);
-                })
-                .catch(error => {
-                    displayToast(error.message || 'An unexpected error occurred.');
-                    console.error('Error:', error);
-                });
-
-            disableInspectMode();
-
-        }
-
-        function enableInspectMode() {
-            console.log('Inspect Mode Enabled');
-            document.addEventListener('mouseover', onMouseOver);
-            document.addEventListener('mouseout', onMouseOut);
-            document.addEventListener('click', onClick);
-            inspectMode = true;
-        }
-
-        function disableInspectMode() {
-            console.log('Inspect Mode Disabled');
-            removeHighlightStyle();
-            document.removeEventListener('mouseover', onMouseOver);
-            document.removeEventListener('mouseout', onMouseOut);
-            document.removeEventListener('click', onClick);
-            inspectMode = false;
-            selectedElement = null;
-        }
-
-        return {enableInspectMode, disableInspectMode};
-    }
-
-    const inspector = enableInspectMode();
-
-    function displayToast(status) {
-        let toast = document.getElementById('extension-toast');
-
-        // Create toast container if not already present
-        if (!toast) {
-            toast = document.createElement('div');
-            toast.id = 'extension-toast';
-            toast.className = 'extension-toast';
-            document.body.appendChild(toast);
-        }
-
-        // Set toast content and style based on status
-        if (status === true) {
-            toast.innerHTML = `
-                <div class="toast-content">MATCH 🎉</div>
-            `;
-            toast.className = 'extension-toast success';
-            hideToastAfterDelay(toast);
-        } else if (status === false) {
-            toast.innerHTML = `
-                <div class="toast-content">MISMATCH 🙁</div>
-            `;
-            toast.className = 'extension-toast error';
-            hideToastAfterDelay(toast);
-        } else if (status === 'loading') {
-            toast.innerHTML = `
-                <div class="toast-content">
-                    <div class="toast-spinner"></div>
-                    <div>Loading...</div>
-                </div>
-            `;
-            toast.className = 'extension-toast loading';
-        } else if (typeof status === 'string') {
-            toast.innerHTML = `
-                <div class="toast-content">${status}</div>
-            `;
-            toast.className = 'extension-toast message';
-            hideToastAfterDelay(toast);
-        } else {
-            console.error('Invalid status for toast');
-        }
-
-        // Show the toast with animation
-        toast.classList.remove('hide');
-        toast.classList.add('show');
-
-        // Allow manual dismissal on click
-        toast.addEventListener('click', () => {
-            toast.classList.remove('show');
-            toast.classList.add('hide');
-            setTimeout(() => {
-                toast.remove();
-            }, 400);
-        });
-    }
-
-    function hideToastAfterDelay(toast, delay = 3000) {
-        setTimeout(() => {
-            toast.classList.remove('show');
-            toast.classList.add('hide');
-            setTimeout(() => {
-                toast.remove();
-            }, 400); // Match this to the fadeOut animation duration
-        }, delay);
-    }
+    const inspector = Inspector();
 
     async function makeRecord(applied) {
         const jd = extractTextFromElement('.jobs-box__html-content .mt4');

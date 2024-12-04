@@ -5,7 +5,9 @@
   "description": "Streamline and accelerate your job search on LinkedIn",
   "permissions": [
     "downloads",
-    "storage"
+    "storage",
+    "activeTab",
+    "scripting"
   ],
   "host_permissions": [
     "*://*.linkedin.com/*"
@@ -33,7 +35,7 @@
         "scripts/pdf.worker.js",
         "popup/keywords.css",
         "content/inspection_mode.css",
-        "content/modal.css"
+        "content/toast.css"
       ],
       "matches": [
         "*://*.linkedin.com/*"
@@ -53,9 +55,28 @@
         "scripts/config.js",
         "scripts/chatGPT.js",
         "content/analyzeKeyword.js",
-        "content/autoFormFill.js"
+        "content/autoFormFill.js",
+        "content/toast.js",
+        "content/findLca.js",
+        "content/inspection_mode.js"
       ],
       "run_at": "document_end"
     }
-  ]
+  ],
+  "commands": {
+    "fill-form": {
+      "suggested_key": {
+        "default": "Ctrl+F",
+        "mac": "MacCtrl+F"
+      },
+      "description": "Fill Form"
+    },
+    "fill-form-select": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+F",
+        "mac": "MacCtrl+Shift+F"
+      },
+      "description": "Fill Form with Selection"
+    }
+  }
 }
