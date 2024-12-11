@@ -6,19 +6,67 @@
  * @param {string} [model="gpt-4"] - The OpenAI model to use.
  * @returns {Promise<Object[]>} - A promise that resolves to the parsed JSON response or an empty array on failure.
  */
-async function extractForm(apiToken, userPrompt, model = "gpt-4o") {
+async function extractForm(apiToken, userPrompt, resume, model = "gpt-4o") {
     const systemPrompt = `
-        Fill in this form with my information.
-        Return a json with the query selector of each field, and value to fill in the element.
+        Fill in the given form with my information.
+        Return a json with the query selector of each field from the form, and value to fill in the element.
 
-        The query selector should be in raw string format, i.e. don't try to escape special characters.
 
-        For example, to select the following ID:
-        "urn:li:fsd_formElement:urn:li:jobs_applyformcommon_easyApplyFormElement:(4084622606,13028506484,multipleChoice)-0"
+        Below is my js function to fill in the return json value to the form
+            // Fill in the value based on the element type
+            switch (element.type) {
+                case 'text':
+                case 'email':
+                case 'tel':
+                case 'number':
+                case 'password':
+                case 'url':
+                case 'search':
+                case 'date':
+                case 'datetime-local':
+                case 'month':
+                case 'week':
+                case 'time':
+                    element.value = field.value;
+                    break;
+    
+                case 'radio':
+                    // Find the radio button with matching value
+                    const radios = document.getElementsByName(element.name);
+                    for (let radio of radios) {
+                        if (radio.value === field.value) {
+                            radio.checked = true;
+                            element = radio; // Update element for event dispatch
+                            break;
+                        }
+                    }
+                    break;
+    
+                case 'checkbox':
+                    element.checked = field.value === true || field.value === 'true' || field.value === 'Yes' || field.value === 'yes' || field.value === 'on';
+                    break;
+    
+                default:
+                    if (element.tagName.toLowerCase() === 'select') {
+                        const optionToSelect = Array.from(element.options).find(option => option.value === field.value || option.text === field.value);
+                        if (optionToSelect) {
+                            element.value = optionToSelect.value;
+                        } else {
+                            console.warn(\`No matching option found for selector: \${field.querySelector} and value: \${field.value}\`);
+                        }
+                    } else if (element.tagName.toLowerCase() === 'textarea') {
+                        element.value = field.value;
+                    } else {
+                        console.warn(\`Unhandled element type: \${element.type} for selector: \${field.querySelector}\`);
+                        return;
+                    }
+                    break;
+            }
 
-        Should return as is, DO NOT return the below:
-        "urn\\:li\\:fsd_formElement\\:urn\\:li\\:jobs_applyformcommon_easyApplyFormElement\\:\\(4084622606\\,13028506484\\,multipleChoice\\)-0"
+        Below is my information:\n\n${resume}
     `
+
+
 
     const response_format = {
         type: "json_schema",
