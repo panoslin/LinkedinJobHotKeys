@@ -1,19 +1,6 @@
 function fillFormFields(fieldData) {
-    // Iterate over each field in the JSON input
     fieldData.fields.forEach(field => {
-        // Select the form element using the querySelector
-        let element;
-        try {
-            element = (
-                document.querySelector(`#${CSS.escape(field.querySelector)}`) ||
-                document.querySelector(field.querySelector) ||
-                [...document.querySelectorAll('input, select, textarea')]
-                    .filter(el => Array.from(el.attributes).some(attr => attr.value === field.querySelector))[0]
-            );
-        } catch (error) {
-            console.error(`Error selecting element with querySelector: ${field.querySelector}`);
-            return; // Skip to the next field if the querySelector is invalid
-        }
+        let element = fuzzyFindElement(field);
 
         if (!element) {
             console.warn(`Element not found for selector: ${field.querySelector}`);
@@ -22,48 +9,59 @@ function fillFormFields(fieldData) {
 
         // Fill in the value based on the element type
         switch (element.type) {
-            case 'text': // Text input fields
+            case 'text':
             case 'email':
             case 'tel':
             case 'number':
             case 'password':
             case 'url':
-                element.value = element.value || field.value;
+            case 'search':
+            case 'date':
+            case 'datetime-local':
+            case 'month':
+            case 'week':
+            case 'time':
+                element.value = field.value;
                 break;
 
-            case 'radio': // Radio buttons
-                if (
-                    element.value === field.value ||
-                    document.querySelector(`label[for="${element.id}"]`).textContent.trim() === field.value
-                ) {
-                    element.checked = true;
+            case 'radio':
+                // Find the radio button with matching value
+                const radios = document.getElementsByName(element.name);
+                for (let radio of radios) {
+                    if (
+                        radio.value === field.value ||
+                        document.querySelector(`label[for="${radio.id}"]`).textContent.trim() === field.value
+                    ) {
+                        radio.checked = true;
+                        element = radio; // Update element for event dispatch
+                        break;
+                    }
                 }
                 break;
 
-            case 'checkbox': // Checkboxes
-                element.checked = field.value === true || field.value === 'true' || field.value === 'Yes';
-                break;
-
-            case 'select-one': // Dropdowns (single select)
-                const optionToSelect = Array.from(element.options).find(option => option.value === field.value || option.text === field.value);
-                if (optionToSelect) {
-                    element.value = optionToSelect.value;
-                } else {
-                    console.warn(`No matching option found for selector: ${field.querySelector} and value: ${field.value}`);
-                }
-                break;
-
-            case 'textarea': // Text areas
-                element.value = element.value || field.value;
+            case 'checkbox':
+                element.checked = field.value === true || field.value === 'true' || field.value === 'Yes' || field.value === 'yes' || field.value === 'on';
                 break;
 
             default:
-                console.warn(`Unhandled element type: ${element.type} for selector: ${field.querySelector}`);
-                return;
+                if (element.tagName.toLowerCase() === 'select') {
+                    const optionToSelect = Array.from(element.options).find(option => option.value === field.value || option.text === field.value);
+                    if (optionToSelect) {
+                        element.value = optionToSelect.value;
+                    } else {
+                        console.warn(`No matching option found for selector: ${field.querySelector} and value: ${field.value}`);
+                    }
+                } else if (element.tagName.toLowerCase() === 'textarea') {
+                    element.value = field.value;
+                } else {
+                    console.warn(`Unhandled element type: ${element.type} for selector: ${field.querySelector}`);
+                    return;
+                }
+                break;
         }
 
-        // Trigger input or change event if necessary to ensure any reactive behavior works
-        const eventType = element.type === 'checkbox' || element.type === 'radio' || element.type === 'select-one' ? 'change' : 'input';
+        // Trigger input or change event if necessary
+        const eventType = ['checkbox', 'radio', 'select-one'].includes(element.type) ? 'change' : 'input';
         element.dispatchEvent(new Event(eventType, {bubbles: true, cancelable: true}));
     });
 }
@@ -77,7 +75,8 @@ function fillFormFields(fieldData) {
  */
 function isFieldFilled(field) {
     if (!field || !(field instanceof HTMLElement)) {
-        throw new Error("Invalid field element provided.");
+        console.warn("Invalid field element provided.");
+        return true;
     }
 
     const fieldType = field.type || field.tagName.toLowerCase();
@@ -126,7 +125,8 @@ function isFieldFilled(field) {
  */
 function areAllFieldsFilled(form) {
     if (!form) {
-        throw new Error("Invalid form element provided.");
+        console.warn("No form element provided.");
+        return true;
     }
 
     const fields = form.querySelectorAll("input, select, textarea");
