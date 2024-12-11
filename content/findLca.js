@@ -55,13 +55,7 @@ function findLCAElements(labels) {
         const id = label.getAttribute('for'); // Get the 'for' attribute value
         if (!id) return;
 
-        // Find the corresponding element
-        // Try to find the element by ID
-        // If not found, try to find the element by 'for' attribute
-        // TODO: FUZZY FIND ELEMENT
-        const targetElement = document.getElementById(id) ||
-            [...document.querySelectorAll('input, select, textarea')]
-                .filter(el => Array.from(el.attributes).some(attr => attr.value === id))[0];
+        let targetElement = fuzzyFindElement(id);
 
         if (!targetElement) return;
 

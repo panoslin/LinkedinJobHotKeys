@@ -61,6 +61,7 @@ chrome.commands.onCommand.addListener((command) => {
                     const jsFiles = [
                         "scripts/config.js",
                         "scripts/chatGPT.js",
+                        "content/fuzzyFindElement.js",
                         "content/analyzeKeyword.js",
                         "content/autoFormFill.js",
                         "content/findLca.js",
