@@ -62,12 +62,12 @@ chrome.commands.onCommand.addListener((command) => {
                         "scripts/config.js",
                         "scripts/chatGPT.js",
                         "content/fuzzyFindElement.js",
+                        "content/toast.js",
                         "content/analyzeKeyword.js",
-                        "content/autoFormFill.js",
                         "content/findLca.js",
                         "content/inspection_mode.js",
-                        "content/toast.js",
-                        "content/contentScript.js",
+                        "content/autoFormFill.js",
+                        "content/contentScript.js"
                     ];
                     for (const jsFile of jsFiles) {
                         await chrome.scripting.executeScript({

@@ -38,7 +38,7 @@
         "content/toast.css"
       ],
       "matches": [
-        "*://*.linkedin.com/*"
+        "<all_urls>"
       ]
     }
   ],
@@ -51,14 +51,15 @@
         "*://*.linkedin.com/*"
       ],
       "js": [
-        "content/contentScript.js",
         "scripts/config.js",
         "scripts/chatGPT.js",
-        "content/analyzeKeyword.js",
-        "content/autoFormFill.js",
+        "content/fuzzyFindElement.js",
         "content/toast.js",
+        "content/analyzeKeyword.js",
         "content/findLca.js",
-        "content/inspection_mode.js"
+        "content/inspection_mode.js",
+        "content/autoFormFill.js",
+        "content/contentScript.js"
       ],
       "run_at": "document_end"
     }
