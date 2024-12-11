@@ -99,7 +99,8 @@
             }
         } else if (request.action === "fill-form") {
             console.log("fillForm action triggered!");
-            fillForm(personalInfo, filledForms, chatGPTAccessToken, true);
+            const container = document.querySelector('form')
+            fillForm(personalInfo, filledForms, chatGPTAccessToken, true, container);
         } else if (request.action === "fill-form-select") {
             console.log("fillForm action with select triggered!");
             inspector.setDynamicFunction((selectedElement) => {
@@ -237,7 +238,7 @@
                     if (dismissApplicationSentModal()) {
                         filledForms = new Set();
                     }
-                    fillForm(personalInfo, filledForms, chatGPTAccessToken);
+                    fillForm(personalInfo, filledForms, chatGPTAccessToken, false, document.querySelector('form'));
                     await analyzeKeyword(mutation);
                     break;
                 }

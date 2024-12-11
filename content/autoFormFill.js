@@ -141,7 +141,10 @@ function areAllFieldsFilled(form) {
 }
 
 
-function fillForm(personalInfo, filledForms, chatGPTAccessToken, force = false, root = document) {
+function fillForm(personalInfo, filledForms, chatGPTAccessToken, force = false, root) {
+    if (!root) {
+        return;
+    }
     if (!personalInfo) {
         console.warn('Personal info not loaded yet.');
         return;
@@ -157,15 +160,14 @@ function fillForm(personalInfo, filledForms, chatGPTAccessToken, force = false, 
         autoFillStatus.innerHTML = 'Auto Fill<span class="shortcut mr2 ml2">Ctrl + F(ill)</span>';
         footer.appendChild(autoFillStatus);
         autoFillStatus.addEventListener('click', () => {
-            fillForm(personalInfo, filledForms, chatGPTAccessToken, true);
+            fillForm(personalInfo, filledForms, chatGPTAccessToken, true, document.querySelector('form .ph5'));
         })
     } else {
         // use modal
     }
 
     const labels = root.querySelectorAll('label');
-    const form = root.querySelector('form');
-    // none of the id is found in filledForms
+    const form = findMultipleLCA(Array.from(labels));
     if (
         labels.length > 0 &&
         (
@@ -173,7 +175,10 @@ function fillForm(personalInfo, filledForms, chatGPTAccessToken, force = false, 
             (
                 // not all fields are processed
                 !Array.from(labels).every(label => filledForms.has(label.attributes['for']?.value)) &&
-                !areAllFieldsFilled(form)
+                !areAllFieldsFilled(form) &&
+                !Array.from(labels).some(label => {
+                    return label.attributes.for.value.startsWith('jobsDocumentCardToggle')
+                })
             )
         )
     ) {
@@ -184,35 +189,47 @@ function fillForm(personalInfo, filledForms, chatGPTAccessToken, force = false, 
 
         // add all id's to filledForms
         labels.forEach(label => filledForms.add(label.attributes['for']?.value));
+        // use LCA to separate each question
         const forms = findLCAElements(labels);
+        // const forms = extractQuestions(form);
 
-        const formPromises = Array.from(forms)
-            .filter(form => {
-                return !isFieldFilled(form.querySelector('input, select, textarea'))
-            })
-            .map(form => {
-                console.log(form);
-                const userPrompt = `
-                INFORMATION:
-                ${JSON.stringify(personalInfo)}
-    
-    
-                FORM:
-                ${form.innerHTML}
-            `;
+        const formsArray = Array.from(forms);
+        const batchSize = 10;
 
-                return extractForm(chatGPTAccessToken, userPrompt)
-                    .then(response => {
-                        console.log(response);
-                        fillFormFields(response);
-                    })
-                    .catch(error => {
-                        console.error("Error processing form:", error);
-                    });
-            });
+        // Filter forms
+        const filteredForms = formsArray.filter(form => {
+            return !isFieldFilled(form.querySelector('input, select, textarea')) || !isFieldFilled(form);
+        });
 
-        // Wait for all form requests to complete
-        Promise.all(formPromises)
+        function processBatches(filteredForms, batchSize) {
+            const batchPromises = [];
+
+            for (let i = 0; i < filteredForms.length; i += batchSize) {
+                const batch = filteredForms.slice(i, i + batchSize);
+
+                const batchPromise = (() => {
+                    const concatenatedUserPrompt = batch.map(form => form.innerHTML).join("\n");
+
+                    // Process the concatenated prompt for the batch
+                    return extractForm(chatGPTAccessToken, concatenatedUserPrompt, JSON.stringify(personalInfo))
+                        .then(response => {
+                            console.log(response);
+                            fillFormFields(response);
+                        })
+                        .catch(error => {
+                            console.error("Error processing batch:", error);
+                        });
+                })();
+
+                batchPromises.push(batchPromise);
+            }
+
+            // Return a promise that resolves when all batch promises are complete
+            return Promise.all(batchPromises);
+        }
+
+        // Process all batches and handle completion
+        processBatches(filteredForms, batchSize)
             .then(() => {
                 console.log("All forms processed!");
             })
@@ -227,6 +244,53 @@ function fillForm(personalInfo, filledForms, chatGPTAccessToken, force = false, 
     }
 }
 
+// /**
+//  * Extracts all question elements from a given HTML element.
+//  * Each question is assumed to be a complete unit containing
+//  * the question text and its associated input fields.
+//  *
+//  * @param {HTMLElement} rootElement - The HTML element containing the form.
+//  * @return {HTMLElement[]} - An array of question elements.
+//  */
+// function extractQuestions(rootElement) {
+//     const questions = [];
+//
+//     // Helper function to determine if an element represents a question
+//     function isQuestionElement(element) {
+//         // Check for common tags used for questions
+//         const questionTags = ['div', 'fieldset', 'li', 'p', 'label'];
+//
+//         // Check if the element has a class or ID indicating a question
+//         const classOrIdRegex = /question|q-|item|field|form/i;
+//
+//         return (
+//             questionTags.includes(element.tagName.toLowerCase()) &&
+//             (classOrIdRegex.test(element.className) ||
+//                 classOrIdRegex.test(element.id))
+//         );
+//     }
+//
+//     // Recursive function to traverse the DOM tree
+//     function traverse(element) {
+//         // If the element is a question element, add it to the list
+//         if (isQuestionElement(element)) {
+//             questions.push(element);
+//         } else {
+//             // Otherwise, traverse its children
+//             element.childNodes.forEach((child) => {
+//                 if (child.nodeType === Node.ELEMENT_NODE) {
+//                     traverse(child);
+//                 }
+//             });
+//         }
+//     }
+//
+//     traverse(rootElement);
+//     if (questions.length === 0) {
+//         questions.push(rootElement);
+//     }
+//     return questions || rootElement;
+// }
 
 //
 // // function extractLabeledFormFields(formSelector) {
