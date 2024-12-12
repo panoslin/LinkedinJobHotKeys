@@ -185,6 +185,8 @@ function fillForm(personalInfo, filledForms, chatGPTAccessToken, force = false, 
         if (autoFillStatus) {
             autoFillStatus.textContent = 'Auto Filling...';
             autoFillStatus.classList.remove("no-spinner");
+        } else {
+            displayToast('loading');
         }
 
         // add all id's to filledForms
@@ -218,6 +220,7 @@ function fillForm(personalInfo, filledForms, chatGPTAccessToken, force = false, 
                         })
                         .catch(error => {
                             console.error("Error processing batch:", error);
+                            displayToast(error.message);
                         });
                 })();
 
@@ -237,6 +240,9 @@ function fillForm(personalInfo, filledForms, chatGPTAccessToken, force = false, 
                 if (autoFillStatus) {
                     autoFillStatus.innerHTML = 'Auto Fill<span class="shortcut mr2 ml2">Ctrl + F(ill)</span>';
                     autoFillStatus.classList.add("no-spinner");
+                } else {
+                    displayToast(true);
+
                 }
             });
     } else {
