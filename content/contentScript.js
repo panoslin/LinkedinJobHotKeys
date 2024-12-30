@@ -276,47 +276,64 @@
 
                     function processKeywordValue(value) {
                         // If value is an array with objects
-                        if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object') {
+                        if (
+                            Array.isArray(value) &&
+                            value.length > 0 &&
+                            typeof value[0] === "object"
+                        ) {
                             const items = [];
-                            value.forEach(obj => {
-                                Object.entries(obj).forEach(([subKey, subValue]) => {
-                                    // Handle arrays within objects
-                                    if (Array.isArray(subValue)) {
-                                        subValue.forEach(item => {
-                                            if (item && typeof item === 'string') {
-                                                items.push(`${subKey}: ${item}`);
-                                            }
-                                        });
-                                    }
-                                    // Handle boolean values
-                                    else if (typeof subValue === 'boolean') {
-                                        if (subValue) {
-                                            items.push(subKey);
+                            value.forEach((obj) => {
+                                Object.entries(obj).forEach(
+                                    ([subKey, subValue]) => {
+                                        // Handle arrays within objects
+                                        if (Array.isArray(subValue)) {
+                                            subValue.forEach((item) => {
+                                                if (
+                                                    item &&
+                                                    typeof item === "string"
+                                                ) {
+                                                    items.push(
+                                                        `${subKey}: ${item}`,
+                                                    );
+                                                }
+                                            });
                                         }
-                                    }
-                                    // Handle string values
-                                    else if (typeof subValue === 'string') {
-                                        items.push(`${subKey}: ${subValue}`);
-                                    }
-                                });
+                                        // Handle boolean values
+                                        else if (
+                                            typeof subValue === "boolean"
+                                        ) {
+                                            if (subValue) {
+                                                items.push(subKey);
+                                            }
+                                        }
+                                        // Handle string values
+                                        else if (typeof subValue === "string") {
+                                            items.push(
+                                                `${subKey}: ${subValue}`,
+                                            );
+                                        }
+                                    },
+                                );
                             });
                             return items;
                         }
                         // If value is a simple array of strings
                         else if (Array.isArray(value)) {
-                            return value.filter(item => item && typeof item === 'string');
+                            return value.filter(
+                                (item) => item && typeof item === "string",
+                            );
                         }
                         // If value is a string
-                        else if (typeof value === 'string') {
+                        else if (typeof value === "string") {
                             return value;
                         }
                         // If value is an object
-                        else if (typeof value === 'object' && value !== null) {
+                        else if (typeof value === "object" && value !== null) {
                             const items = [];
                             Object.entries(value).forEach(([key, val]) => {
-                                if (typeof val === 'string') {
+                                if (typeof val === "string") {
                                     items.push(`${key}: ${val}`);
-                                } else if (typeof val === 'boolean' && val) {
+                                } else if (typeof val === "boolean" && val) {
                                     items.push(key);
                                 }
                             });
@@ -326,17 +343,81 @@
                     }
 
                     // Update the keywords processing section
-                    Object.entries(keywords).forEach(([category, keywordList]) => {
-                        const processedValue = processKeywordValue(keywordList);
-                        
-                        if (!processedValue) return;
+                    Object.entries(keywords).forEach(
+                        ([category, keywordList]) => {
+                            const processedValue =
+                                processKeywordValue(keywordList);
 
-                        // If the processed value is an array
-                        if (Array.isArray(processedValue)) {
-                            if (processedValue.length === 0) return;
-                            
-                            if (processedValue.length === 1) {
-                                // Single item goes to basic info
+                            if (!processedValue) return;
+
+                            // If the processed value is an array
+                            if (Array.isArray(processedValue)) {
+                                if (processedValue.length === 0) return;
+
+                                if (processedValue.length === 1) {
+                                    // Single item goes to basic info
+                                    const infoItem =
+                                        document.createElement("div");
+                                    infoItem.classList.add("info-item");
+
+                                    const infoLabel =
+                                        document.createElement("div");
+                                    infoLabel.classList.add("info-label");
+                                    infoLabel.textContent = category;
+
+                                    const infoValue =
+                                        document.createElement("div");
+                                    infoValue.classList.add("info-value");
+                                    infoValue.textContent = processedValue[0];
+
+                                    infoItem.appendChild(infoLabel);
+                                    infoItem.appendChild(infoValue);
+                                    basicInfoSection.appendChild(infoItem);
+
+                                    infoValue.addEventListener("click", () => {
+                                        highlightKeywordInDiv(processedValue[0]);
+                                    });
+                                } else {
+                                    // Multiple items go to list section
+                                    const sectionDiv =
+                                        document.createElement("div");
+                                    sectionDiv.classList.add("info-section");
+
+                                    const titleDiv =
+                                        document.createElement("h2");
+                                    titleDiv.classList.add("section-title");
+                                    titleDiv.textContent = category;
+                                    sectionDiv.appendChild(titleDiv);
+
+                                    const ul = document.createElement("ul");
+                                    processedValue.forEach((item) => {
+                                        if (
+                                            item &&
+                                            typeof item === "string" &&
+                                            item.trim()
+                                        ) {
+                                            const li =
+                                                document.createElement("li");
+                                            li.textContent = item;
+                                            ul.appendChild(li);
+
+                                            li.addEventListener("click", () => {
+                                                highlightKeywordInDiv(item);
+                                            });
+                                        }
+                                    });
+
+                                    if (ul.children.length > 0) {
+                                        sectionDiv.appendChild(ul);
+                                        listSections.push(sectionDiv);
+                                    }
+                                }
+                            }
+                            // If the processed value is a string
+                            else if (
+                                typeof processedValue === "string" &&
+                                processedValue.trim()
+                            ) {
                                 const infoItem = document.createElement("div");
                                 infoItem.classList.add("info-item");
 
@@ -346,54 +427,18 @@
 
                                 const infoValue = document.createElement("div");
                                 infoValue.classList.add("info-value");
-                                infoValue.textContent = processedValue[0];
+                                infoValue.textContent = processedValue;
 
                                 infoItem.appendChild(infoLabel);
                                 infoItem.appendChild(infoValue);
                                 basicInfoSection.appendChild(infoItem);
-                            } else {
-                                // Multiple items go to list section
-                                const sectionDiv = document.createElement("div");
-                                sectionDiv.classList.add("info-section");
 
-                                const titleDiv = document.createElement("h2");
-                                titleDiv.classList.add("section-title");
-                                titleDiv.textContent = category;
-                                sectionDiv.appendChild(titleDiv);
-
-                                const ul = document.createElement("ul");
-                                processedValue.forEach(item => {
-                                    if (item && typeof item === 'string' && item.trim()) {
-                                        const li = document.createElement("li");
-                                        li.textContent = item;
-                                        ul.appendChild(li);
-                                    }
+                                infoValue.addEventListener("click", () => {
+                                    highlightKeywordInDiv(processedValue);
                                 });
-
-                                if (ul.children.length > 0) {
-                                    sectionDiv.appendChild(ul);
-                                    listSections.push(sectionDiv);
-                                }
                             }
-                        }
-                        // If the processed value is a string
-                        else if (typeof processedValue === 'string' && processedValue.trim()) {
-                            const infoItem = document.createElement("div");
-                            infoItem.classList.add("info-item");
-
-                            const infoLabel = document.createElement("div");
-                            infoLabel.classList.add("info-label");
-                            infoLabel.textContent = category;
-
-                            const infoValue = document.createElement("div");
-                            infoValue.classList.add("info-value");
-                            infoValue.textContent = processedValue;
-
-                            infoItem.appendChild(infoLabel);
-                            infoItem.appendChild(infoValue);
-                            basicInfoSection.appendChild(infoItem);
-                        }
-                    });
+                        },
+                    );
 
                     // Add the sections to the container only if they have content
                     if (basicInfoSection.children.length > 0) {

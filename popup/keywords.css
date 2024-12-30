@@ -288,6 +288,7 @@
   padding-left: 8px;
   border-left: 2px solid var(--border-color);
   font-size: var(--text-lg);
+  cursor: pointer;
 }
 
 .info-section ul {
@@ -302,6 +303,7 @@
   color: var(--secondary-text);
   transition: transform 0.2s ease;
   font-size: var(--text-lg);
+  cursor: pointer;
 }
 
 .info-section li:hover {
