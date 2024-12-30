@@ -133,6 +133,7 @@
                     chatGPTAccessToken,
                     true,
                     container,
+                    resumeText,
                 );
             } else if (request.action === "fill-form-select") {
                 console.log("fillForm action with select triggered!");
@@ -143,6 +144,7 @@
                         chatGPTAccessToken,
                         true,
                         selectedElement,
+                        resumeText,
                     );
                 });
                 inspector.enableInspectMode();
@@ -191,7 +193,7 @@
         const jobId = new URL(window.location.href).searchParams.get(
             "currentJobId",
         );
-        const jd = extractTextFromElement(".jobs-box__html-content .mt4");
+        const jd = extractTextFromElement(".jobs-search__job-details--wrapper");
         const applied = document.querySelector(
             ".jobs-s-apply a.jobs-s-apply__application-link",
         );
@@ -272,23 +274,69 @@
                     basicInfoSection.classList.add("info-section");
                     const listSections = [];
 
-                    // First pass: separate list and non-list items
-                    Object.entries(keywords).forEach(
-                        ([category, keywordList]) => {
-                            // Skip if the value is empty, null, or undefined
-                            if (
-                                !keywordList ||
-                                (Array.isArray(keywordList) &&
-                                    keywordList.length === 0)
-                            ) {
-                                return;
-                            }
+                    function processKeywordValue(value) {
+                        // If value is an array with objects
+                        if (Array.isArray(value) && value.length > 0 && typeof value[0] === 'object') {
+                            const items = [];
+                            value.forEach(obj => {
+                                Object.entries(obj).forEach(([subKey, subValue]) => {
+                                    // Handle arrays within objects
+                                    if (Array.isArray(subValue)) {
+                                        subValue.forEach(item => {
+                                            if (item && typeof item === 'string') {
+                                                items.push(`${subKey}: ${item}`);
+                                            }
+                                        });
+                                    }
+                                    // Handle boolean values
+                                    else if (typeof subValue === 'boolean') {
+                                        if (subValue) {
+                                            items.push(subKey);
+                                        }
+                                    }
+                                    // Handle string values
+                                    else if (typeof subValue === 'string') {
+                                        items.push(`${subKey}: ${subValue}`);
+                                    }
+                                });
+                            });
+                            return items;
+                        }
+                        // If value is a simple array of strings
+                        else if (Array.isArray(value)) {
+                            return value.filter(item => item && typeof item === 'string');
+                        }
+                        // If value is a string
+                        else if (typeof value === 'string') {
+                            return value;
+                        }
+                        // If value is an object
+                        else if (typeof value === 'object' && value !== null) {
+                            const items = [];
+                            Object.entries(value).forEach(([key, val]) => {
+                                if (typeof val === 'string') {
+                                    items.push(`${key}: ${val}`);
+                                } else if (typeof val === 'boolean' && val) {
+                                    items.push(key);
+                                }
+                            });
+                            return items.length > 0 ? items : null;
+                        }
+                        return null;
+                    }
 
-                            // Handle arrays: if it's a single-element array, treat it as a non-list item
-                            if (
-                                Array.isArray(keywordList) &&
-                                keywordList.length === 1
-                            ) {
+                    // Update the keywords processing section
+                    Object.entries(keywords).forEach(([category, keywordList]) => {
+                        const processedValue = processKeywordValue(keywordList);
+                        
+                        if (!processedValue) return;
+
+                        // If the processed value is an array
+                        if (Array.isArray(processedValue)) {
+                            if (processedValue.length === 0) return;
+                            
+                            if (processedValue.length === 1) {
+                                // Single item goes to basic info
                                 const infoItem = document.createElement("div");
                                 infoItem.classList.add("info-item");
 
@@ -298,19 +346,14 @@
 
                                 const infoValue = document.createElement("div");
                                 infoValue.classList.add("info-value");
-                                infoValue.textContent = keywordList[0];
+                                infoValue.textContent = processedValue[0];
 
                                 infoItem.appendChild(infoLabel);
                                 infoItem.appendChild(infoValue);
                                 basicInfoSection.appendChild(infoItem);
-                            }
-                            // Handle arrays with multiple elements
-                            else if (
-                                Array.isArray(keywordList) &&
-                                keywordList.length > 1
-                            ) {
-                                const sectionDiv =
-                                    document.createElement("div");
+                            } else {
+                                // Multiple items go to list section
+                                const sectionDiv = document.createElement("div");
                                 sectionDiv.classList.add("info-section");
 
                                 const titleDiv = document.createElement("h2");
@@ -319,43 +362,38 @@
                                 sectionDiv.appendChild(titleDiv);
 
                                 const ul = document.createElement("ul");
-                                keywordList.forEach((keyword) => {
-                                    if (keyword && keyword.trim()) {
-                                        // Only add non-empty keywords
+                                processedValue.forEach(item => {
+                                    if (item && typeof item === 'string' && item.trim()) {
                                         const li = document.createElement("li");
-                                        li.textContent = keyword;
+                                        li.textContent = item;
                                         ul.appendChild(li);
                                     }
                                 });
 
-                                // Only add the section if there are actual list items
                                 if (ul.children.length > 0) {
                                     sectionDiv.appendChild(ul);
                                     listSections.push(sectionDiv);
                                 }
                             }
-                            // Handle non-array values
-                            else if (
-                                typeof keywordList === "string" &&
-                                keywordList.trim()
-                            ) {
-                                const infoItem = document.createElement("div");
-                                infoItem.classList.add("info-item");
+                        }
+                        // If the processed value is a string
+                        else if (typeof processedValue === 'string' && processedValue.trim()) {
+                            const infoItem = document.createElement("div");
+                            infoItem.classList.add("info-item");
 
-                                const infoLabel = document.createElement("div");
-                                infoLabel.classList.add("info-label");
-                                infoLabel.textContent = category;
+                            const infoLabel = document.createElement("div");
+                            infoLabel.classList.add("info-label");
+                            infoLabel.textContent = category;
 
-                                const infoValue = document.createElement("div");
-                                infoValue.classList.add("info-value");
-                                infoValue.textContent = keywordList;
+                            const infoValue = document.createElement("div");
+                            infoValue.classList.add("info-value");
+                            infoValue.textContent = processedValue;
 
-                                infoItem.appendChild(infoLabel);
-                                infoItem.appendChild(infoValue);
-                                basicInfoSection.appendChild(infoItem);
-                            }
-                        },
-                    );
+                            infoItem.appendChild(infoLabel);
+                            infoItem.appendChild(infoValue);
+                            basicInfoSection.appendChild(infoItem);
+                        }
+                    });
 
                     // Add the sections to the container only if they have content
                     if (basicInfoSection.children.length > 0) {
@@ -423,6 +461,7 @@
                         chatGPTAccessToken,
                         false,
                         document.querySelector("form"),
+                        resumeText,
                     );
                     await analyzeKeyword(mutation);
                     break;
