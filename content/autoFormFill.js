@@ -1,6 +1,6 @@
 function fillFormFields(fieldData) {
     fieldData.fields.forEach((field) => {
-        let element = fuzzyFindElement(field);
+        let element = fuzzyFindElement(field.querySelector);
 
         if (!element) {
             console.warn(
@@ -172,6 +172,7 @@ function fillForm(
     chatGPTAccessToken,
     force = false,
     root,
+    resumeText
 ) {
     if (!root) {
         return;
@@ -206,24 +207,25 @@ function fillForm(
                 chatGPTAccessToken,
                 true,
                 document.querySelector("form .ph5"),
+                resumeText
             );
         });
     } else {
         // use modal
     }
 
-    const labels = root.querySelectorAll("label");
+    const labels = root.querySelectorAll("label, fieldset");
     const form = findMultipleLCA(Array.from(labels));
     if (
         labels.length > 0 &&
         (force ||
             // not all fields are processed
             (!Array.from(labels).every((label) =>
-                filledForms.has(label.attributes["for"]?.value),
-            ) &&
+                    filledForms.has(label.attributes["for"]?.value),
+                ) &&
                 !areAllFieldsFilled(form) &&
                 !Array.from(labels).some((label) => {
-                    return label.attributes.for.value.startsWith(
+                    return label.attributes?.for?.value?.startsWith(
                         "jobsDocumentCardToggle",
                     );
                 })))
@@ -236,70 +238,51 @@ function fillForm(
         }
 
         // add all id's to filledForms
-        labels.forEach((label) =>
-            filledForms.add(label.attributes["for"]?.value),
-        );
-        // use LCA to separate each question
+        labels.forEach(label => filledForms.add(label.attributes['for']?.value));
         const forms = findLCAElements(labels);
-        // const forms = extractQuestions(form);
 
-        const formsArray = Array.from(forms);
-        const batchSize = 10;
+        const formPromises = Array.from(forms)
+            .filter(element => {
+                if (element.tagName.toLowerCase() === 'fieldset') {
+                    return !Array.from(element.querySelectorAll('input, select, textarea')).every(isFieldFilled);
+                } else {
+                    return !isFieldFilled(element.querySelector('input, select, textarea'));
+                }
+            })
+            .map(form => {
+                console.log(form);
+                const modifiedPersonalInfo = { ...personalInfo };
+                delete modifiedPersonalInfo.summarizedResume;
+                delete modifiedPersonalInfo.testMessage;
+                modifiedPersonalInfo.resumeText = resumeText;
+                const userPrompt = `
+                    INFORMATION:
+                    ${JSON.stringify(modifiedPersonalInfo)}
+        
+        
+                    FORM:
+                    ${form.innerHTML}
+                `;
 
-        // Filter forms
-        const filteredForms = formsArray.filter((form) => {
-            return (
-                !isFieldFilled(form.querySelector("input, select, textarea")) ||
-                !isFieldFilled(form)
-            );
-        });
+                return extractForm(chatGPTAccessToken, userPrompt)
+                    .then(response => {
+                        console.log(response);
+                        fillFormFields(response);
+                    })
+                    .catch(error => {
+                        console.error("Error processing form:", error);
+                    });
+            });
 
-        function processBatches(filteredForms, batchSize) {
-            const batchPromises = [];
-
-            for (let i = 0; i < filteredForms.length; i += batchSize) {
-                const batch = filteredForms.slice(i, i + batchSize);
-
-                const batchPromise = (() => {
-                    const concatenatedUserPrompt = batch
-                        .map((form) => form.innerHTML)
-                        .join("\n");
-
-                    // Process the concatenated prompt for the batch
-                    return extractForm(
-                        chatGPTAccessToken,
-                        concatenatedUserPrompt,
-                        JSON.stringify(personalInfo),
-                    )
-                        .then((response) => {
-                            console.log(response);
-                            fillFormFields(response);
-                        })
-                        .catch((error) => {
-                            console.error("Error processing batch:", error);
-                            displayToast(error.message);
-                        });
-                })();
-
-                batchPromises.push(batchPromise);
-            }
-
-            // Return a promise that resolves when all batch promises are complete
-            return Promise.all(batchPromises);
-        }
-
-        // Process all batches and handle completion
-        processBatches(filteredForms, batchSize)
+        // Wait for all form requests to complete
+        Promise.all(formPromises)
             .then(() => {
                 console.log("All forms processed!");
             })
             .finally(() => {
                 if (autoFillStatus) {
-                    autoFillStatus.innerHTML =
-                        'Auto Fill<span class="shortcut mr2 ml2">Ctrl + F(ill)</span>';
+                    autoFillStatus.innerHTML = 'Auto Fill<span class="shortcut mr2 ml2">Ctrl + F(ill)</span>';
                     autoFillStatus.classList.add("no-spinner");
-                } else {
-                    displayToast(true);
                 }
             });
     } else {
