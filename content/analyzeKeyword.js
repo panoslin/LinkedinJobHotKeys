@@ -78,36 +78,36 @@ function highlightKeywordInDiv(keyword) {
 }
 
 
-function createKeyword(keyword, isMatch) {
-    const keywordSpan = document.createElement('span');
-    keywordSpan.classList.add('keyword', isMatch ? 'match' : 'mismatch');
-    if (keyword.length === 0 || keyword[0].length > 60) {
-        // too long, not valid keyword
-        return null;
-    }
-    keywordSpan.textContent = keyword[0];
+// function createKeyword(keyword, isMatch) {
+//     const keywordSpan = document.createElement('span');
+//     keywordSpan.classList.add('keyword');
+//     if (keyword.length === 0 || keyword[0].length > 60) {
+//         // too long, not valid keyword
+//         return null;
+//     }
+//     keywordSpan.textContent = keyword;
 
-    // Create a tooltip
-    if (keyword[1] && keyword[1].length <= 200) {
-        const tooltip = document.createElement('div');
-        tooltip.classList.add('tooltip');
-        tooltip.textContent = keyword[1];
+//     // // Create a tooltip
+//     // if (keyword[1] && keyword[1].length <= 200) {
+//     //     const tooltip = document.createElement('div');
+//     //     tooltip.classList.add('tooltip');
+//     //     tooltip.textContent = keyword[1];
 
-        keywordSpan.appendChild(tooltip);
-        // Show and hide tooltip on hover
-        keywordSpan.addEventListener('mouseover', () => {
-            tooltip.style.visibility = 'visible';
-            tooltip.style.opacity = '1';
-        });
-        keywordSpan.addEventListener('mouseout', () => {
-            tooltip.style.visibility = 'hidden';
-            tooltip.style.opacity = '0';
-        });
+//     //     keywordSpan.appendChild(tooltip);
+//     //     // Show and hide tooltip on hover
+//     //     keywordSpan.addEventListener('mouseover', () => {
+//     //         tooltip.style.visibility = 'visible';
+//     //         tooltip.style.opacity = '1';
+//     //     });
+//     //     keywordSpan.addEventListener('mouseout', () => {
+//     //         tooltip.style.visibility = 'hidden';
+//     //         tooltip.style.opacity = '0';
+//     //     });
 
-    }
+//     // }
 
-    keywordSpan.addEventListener('click', () => {
-        highlightKeywordInDiv(keyword[1]);
-    });
-    return keywordSpan;
-}
+//     keywordSpan.addEventListener('click', () => {
+//         highlightKeywordInDiv(keyword);
+//     });
+//     return keywordSpan;
+// }

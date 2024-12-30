@@ -142,8 +142,9 @@
 
     async function analyzeKeyword(mutation) {
         const jobId = new URL(window.location.href).searchParams.get('currentJobId');
-        const jd = extractTextFromElement('.jobs-search__job-details--wrapper');
+        const jd = extractTextFromElement('.jobs-box__html-content .mt4');
         const applied = document.querySelector('.jobs-s-apply a.jobs-s-apply__application-link');
+        
         if (applied) {
             document.querySelectorAll('.chat-gpt-suggested-keywords-container').forEach((el) => el.remove());
             document.querySelector('.upsell-premium-custom-section-card__container')?.remove();
@@ -155,13 +156,9 @@
             document.querySelector('.upsell-premium-custom-section-card__container')?.remove();
             document.querySelector('#how-you-match-card-container')?.remove();
 
-            const resume = personalInfo.summarizedResume || resumeText;
-            const userPrompt = `
-                \nAdditional information: ${personalInfo.additional_info}
-                \n\nResume: ${resume}
-                \n\nJD: ${jd}
-            `;
+            const userPrompt = jd;
             const container = document.querySelector('.job-details-jobs-unified-top-card__container--two-pane div');
+            
             if (container) {
                 const chatGPTContainer = document.createElement('div');
                 chatGPTContainer.classList.add('chat-gpt-suggested-keywords-container');
@@ -174,29 +171,105 @@
 
                 try {
                     const response = await extractKeywords(chatGPTAccessToken, userPrompt);
+                    console.log(response);
                     loadingStatus.remove();
                     document.querySelector('.upsell-premium-custom-section-card__container')?.remove();
                     document.querySelector('#how-you-match-card-container')?.remove();
 
-                    const {match, mismatch, summary} = response;
+                    const {keywords, summary} = response;
 
-                    const keywordsContainer = document.createElement('div');
-                    keywordsContainer.classList.add('keywords');
-                    match.forEach((keyword) => {
-                        const keywordSpan = createKeyword(keyword, true);
-                        if (keywordSpan) keywordsContainer.appendChild(keywordSpan);
-                    });
-                    mismatch.forEach((keyword) => {
-                        const keywordSpan = createKeyword(keyword, false);
-                        if (keywordSpan) keywordsContainer.appendChild(keywordSpan);
-                    });
-
+                    // Add summary section
                     const summaryContainer = document.createElement('div');
                     summaryContainer.classList.add('summary');
-                    summaryContainer.innerHTML = `<strong>Summary:</strong> ${summary}`;
-
+                    summaryContainer.innerHTML = summary;
                     chatGPTContainer.appendChild(summaryContainer);
+
+                    // Create container for all keyword sections
+                    const keywordsContainer = document.createElement('div');
+                    keywordsContainer.classList.add('keywords-container');
+
+                    // Process each category of keywords
+                    const basicInfoSection = document.createElement('div');
+                    basicInfoSection.classList.add('info-section');
+                    const listSections = [];
+
+                    // First pass: separate list and non-list items
+                    Object.entries(keywords).forEach(([category, keywordList]) => {
+                        // Skip if the value is empty, null, or undefined
+                        if (!keywordList || (Array.isArray(keywordList) && keywordList.length === 0)) {
+                            return;
+                        }
+
+                        // Handle arrays: if it's a single-element array, treat it as a non-list item
+                        if (Array.isArray(keywordList) && keywordList.length === 1) {
+                            const infoItem = document.createElement('div');
+                            infoItem.classList.add('info-item');
+                            
+                            const infoLabel = document.createElement('div');
+                            infoLabel.classList.add('info-label');
+                            infoLabel.textContent = category;
+                            
+                            const infoValue = document.createElement('div');
+                            infoValue.classList.add('info-value');
+                            infoValue.textContent = keywordList[0];
+                            
+                            infoItem.appendChild(infoLabel);
+                            infoItem.appendChild(infoValue);
+                            basicInfoSection.appendChild(infoItem);
+                        } 
+                        // Handle arrays with multiple elements
+                        else if (Array.isArray(keywordList) && keywordList.length > 1) {
+                            const sectionDiv = document.createElement('div');
+                            sectionDiv.classList.add('info-section');
+
+                            const titleDiv = document.createElement('h2');
+                            titleDiv.classList.add('section-title');
+                            titleDiv.textContent = category;
+                            sectionDiv.appendChild(titleDiv);
+
+                            const ul = document.createElement('ul');
+                            keywordList.forEach(keyword => {
+                                if (keyword && keyword.trim()) { // Only add non-empty keywords
+                                    const li = document.createElement('li');
+                                    li.textContent = keyword;
+                                    ul.appendChild(li);
+                                }
+                            });
+                            
+                            // Only add the section if there are actual list items
+                            if (ul.children.length > 0) {
+                                sectionDiv.appendChild(ul);
+                                listSections.push(sectionDiv);
+                            }
+                        } 
+                        // Handle non-array values
+                        else if (typeof keywordList === 'string' && keywordList.trim()) {
+                            const infoItem = document.createElement('div');
+                            infoItem.classList.add('info-item');
+                            
+                            const infoLabel = document.createElement('div');
+                            infoLabel.classList.add('info-label');
+                            infoLabel.textContent = category;
+                            
+                            const infoValue = document.createElement('div');
+                            infoValue.classList.add('info-value');
+                            infoValue.textContent = keywordList;
+                            
+                            infoItem.appendChild(infoLabel);
+                            infoItem.appendChild(infoValue);
+                            basicInfoSection.appendChild(infoItem);
+                        }
+                    });
+
+                    // Add the sections to the container only if they have content
+                    if (basicInfoSection.children.length > 0) {
+                        keywordsContainer.appendChild(basicInfoSection);
+                    }
+                    listSections.forEach(section => {
+                        keywordsContainer.appendChild(section);
+                    });
                     chatGPTContainer.appendChild(keywordsContainer);
+
                 } catch (error) {
                     console.error('Error:', error);
                     loadingStatus.textContent = 'Error: ' + error.message;

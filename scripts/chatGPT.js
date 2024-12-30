@@ -64,9 +64,7 @@ async function extractForm(apiToken, userPrompt, resume, model = "gpt-4o") {
             }
 
         Below is my information:\n\n${resume}
-    `
-
-
+    `;
 
     const response_format = {
         type: "json_schema",
@@ -187,7 +185,7 @@ async function extractPersonalInfo(apiToken, userPrompt, model = "gpt-4o") {
 }
 
 /**
- * Extracts keywords from resume and JD using OpenAI's model.
+ * Extracts keywords from JD using OpenAI's model.
  *
  * @param {string} apiToken - Your OpenAI API token.
  * @param {string} userPrompt - The user's input prompt.
@@ -195,10 +193,8 @@ async function extractPersonalInfo(apiToken, userPrompt, model = "gpt-4o") {
  * @returns {Promise<Object[]>} - A promise that resolves to the parsed JSON response or an empty array on failure.
  */
 async function extractKeywords(apiToken, userPrompt, model = "gpt-4o") {
-    const systemPrompt = "Extract all of the important keywords (at least 10) from the given job description. " +
-        "Return the keywords as a pair (keyword, original text from job description), both should less than 5 words. " +
-        "After finding the keywords from the job description, tell me match/mismatch with the resume for each keyword" +
-        "Also gimme me a summary (in HTML style, less then 25 words) and apply decision (true or false). ";
+    const systemPrompt =
+        "Extract important keywords from this job description. Also gimme me a summary (in HTML style, less then 25 words) ";
 
     const response_format = {
         type: "json_schema",
@@ -207,37 +203,30 @@ async function extractKeywords(apiToken, userPrompt, model = "gpt-4o") {
             schema: {
                 type: "object",
                 properties: {
-                    match: {
-                        type: "array",
-                        items: {
-                            type: "array",
-                            items: {type: "string"}
-                        }
+                    summary: {
+                        type: "string",
                     },
-                    mismatch: {
-                        type: "array",
-                        items: {
+                    keywords: {
+                        type: "object",
+                        additionalProperties: {
                             type: "array",
-                            items: {type: "string"}
-                        }
+                            items: {type: "string"},
+                        },
                     },
-                    summary: {type: "string"},
-                    apply: {type: "boolean"},
                 },
-                required: [
-                    "match",
-                    "mismatch",
-                    "summary",
-                    "apply"
-                ],
-                additionalProperties: false
+                required: ["summary", "keywords"],
+                additionalProperties: true,
             },
-            strict: true
-        }
-    }
-    return await sendPrompt(apiToken, userPrompt, systemPrompt, model, response_format);
+        },
+    };
+    return await sendPrompt(
+        apiToken,
+        userPrompt,
+        systemPrompt,
+        model,
+        response_format,
+    );
 }
-
 
 /**
  * Sends a prompt to the OpenAI Chat Completion API and returns the parsed response.
