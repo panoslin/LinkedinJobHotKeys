@@ -79,21 +79,26 @@ async function extractForm(apiToken, userPrompt, resume, model = "gpt-4o") {
                             type: "object",
                             properties: {
                                 querySelector: {type: "string"},
-                                value: {type: "string"}
+                                value: {type: "string"},
                             },
                             required: ["querySelector", "value"],
-                            additionalProperties: false
-                        }
+                            additionalProperties: false,
+                        },
                     },
-
                 },
                 required: ["fields"],
-                additionalProperties: false
+                additionalProperties: false,
             },
-            strict: true
-        }
-    }
-    return await sendPrompt(apiToken, userPrompt, systemPrompt, model, response_format);
+            strict: true,
+        },
+    };
+    return await sendPrompt(
+        apiToken,
+        userPrompt,
+        systemPrompt,
+        model,
+        response_format,
+    );
 }
 
 /**
@@ -105,7 +110,8 @@ async function extractForm(apiToken, userPrompt, resume, model = "gpt-4o") {
  * @returns {Promise<Object[]>} - A promise that resolves to the parsed JSON response or an empty array on failure.
  */
 async function summarizeResume(apiToken, userPrompt, model = "gpt-4o") {
-    const systemPrompt = "Summarize and show me the comprehensive list of technical and non-technical qualifications of this resume";
+    const systemPrompt =
+        "Summarize and show me the comprehensive list of technical and non-technical qualifications of this resume";
     const response_format = {
         type: "json_schema",
         json_schema: {
@@ -117,23 +123,32 @@ async function summarizeResume(apiToken, userPrompt, model = "gpt-4o") {
                         type: "object",
                         additionalProperties: {
                             type: "array",
-                            items: {type: "string"}
-                        }
+                            items: {type: "string"},
+                        },
                     },
                     Non_Technical_Qualifications: {
                         type: "object",
                         additionalProperties: {
                             type: "array",
-                            items: {type: "string"}
-                        }
-                    }
+                            items: {type: "string"},
+                        },
+                    },
                 },
-                required: ["Technical_Qualifications", "Non_Technical_Qualifications"],
-                additionalProperties: true // Allows additional keys at the root level
-            }
-        }
+                required: [
+                    "Technical_Qualifications",
+                    "Non_Technical_Qualifications",
+                ],
+                additionalProperties: true, // Allows additional keys at the root level
+            },
+        },
     };
-    return await sendPrompt(apiToken, userPrompt, systemPrompt, model, response_format);
+    return await sendPrompt(
+        apiToken,
+        userPrompt,
+        systemPrompt,
+        model,
+        response_format,
+    );
 }
 
 /**
@@ -145,9 +160,10 @@ async function summarizeResume(apiToken, userPrompt, model = "gpt-4o") {
  * @returns {Promise<Object[]>} - A promise that resolves to the parsed JSON response or an empty array on failure.
  */
 async function extractPersonalInfo(apiToken, userPrompt, model = "gpt-4o") {
-    const systemPrompt = "Extract the following information and return a json from the uploaded resume. " +
+    const systemPrompt =
+        "Extract the following information and return a json from the uploaded resume. " +
         "leave blank if you cannot find the related fields. If the field is url, make it a valid url:\n" +
-        "name, linkedin, location, company, github, email, phone, preferred_name, required_visa_sponsorship"
+        "name, linkedin, location, company, github, email, phone, preferred_name, required_visa_sponsorship";
     const response_format = {
         type: "json_schema",
         json_schema: {
@@ -163,7 +179,7 @@ async function extractPersonalInfo(apiToken, userPrompt, model = "gpt-4o") {
                     email: {type: "string"},
                     phone: {type: "string"},
                     preferred_name: {type: "string"},
-                    required_visa_sponsorship: {type: "string"}
+                    required_visa_sponsorship: {type: "string"},
                 },
                 required: [
                     "name",
@@ -174,14 +190,20 @@ async function extractPersonalInfo(apiToken, userPrompt, model = "gpt-4o") {
                     "email",
                     "phone",
                     "preferred_name",
-                    "required_visa_sponsorship"
+                    "required_visa_sponsorship",
                 ],
-                additionalProperties: false
+                additionalProperties: false,
             },
-            strict: true
-        }
-    }
-    return await sendPrompt(apiToken, userPrompt, systemPrompt, model, response_format);
+            strict: true,
+        },
+    };
+    return await sendPrompt(
+        apiToken,
+        userPrompt,
+        systemPrompt,
+        model,
+        response_format,
+    );
 }
 
 /**
@@ -243,13 +265,13 @@ async function sendPrompt(
     userPrompt,
     systemPrompt,
     model = "gpt-4o",
-    response_format = null
+    response_format = null,
 ) {
-    const API_URL = 'https://api.openai.com/v1/chat/completions';
+    const API_URL = "https://api.openai.com/v1/chat/completions";
 
     const messages = [
         {role: "system", content: systemPrompt},
-        {role: "user", content: userPrompt}
+        {role: "user", content: userPrompt},
     ];
 
     let requestBody = {};
@@ -259,26 +281,26 @@ async function sendPrompt(
             messages,
             n: 1,
             frequency_penalty: 1.0,
-            response_format: response_format
+            response_format: response_format,
         };
     } else {
         requestBody = {
             model,
             messages,
             n: 1,
-            frequency_penalty: 1.0
+            frequency_penalty: 1.0,
         };
     }
 
     const headers = {
-        'Authorization': `Bearer ${apiToken}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${apiToken}`,
+        "Content-Type": "application/json",
     };
 
     const response = await fetch(API_URL, {
-        method: 'POST',
+        method: "POST",
         headers,
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
@@ -287,7 +309,9 @@ async function sendPrompt(
             console.error("Rate limit reached. Please wait and try again.");
             return [];
         }
-        throw new Error(`API request failed with status ${response.status}: ${errorText}`);
+        throw new Error(
+            `API request failed with status ${response.status}: ${errorText}`,
+        );
     }
 
     const completion = await response.json();
@@ -298,13 +322,14 @@ async function sendPrompt(
         return [];
     }
 
-    if (choice.finish_reason === 'length') {
-        console.warn("Completion finished with incomplete output. Please try again with more context.");
+    if (choice.finish_reason === "length") {
+        console.warn(
+            "Completion finished with incomplete output. Please try again with more context.",
+        );
         console.warn(choice.message?.content || "No content returned.");
         return [];
     }
 
-    const parsedContent = JSON.parse(choice.message?.content || '{}');
+    const parsedContent = JSON.parse(choice.message?.content || "{}");
     return parsedContent || [];
-
 }

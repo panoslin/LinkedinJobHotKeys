@@ -3,15 +3,8 @@
   "name": "LinkedIn Job Turbo",
   "version": "3.2",
   "description": "Streamline and accelerate your job search on LinkedIn",
-  "permissions": [
-    "downloads",
-    "storage",
-    "activeTab",
-    "scripting"
-  ],
-  "host_permissions": [
-    "*://*.linkedin.com/*"
-  ],
+  "permissions": ["downloads", "storage", "activeTab", "scripting"],
+  "host_permissions": ["*://*.linkedin.com/*"],
   "icons": {
     "16": "icons/img.png",
     "48": "icons/img.png",
@@ -37,9 +30,7 @@
         "content/inspection_mode.css",
         "content/toast.css"
       ],
-      "matches": [
-        "<all_urls>"
-      ]
+      "matches": ["<all_urls>"]
     }
   ],
   "content_security_policy": {
@@ -47,9 +38,7 @@
   },
   "content_scripts": [
     {
-      "matches": [
-        "*://*.linkedin.com/*"
-      ],
+      "matches": ["*://*.linkedin.com/*"],
       "js": [
         "scripts/config.js",
         "scripts/chatGPT.js",

@@ -1,36 +1,40 @@
 function fillFormFields(fieldData) {
-    fieldData.fields.forEach(field => {
+    fieldData.fields.forEach((field) => {
         let element = fuzzyFindElement(field);
 
         if (!element) {
-            console.warn(`Element not found for selector: ${field.querySelector}`);
+            console.warn(
+                `Element not found for selector: ${field.querySelector}`,
+            );
             return; // Skip to the next field if the element is not found
         }
 
         // Fill in the value based on the element type
         switch (element.type) {
-            case 'text':
-            case 'email':
-            case 'tel':
-            case 'number':
-            case 'password':
-            case 'url':
-            case 'search':
-            case 'date':
-            case 'datetime-local':
-            case 'month':
-            case 'week':
-            case 'time':
+            case "text":
+            case "email":
+            case "tel":
+            case "number":
+            case "password":
+            case "url":
+            case "search":
+            case "date":
+            case "datetime-local":
+            case "month":
+            case "week":
+            case "time":
                 element.value = field.value;
                 break;
 
-            case 'radio':
+            case "radio":
                 // Find the radio button with matching value
                 const radios = document.getElementsByName(element.name);
                 for (let radio of radios) {
                     if (
                         radio.value === field.value ||
-                        document.querySelector(`label[for="${radio.id}"]`).textContent.trim() === field.value
+                        document
+                            .querySelector(`label[for="${radio.id}"]`)
+                            .textContent.trim() === field.value
                     ) {
                         radio.checked = true;
                         element = radio; // Update element for event dispatch
@@ -39,33 +43,51 @@ function fillFormFields(fieldData) {
                 }
                 break;
 
-            case 'checkbox':
-                element.checked = field.value === true || field.value === 'true' || field.value === 'Yes' || field.value === 'yes' || field.value === 'on';
+            case "checkbox":
+                element.checked =
+                    field.value === true ||
+                    field.value === "true" ||
+                    field.value === "Yes" ||
+                    field.value === "yes" ||
+                    field.value === "on";
                 break;
 
             default:
-                if (element.tagName.toLowerCase() === 'select') {
-                    const optionToSelect = Array.from(element.options).find(option => option.value === field.value || option.text === field.value);
+                if (element.tagName.toLowerCase() === "select") {
+                    const optionToSelect = Array.from(element.options).find(
+                        (option) =>
+                            option.value === field.value ||
+                            option.text === field.value,
+                    );
                     if (optionToSelect) {
                         element.value = optionToSelect.value;
                     } else {
-                        console.warn(`No matching option found for selector: ${field.querySelector} and value: ${field.value}`);
+                        console.warn(
+                            `No matching option found for selector: ${field.querySelector} and value: ${field.value}`,
+                        );
                     }
-                } else if (element.tagName.toLowerCase() === 'textarea') {
+                } else if (element.tagName.toLowerCase() === "textarea") {
                     element.value = field.value;
                 } else {
-                    console.warn(`Unhandled element type: ${element.type} for selector: ${field.querySelector}`);
+                    console.warn(
+                        `Unhandled element type: ${element.type} for selector: ${field.querySelector}`,
+                    );
                     return;
                 }
                 break;
         }
 
         // Trigger input or change event if necessary
-        const eventType = ['checkbox', 'radio', 'select-one'].includes(element.type) ? 'change' : 'input';
-        element.dispatchEvent(new Event(eventType, {bubbles: true, cancelable: true}));
+        const eventType = ["checkbox", "radio", "select-one"].includes(
+            element.type,
+        )
+            ? "change"
+            : "input";
+        element.dispatchEvent(
+            new Event(eventType, {bubbles: true, cancelable: true}),
+        );
     });
 }
-
 
 /**
  * Check if a form field is filled.
@@ -98,11 +120,15 @@ function isFieldFilled(field) {
 
         case "select-multiple":
             // Check if any selected option is not the default one
-            return Array.from(field.options).some(option => option.selected && option.value.trim() !== "");
+            return Array.from(field.options).some(
+                (option) => option.selected && option.value.trim() !== "",
+            );
 
         case "radio":
             // Check if at least one radio button in the group is selected
-            return Array.from(document.getElementsByName(field.name)).some(radio => radio.checked);
+            return Array.from(document.getElementsByName(field.name)).some(
+                (radio) => radio.checked,
+            );
 
         case "checkbox":
             // Check if the checkbox is checked
@@ -140,57 +166,79 @@ function areAllFieldsFilled(form) {
     return true;
 }
 
-
-function fillForm(personalInfo, filledForms, chatGPTAccessToken, force = false, root) {
+function fillForm(
+    personalInfo,
+    filledForms,
+    chatGPTAccessToken,
+    force = false,
+    root,
+) {
     if (!root) {
         return;
     }
     if (!personalInfo) {
-        console.warn('Personal info not loaded yet.');
+        console.warn("Personal info not loaded yet.");
         return;
     }
 
-    let autoFillStatus = document.querySelector('.auto-fill-button');
+    let autoFillStatus = document.querySelector(".auto-fill-button");
     // add auto fill button
-    const footer = document.querySelector('footer[role="presentation"] .display-flex')
+    const footer = document.querySelector(
+        'footer[role="presentation"] .display-flex',
+    );
     if (footer && !autoFillStatus) {
-        autoFillStatus = document.createElement('button');
-        autoFillStatus.classList.add('artdeco-button', 'artdeco-button--premium', 'ml2', 'auto-fill-button', 'no-spinner');
-        autoFillStatus.type = 'button';
-        autoFillStatus.innerHTML = 'Auto Fill<span class="shortcut mr2 ml2">Ctrl + F(ill)</span>';
+        autoFillStatus = document.createElement("button");
+        autoFillStatus.classList.add(
+            "artdeco-button",
+            "artdeco-button--premium",
+            "ml2",
+            "auto-fill-button",
+            "no-spinner",
+        );
+        autoFillStatus.type = "button";
+        autoFillStatus.innerHTML =
+            'Auto Fill<span class="shortcut mr2 ml2">Ctrl + F(ill)</span>';
         footer.appendChild(autoFillStatus);
-        autoFillStatus.addEventListener('click', () => {
-            fillForm(personalInfo, filledForms, chatGPTAccessToken, true, document.querySelector('form .ph5'));
-        })
+        autoFillStatus.addEventListener("click", () => {
+            fillForm(
+                personalInfo,
+                filledForms,
+                chatGPTAccessToken,
+                true,
+                document.querySelector("form .ph5"),
+            );
+        });
     } else {
         // use modal
     }
 
-    const labels = root.querySelectorAll('label');
+    const labels = root.querySelectorAll("label");
     const form = findMultipleLCA(Array.from(labels));
     if (
         labels.length > 0 &&
-        (
-            force ||
-            (
-                // not all fields are processed
-                !Array.from(labels).every(label => filledForms.has(label.attributes['for']?.value)) &&
+        (force ||
+            // not all fields are processed
+            (!Array.from(labels).every((label) =>
+                filledForms.has(label.attributes["for"]?.value),
+            ) &&
                 !areAllFieldsFilled(form) &&
-                !Array.from(labels).some(label => {
-                    return label.attributes.for.value.startsWith('jobsDocumentCardToggle')
-                })
-            )
-        )
+                !Array.from(labels).some((label) => {
+                    return label.attributes.for.value.startsWith(
+                        "jobsDocumentCardToggle",
+                    );
+                })))
     ) {
         if (autoFillStatus) {
-            autoFillStatus.textContent = 'Auto Filling...';
+            autoFillStatus.textContent = "Auto Filling...";
             autoFillStatus.classList.remove("no-spinner");
         } else {
-            displayToast('loading');
+            displayToast("loading");
         }
 
         // add all id's to filledForms
-        labels.forEach(label => filledForms.add(label.attributes['for']?.value));
+        labels.forEach((label) =>
+            filledForms.add(label.attributes["for"]?.value),
+        );
         // use LCA to separate each question
         const forms = findLCAElements(labels);
         // const forms = extractQuestions(form);
@@ -199,8 +247,11 @@ function fillForm(personalInfo, filledForms, chatGPTAccessToken, force = false, 
         const batchSize = 10;
 
         // Filter forms
-        const filteredForms = formsArray.filter(form => {
-            return !isFieldFilled(form.querySelector('input, select, textarea')) || !isFieldFilled(form);
+        const filteredForms = formsArray.filter((form) => {
+            return (
+                !isFieldFilled(form.querySelector("input, select, textarea")) ||
+                !isFieldFilled(form)
+            );
         });
 
         function processBatches(filteredForms, batchSize) {
@@ -210,15 +261,21 @@ function fillForm(personalInfo, filledForms, chatGPTAccessToken, force = false, 
                 const batch = filteredForms.slice(i, i + batchSize);
 
                 const batchPromise = (() => {
-                    const concatenatedUserPrompt = batch.map(form => form.innerHTML).join("\n");
+                    const concatenatedUserPrompt = batch
+                        .map((form) => form.innerHTML)
+                        .join("\n");
 
                     // Process the concatenated prompt for the batch
-                    return extractForm(chatGPTAccessToken, concatenatedUserPrompt, JSON.stringify(personalInfo))
-                        .then(response => {
+                    return extractForm(
+                        chatGPTAccessToken,
+                        concatenatedUserPrompt,
+                        JSON.stringify(personalInfo),
+                    )
+                        .then((response) => {
                             console.log(response);
                             fillFormFields(response);
                         })
-                        .catch(error => {
+                        .catch((error) => {
                             console.error("Error processing batch:", error);
                             displayToast(error.message);
                         });
@@ -238,11 +295,11 @@ function fillForm(personalInfo, filledForms, chatGPTAccessToken, force = false, 
             })
             .finally(() => {
                 if (autoFillStatus) {
-                    autoFillStatus.innerHTML = 'Auto Fill<span class="shortcut mr2 ml2">Ctrl + F(ill)</span>';
+                    autoFillStatus.innerHTML =
+                        'Auto Fill<span class="shortcut mr2 ml2">Ctrl + F(ill)</span>';
                     autoFillStatus.classList.add("no-spinner");
                 } else {
                     displayToast(true);
-
                 }
             });
     } else {

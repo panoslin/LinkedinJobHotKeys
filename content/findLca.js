@@ -26,18 +26,18 @@ function findMultipleLCA(elements) {
     const ancestorPaths = elements.map(getAncestorPath);
 
     // Find the minimum length among all ancestor paths
-    const minLength = Math.min(...ancestorPaths.map(path => path.length));
+    const minLength = Math.min(...ancestorPaths.map((path) => path.length));
 
     let lca = null;
 
     // Compare ancestors at each level
     for (let i = 0; i < minLength; i++) {
         // Get the ancestor at the current level for all elements
-        const currentAncestors = ancestorPaths.map(path => path[i]);
+        const currentAncestors = ancestorPaths.map((path) => path[i]);
 
         // Check if all ancestors at this level are the same
         const firstAncestor = currentAncestors[0];
-        if (currentAncestors.every(ancestor => ancestor === firstAncestor)) {
+        if (currentAncestors.every((ancestor) => ancestor === firstAncestor)) {
             lca = firstAncestor;
         } else {
             // Ancestors diverge at this level
@@ -51,8 +51,8 @@ function findMultipleLCA(elements) {
 function findLCAElements(labels) {
     const lcaElements = new Set();
 
-    labels.forEach(label => {
-        const id = label.getAttribute('for'); // Get the 'for' attribute value
+    labels.forEach((label) => {
+        const id = label.getAttribute("for"); // Get the 'for' attribute value
         if (!id) return;
 
         let targetElement = fuzzyFindElement(id);

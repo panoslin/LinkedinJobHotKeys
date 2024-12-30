@@ -1,28 +1,34 @@
 function highlightKeywordInDiv(keyword) {
-    const targetDiv = document.querySelector('.jobs-box__html-content .mt4');
+    const targetDiv = document.querySelector(".jobs-box__html-content .mt4");
 
     if (!targetDiv) {
-        console.warn('Target div not found.');
+        console.warn("Target div not found.");
         return;
     }
 
     // Remove existing highlights
     const removeHighlights = (node) => {
-        if (node.nodeType === Node.ELEMENT_NODE && node.classList.contains('highlighted')) {
+        if (
+            node.nodeType === Node.ELEMENT_NODE &&
+            node.classList.contains("highlighted")
+        ) {
             const parent = node.parentNode;
             while (node.firstChild) {
                 parent.insertBefore(node.firstChild, node);
             }
             parent.removeChild(node);
-        } else if (node.nodeType === Node.ELEMENT_NODE || node.nodeType === Node.DOCUMENT_FRAGMENT_NODE) {
+        } else if (
+            node.nodeType === Node.ELEMENT_NODE ||
+            node.nodeType === Node.DOCUMENT_FRAGMENT_NODE
+        ) {
             Array.from(node.childNodes).forEach(removeHighlights);
         }
     };
     removeHighlights(targetDiv);
 
     // Escape special characters in the keyword
-    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(`(${escapedKeyword})`, 'gi'); // Case-insensitive match
+    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(`(${escapedKeyword})`, "gi"); // Case-insensitive match
 
     // Highlight matches in text nodes
     const highlightMatches = (node) => {
@@ -33,15 +39,27 @@ function highlightKeywordInDiv(keyword) {
                 let lastIndex = 0;
 
                 matches.forEach((match) => {
-                    const matchIndex = node.textContent.toLowerCase().indexOf(match.toLowerCase(), lastIndex);
+                    const matchIndex = node.textContent
+                        .toLowerCase()
+                        .indexOf(match.toLowerCase(), lastIndex);
                     if (matchIndex >= lastIndex) {
                         // Append text before the match
-                        fragment.appendChild(document.createTextNode(node.textContent.substring(lastIndex, matchIndex)));
+                        fragment.appendChild(
+                            document.createTextNode(
+                                node.textContent.substring(
+                                    lastIndex,
+                                    matchIndex,
+                                ),
+                            ),
+                        );
 
                         // Create a span for the match
-                        const span = document.createElement('span');
-                        span.className = 'highlighted';
-                        span.textContent = node.textContent.substring(matchIndex, matchIndex + match.length);
+                        const span = document.createElement("span");
+                        span.className = "highlighted";
+                        span.textContent = node.textContent.substring(
+                            matchIndex,
+                            matchIndex + match.length,
+                        );
                         fragment.appendChild(span);
 
                         lastIndex = matchIndex + match.length;
@@ -49,13 +67,21 @@ function highlightKeywordInDiv(keyword) {
                 });
 
                 // Append remaining text
-                fragment.appendChild(document.createTextNode(node.textContent.substring(lastIndex)));
+                fragment.appendChild(
+                    document.createTextNode(
+                        node.textContent.substring(lastIndex),
+                    ),
+                );
 
                 // Replace the original text node with the fragment
                 node.replaceWith(fragment);
             }
         } else if (node.nodeType === Node.ELEMENT_NODE) {
-            if (node.classList.contains('keyword') || node.classList.contains('tooltip') || node.classList.contains('summary')) {
+            if (
+                node.classList.contains("keyword") ||
+                node.classList.contains("tooltip") ||
+                node.classList.contains("summary")
+            ) {
                 return;
             }
             Array.from(node.childNodes).forEach(highlightMatches);
@@ -64,19 +90,18 @@ function highlightKeywordInDiv(keyword) {
     highlightMatches(targetDiv);
 
     // Scroll to the first match
-    const matches = targetDiv.querySelectorAll('.highlighted');
+    const matches = targetDiv.querySelectorAll(".highlighted");
     for (let i = 0; i < matches.length; i++) {
         if (
-            !matches[i].classList.contains('keyword') &&
-            !matches[i].classList.contains('tooltip') &&
-            !matches[i].classList.contains('summary')
+            !matches[i].classList.contains("keyword") &&
+            !matches[i].classList.contains("tooltip") &&
+            !matches[i].classList.contains("summary")
         ) {
-            matches[i].scrollIntoView({behavior: 'smooth', block: 'center'});
+            matches[i].scrollIntoView({behavior: "smooth", block: "center"});
             break;
         }
     }
 }
-
 
 // function createKeyword(keyword, isMatch) {
 //     const keywordSpan = document.createElement('span');

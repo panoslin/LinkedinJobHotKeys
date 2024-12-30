@@ -1,310 +1,316 @@
 .chat-gpt-suggested-keywords-container {
-
 }
 
 @media (max-width: 768px) {
-    .container {
-        padding: 20px;
-    }
-    h1 {
-        font-size: 2.2rem;
-    }
-    h2 {
-        font-size: 1.5rem;
-    }
+  .container {
+    padding: 20px;
+  }
+  h1 {
+    font-size: 2.2rem;
+  }
+  h2 {
+    font-size: 1.5rem;
+  }
 }
 
 .highlighted {
-    background-color: yellow;
-    color: black;
-    font-weight: bold;
-    padding: 0 2px;
-    border-radius: 3px;
+  background-color: yellow;
+  color: black;
+  font-weight: bold;
+  padding: 0 2px;
+  border-radius: 3px;
 }
 
 .loading-status {
-    font-size: 1.75rem; /* Larger, bold text */
-    /*color: #005582; !* LinkedIn blue *!*/
-    text-align: center;
-    margin: 20px 0;
-    font-weight: 700; /* Extra emphasis */
-    position: relative;
-    padding: 15px 20px;
-    border: 2px solid #005582; /* Subtle border to frame the text */
-    border-radius: 12px; /* Smooth rounded edges */
-    /*background: linear-gradient(135deg, #e8f4fc, #ffffff); !* Soft gradient for depth *!*/
-    overflow: hidden;
-    /*animation: pulse 1.5s infinite ease-in-out; !* Smooth glowing effect *!*/
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15); /* Shadow for depth */
+  font-size: 1.75rem; /* Larger, bold text */
+  /*color: #005582; !* LinkedIn blue *!*/
+  text-align: center;
+  margin: 20px 0;
+  font-weight: 700; /* Extra emphasis */
+  position: relative;
+  padding: 15px 20px;
+  border: 2px solid #005582; /* Subtle border to frame the text */
+  border-radius: 12px; /* Smooth rounded edges */
+  /*background: linear-gradient(135deg, #e8f4fc, #ffffff); !* Soft gradient for depth *!*/
+  overflow: hidden;
+  /*animation: pulse 1.5s infinite ease-in-out; !* Smooth glowing effect *!*/
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15); /* Shadow for depth */
 }
 
 /* Add a glowing animated border */
 .loading-status::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 12px;
-    border: 2px solid transparent;
-    background: linear-gradient(45deg, #005582, #6dd5fa, #005582);
-    background-size: 400% 400%;
-    z-index: -1;
-    animation: gradient-border 3s infinite ease;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  background: linear-gradient(45deg, #005582, #6dd5fa, #005582);
+  background-size: 400% 400%;
+  z-index: -1;
+  animation: gradient-border 3s infinite ease;
 }
 
 /* Spinner animation next to text */
 .loading-status::before {
-    content: '';
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    margin-right: 10px;
-    border: 3px solid #005582; /* Spinner border */
-    border-top: 3px solid transparent; /* Creates the spinning effect */
-    border-radius: 50%; /* Circular spinner */
-    animation: spin 1s linear infinite;
-    vertical-align: middle;
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: 10px;
+  border: 3px solid #005582; /* Spinner border */
+  border-top: 3px solid transparent; /* Creates the spinning effect */
+  border-radius: 50%; /* Circular spinner */
+  animation: spin 1s linear infinite;
+  vertical-align: middle;
 }
 
 /* Gradient border animation */
 @keyframes gradient-border {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* Spinner animation */
 @keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Pulse animation for the text */
 @keyframes pulse {
-    0% {
-        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
-    }
-    50% {
-        box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
-    }
-    100% {
-        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
-    }
+  0% {
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+  }
+  50% {
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+  }
+  100% {
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+  }
 }
 
 /* overwrite :root --scaffold-layout-xl-max-width to be 90 vw*/
 :root {
-    --scaffold-layout-xl-max-width: 98.9vw;
-    --linkedin-blue: #0a66c2;
-    --border-color: rgba(0, 0, 0, 0.08);
-    --gradient-start: #0a66c2;
-    --gradient-end: #0077b5;
-    --shadow-color: rgba(10, 102, 194, 0.1);
-    --text-lg: 1.75rem;
+  --scaffold-layout-xl-max-width: 98.9vw;
+  --linkedin-blue: #0a66c2;
+  --border-color: rgba(0, 0, 0, 0.08);
+  --gradient-start: #0a66c2;
+  --gradient-end: #0077b5;
+  --shadow-color: rgba(10, 102, 194, 0.1);
+  --text-lg: 1.75rem;
 }
 
 /* Add a glowing animated border */
 .auto-fill-button::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border-radius: 12px;
-    border: 2px solid transparent;
-    background: linear-gradient(45deg, #005582, #6dd5fa, #005582);
-    background-size: 400% 400%;
-    z-index: -1;
-    animation: gradient-border 3s infinite ease;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  background: linear-gradient(45deg, #005582, #6dd5fa, #005582);
+  background-size: 400% 400%;
+  z-index: -1;
+  animation: gradient-border 3s infinite ease;
 }
 
 /* Spinner animation next to button text */
 .auto-fill-button::before {
-    content: '';
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    margin-right: 10px;
-    border: 3px solid #fff; /* Spinner matches text color */
-    border-top: 3px solid transparent; /* Creates the spinning effect */
-    border-radius: 50%; /* Circular spinner */
-    animation: spin 1s linear infinite;
-    vertical-align: middle;
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: 10px;
+  border: 3px solid #fff; /* Spinner matches text color */
+  border-top: 3px solid transparent; /* Creates the spinning effect */
+  border-radius: 50%; /* Circular spinner */
+  animation: spin 1s linear infinite;
+  vertical-align: middle;
 }
 
 /* Optional: Hover effect for the button */
 .auto-fill-button:hover {
-    color: #005582;
-    background-color: #fff; /* Invert colors for hover */
+  color: #005582;
+  background-color: #fff; /* Invert colors for hover */
 }
 
 /* Disable spinner when class is removed */
 .auto-fill-button.no-spinner::before {
-    content: none; /* Hides the pseudo-element */
+  content: none; /* Hides the pseudo-element */
 }
 
 /* Enhanced shortcut styling */
 .shortcut {
-    display: inline-block;
-    margin-left: 10px; /* Space between button text and shortcut */
-    padding: 0 8px; /* Larger padding for better readability */
-    font-size: 1rem; /* Slightly smaller than the button text */
-    font-weight: 700; /* Bold for emphasis */
-    color: #005582; /* Match the button border color */
-    background: linear-gradient(135deg, #e8f4fc, #ffffff); /* Soft gradient for depth */
-    border: 1px solid #005582; /* Outline for emphasis */
-    border-radius: 6px; /* Rounded edges */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-    text-transform: uppercase; /* Uppercase text for consistency */
-    white-space: nowrap; /* Prevent wrapping */
-    transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth hover effect */
+  display: inline-block;
+  margin-left: 10px; /* Space between button text and shortcut */
+  padding: 0 8px; /* Larger padding for better readability */
+  font-size: 1rem; /* Slightly smaller than the button text */
+  font-weight: 700; /* Bold for emphasis */
+  color: #005582; /* Match the button border color */
+  background: linear-gradient(
+    135deg,
+    #e8f4fc,
+    #ffffff
+  ); /* Soft gradient for depth */
+  border: 1px solid #005582; /* Outline for emphasis */
+  border-radius: 6px; /* Rounded edges */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  text-transform: uppercase; /* Uppercase text for consistency */
+  white-space: nowrap; /* Prevent wrapping */
+  transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth hover effect */
 }
 
 /* Hover effect for the shortcut */
 .shortcut:hover {
-    transform: scale(1.1); /* Slight zoom on hover */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Enhanced shadow */
+  transform: scale(1.1); /* Slight zoom on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Enhanced shadow */
 }
 
 .summary {
-    color: var(--secondary-text);
-    margin: 24px 0;
-    padding: 20px;
-    border-radius: 8px;
-    line-height: 1.6;
-    position: relative;
-    background: linear-gradient(145deg, #ffffff, #f5f9ff);
-    border-left: 4px solid var(--linkedin-blue);
-    font-size: var(--text-lg);
-    transition: all 0.3s ease;
+  color: var(--secondary-text);
+  margin: 24px 0;
+  padding: 20px;
+  border-radius: 8px;
+  line-height: 1.6;
+  position: relative;
+  background: linear-gradient(145deg, #ffffff, #f5f9ff);
+  border-left: 4px solid var(--linkedin-blue);
+  font-size: var(--text-lg);
+  transition: all 0.3s ease;
 }
 
 .summary::before {
-    content: '"';
-    position: absolute;
-    top: -15px;
-    left: 10px;
-    font-size: 48px;
-    color: var(--linkedin-blue);
-    opacity: 0.2;
-    font-family: Georgia, serif;
+  content: '"';
+  position: absolute;
+  top: -15px;
+  left: 10px;
+  font-size: 48px;
+  color: var(--linkedin-blue);
+  opacity: 0.2;
+  font-family: Georgia, serif;
 }
 
 .summary:hover {
-    transform: translateY(-2px);
-    box-shadow: 
-        inset 3px 3px 8px var(--shadow-color),
-        inset -3px -3px 8px rgba(255, 255, 255, 0.8),
-        0 4px 12px rgba(10, 102, 194, 0.1);
-    background: linear-gradient(145deg, #ffffff, #edf5ff);
+  transform: translateY(-2px);
+  box-shadow: inset 3px 3px 8px var(--shadow-color),
+    inset -3px -3px 8px rgba(255, 255, 255, 0.8),
+    0 4px 12px rgba(10, 102, 194, 0.1);
+  background: linear-gradient(145deg, #ffffff, #edf5ff);
 }
 
 .summary::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        var(--linkedin-blue),
-        transparent
-    );
-    opacity: 0.2;
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--linkedin-blue),
+    transparent
+  );
+  opacity: 0.2;
 }
 
 .info-section {
-    margin: 20px 0;
-    padding: 16px;
-    border-radius: 8px;
-    background: rgba(10, 102, 194, 0.03);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin: 20px 0;
+  padding: 16px;
+  border-radius: 8px;
+  background: rgba(10, 102, 194, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .info-section:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px var(--shadow-color);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px var(--shadow-color);
 }
 
 .section-title {
-    font-size: var(--text-lg);
-    font-weight: 600;
-    margin-bottom: 1em;
-    color: var(--linkedin-blue);
-    display: flex;
-    align-items: center;
-    line-height: 1.4;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  margin-bottom: 1em;
+  color: var(--linkedin-blue);
+  display: flex;
+  align-items: center;
+  line-height: 1.4;
 }
 
 .section-title::before {
-    content: '';
-    display: inline-block;
-    width: 4px;
-    height: 16px;
-    background: linear-gradient(to bottom, var(--gradient-start), var(--gradient-end));
-    margin-right: 8px;
-    border-radius: 2px;
+  content: "";
+  display: inline-block;
+  width: 4px;
+  height: 16px;
+  background: linear-gradient(
+    to bottom,
+    var(--gradient-start),
+    var(--gradient-end)
+  );
+  margin-right: 8px;
+  border-radius: 2px;
 }
 
 .info-item {
-    margin-bottom: 16px;
-    transition: transform 0.2s ease;
+  margin-bottom: 16px;
+  transition: transform 0.2s ease;
 }
 
 .info-item:hover {
-    transform: translateX(5px);
+  transform: translateX(5px);
 }
 
 .info-label {
-    font-weight: 600;
-    margin-bottom: 4px;
-    color: var(--linkedin-blue);
-    font-size: var(--text-lg);
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--linkedin-blue);
+  font-size: var(--text-lg);
 }
 
 .info-value {
-    color: var(--secondary-text);
-    padding-left: 8px;
-    border-left: 2px solid var(--border-color);
-    font-size: var(--text-lg);
+  color: var(--secondary-text);
+  padding-left: 8px;
+  border-left: 2px solid var(--border-color);
+  font-size: var(--text-lg);
 }
 
 ul {
-    list-style: none;
-    margin-left: 0;
+  list-style: none;
+  margin-left: 0;
 }
 
 li {
-    position: relative;
-    padding-left: 24px;
-    margin-bottom: 12px;
-    color: var(--secondary-text);
-    transition: transform 0.2s ease;
-    font-size: var(--text-lg);
+  position: relative;
+  padding-left: 24px;
+  margin-bottom: 12px;
+  color: var(--secondary-text);
+  transition: transform 0.2s ease;
+  font-size: var(--text-lg);
 }
 
 li:hover {
-    transform: translateX(5px);
+  transform: translateX(5px);
 }
 
 li::before {
-    content: "•";
-    position: absolute;
-    left: 8px;
-    color: var(--linkedin-blue);
+  content: "•";
+  position: absolute;
+  left: 8px;
+  color: var(--linkedin-blue);
 }

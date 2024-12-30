@@ -1,39 +1,46 @@
 .highlight {
-    outline: 3px solid transparent; /* Base for gradient outline */
-    border-radius: 8px; /* Smooth rounded corners */
-    background: rgba(255, 87, 34, 0.15); /* Soft orange-red background */
-    position: relative; /* For pseudo-element positioning */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Subtle depth */
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* Smooth interaction effects */
+  outline: 3px solid transparent; /* Base for gradient outline */
+  border-radius: 8px; /* Smooth rounded corners */
+  background: rgba(255, 87, 34, 0.15); /* Soft orange-red background */
+  position: relative; /* For pseudo-element positioning */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Subtle depth */
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* Smooth interaction effects */
 }
 
 .highlight::before {
-    content: '';
-    position: absolute;
-    top: -4px;
-    left: -4px;
-    right: -4px;
-    bottom: -4px;
-    border-radius: 10px;
-    background: linear-gradient(90deg, #FF5722, #FFC107, #4CAF50, #03A9F4, #673AB7);
-    background-size: 300% 300%; /* Larger for animation effect */
-    z-index: -1; /* Keep gradient behind */
-    animation: gradientShift 2.5s infinite;
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border-radius: 10px;
+  background: linear-gradient(
+    90deg,
+    #ff5722,
+    #ffc107,
+    #4caf50,
+    #03a9f4,
+    #673ab7
+  );
+  background-size: 300% 300%; /* Larger for animation effect */
+  z-index: -1; /* Keep gradient behind */
+  animation: gradientShift 2.5s infinite;
 }
 
 .highlight:hover {
-    transform: scale(1.0006);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  transform: scale(1.0006);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
 @keyframes gradientShift {
-    0% {
-        background-position: 0% 50%;
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0% 50%;
-    }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }

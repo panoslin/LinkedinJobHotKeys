@@ -1,62 +1,85 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>LinkedIn Job Helper</title>
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-		<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-		<link rel="stylesheet" href="landing.css">
-		<link rel="stylesheet" href="../popup/popup.css">
-	</head>
-	<body>
-		<div class="header">
-			<div class="header-left">
-				<img src="../icons/img.png" alt="Logo" class="logo">
-				<div class="header-title">LinkedIn Job Turbo</div>
-			</div>
-			<!--			<div class="header-right">-->
-			<!--				<i class="fas fa-cog header-icon" id="settingsIcon" title="Settings"></i>-->
-			<!--			</div>-->
-		</div>
+    <head>
+        <title>LinkedIn Job Helper</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+            rel="stylesheet" />
+        <link rel="stylesheet" href="landing.css" />
+        <link rel="stylesheet" href="../popup/popup.css" />
+    </head>
+    <body>
+        <div class="header">
+            <div class="header-left">
+                <img src="../icons/img.png" alt="Logo" class="logo" />
+                <div class="header-title">LinkedIn Job Turbo</div>
+            </div>
+            <!--			<div class="header-right">-->
+            <!--				<i class="fas fa-cog header-icon" id="settingsIcon" title="Settings"></i>-->
+            <!--			</div>-->
+        </div>
 
-		<div class="container-wrapper">
+        <div class="container-wrapper">
+            <div class="container">
+                <h2>
+                    1. Enter Your ChatGPT Access Token (Optional)
+                    <div class="tooltip-container">
+                        <i
+                            class="fas fa-question-circle"
+                            id="infoIcon"
+                            aria-label="Why is this needed?"></i>
+                        <div class="tooltip" id="tooltip">
+                            This token is used to enable integration with
+                            ChatGPT, allowing advanced features such as
+                            personalized AI-driven suggestions and automation.
+                            You can skip this step if you do not wish to use
+                            ChatGPT-related functionalities.
+                        </div>
+                    </div>
+                </h2>
 
-			<div class="container">
-				<h2>
-					1. Enter Your ChatGPT Access Token (Optional)
-					<div class="tooltip-container">
-						<i class="fas fa-question-circle" id="infoIcon" aria-label="Why is this needed?"></i>
-						<div class="tooltip" id="tooltip">
-							This token is used to enable integration with ChatGPT, allowing advanced features such as personalized AI-driven suggestions and automation. You can skip this step if you do not wish to use ChatGPT-related functionalities.
-						</div>
-					</div>
-				</h2>
+                <form id="chatGPTTokenForm">
+                    <div class="form-group">
+                        <input
+                            type="password"
+                            id="chatGPTToken"
+                            required
+                            aria-label="ChatGPT Token"
+                            placeholder=" " />
+                        <label for="chatGPTToken">Access Token:</label>
+                        <i class="fas fa-key icon"></i>
+                    </div>
+                    <button id="saveToken">Save Token</button>
+                </form>
+                <p id="status"></p>
+            </div>
 
-				<form id="chatGPTTokenForm">
-					<div class="form-group">
-						<input type="password" id="chatGPTToken" required aria-label="ChatGPT Token" placeholder=" ">
-						<label for="chatGPTToken">Access Token:</label>
-						<i class="fas fa-key icon"></i>
-					</div>
-					<button id="saveToken">Save Token</button>
-				</form>
-				<p id="status"></p>
-			</div>
+            <div class="container">
+                <h2>2. Choose an Option to Continue</h2>
+                <button id="go-to-manual">Enter Information Manually</button>
+                <button id="uploadResume">
+                    <span id="uploadResumeText" style="margin: 1rem"
+                        >Upload Resume</span
+                    >
+                    <span
+                        id="uploadResumeSpinner"
+                        class="spinner"
+                        style="display: none"></span>
+                </button>
+                <input
+                    type="file"
+                    id="resumeInput"
+                    accept="application/pdf"
+                    style="display: none" />
+            </div>
+        </div>
 
-			<div class="container">
-				<h2>2. Choose an Option to Continue</h2>
-				<button id="go-to-manual">Enter Information Manually</button>
-				<button id="uploadResume">
-					<span id="uploadResumeText" style="margin: 1rem">Upload Resume</span>
-					<span id="uploadResumeSpinner" class="spinner" style="display: none;"></span>
-				</button>
-				<input type="file" id="resumeInput" accept="application/pdf" style="display: none;">
-			</div>
-		</div>
-
-		<script src="../scripts/pdf.js"></script>
-		<script src="landing.js"></script>
-		<script src="../popup/popup.js"></script>
-		<script src="../scripts/chatGPT.js"></script>
-	</body>
-
+        <script src="../scripts/pdf.js"></script>
+        <script src="landing.js"></script>
+        <script src="../popup/popup.js"></script>
+        <script src="../scripts/chatGPT.js"></script>
+    </body>
 </html>
