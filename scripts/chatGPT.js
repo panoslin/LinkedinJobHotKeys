@@ -3,14 +3,27 @@
  *
  * @param {string} apiToken - Your OpenAI API token.
  * @param {string} userPrompt - The user's input prompt.
+ * @param resume - The resume content as a string.
  * @param {string} [model="gpt-4"] - The OpenAI model to use.
  * @returns {Promise<Object[]>} - A promise that resolves to the parsed JSON response or an empty array on failure.
  */
 async function extractForm(apiToken, userPrompt, resume, model = "gpt-4o") {
     const systemPrompt = `
         Fill in the given form with my information.
-        Return a json with the query selector of each field from the form, and value to fill in the element.
-
+        Return a json with the exact HTML element content as the query selector of each field from the form, and value to fill in the element.
+        
+        For example, if I have the following form:
+        <form>
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name"><br><br>
+        </form>
+        
+        You should return the following json:
+        {
+            "querySelector": "<input type="text" id="name" name="name">",
+            "value": "John Doe"
+        }
+        
 
         Below is my js function to fill in the return json value to the form
             // Fill in the value based on the element type
@@ -315,6 +328,7 @@ async function sendPrompt(
     }
 
     const completion = await response.json();
+    console.log(completion);
 
     const choice = completion.choices?.[0];
     if (!choice) {
