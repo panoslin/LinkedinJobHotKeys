@@ -37,6 +37,7 @@ function fillFormFields(fieldData) {
                             .textContent.trim() === field.value
                     ) {
                         radio.checked = true;
+                        radio.click(); // Click the radio button
                         element = radio; // Update element for event dispatch
                         break;
                     }
@@ -44,12 +45,16 @@ function fillFormFields(fieldData) {
                 break;
 
             case "checkbox":
-                element.checked =
+                if (
                     field.value === true ||
                     field.value === "true" ||
                     field.value === "Yes" ||
                     field.value === "yes" ||
-                    field.value === "on";
+                    field.value === "on"
+                ) {
+                    element.click();
+                    element.checked = true;
+                }
                 break;
 
             default:
@@ -283,7 +288,10 @@ function fillForm(
                 if (autoFillStatus) {
                     autoFillStatus.innerHTML = 'Auto Fill<span class="shortcut mr2 ml2">Ctrl + F(ill)</span>';
                     autoFillStatus.classList.add("no-spinner");
+                } else {
+                    displayToast("success");
                 }
+
             });
     } else {
         console.log("No forms to process.");
