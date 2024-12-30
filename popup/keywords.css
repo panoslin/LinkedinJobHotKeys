@@ -290,12 +290,12 @@
   font-size: var(--text-lg);
 }
 
-ul {
+.info-section ul {
   list-style: none;
   margin-left: 0;
 }
 
-li {
+.info-section li {
   position: relative;
   padding-left: 24px;
   margin-bottom: 12px;
@@ -304,11 +304,11 @@ li {
   font-size: var(--text-lg);
 }
 
-li:hover {
+.info-section li:hover {
   transform: translateX(5px);
 }
 
-li::before {
+.info-section li::before {
   content: "•";
   position: absolute;
   left: 8px;
