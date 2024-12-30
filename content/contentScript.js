@@ -22,6 +22,131 @@
         // 'button[aria-label="Dismiss"]',
     ];
 
+    const STOP_WORDS = new Set([
+        "a",
+        "an",
+        "and",
+        "are",
+        "as",
+        "at",
+        "be",
+        "by",
+        "for",
+        "from",
+        "has",
+        "he",
+        "in",
+        "is",
+        "it",
+        "its",
+        "of",
+        "on",
+        "that",
+        "the",
+        "to",
+        "was",
+        "were",
+        "will",
+        "with",
+        "the",
+        "this",
+        "but",
+        "they",
+        "have",
+        "had",
+        "what",
+        "when",
+        "where",
+        "who",
+        "which",
+        "why",
+        "how",
+        "all",
+        "any",
+        "both",
+        "each",
+        "few",
+        "more",
+        "most",
+        "other",
+        "some",
+        "such",
+        "no",
+        "nor",
+        "not",
+        "only",
+        "own",
+        "same",
+        "so",
+        "than",
+        "too",
+        "very",
+        "can",
+        "just",
+        "should",
+        "now",
+        "i",
+        "you",
+        "your",
+        "we",
+        "my",
+        "me",
+        "her",
+        "his",
+        "their",
+        "our",
+        "us",
+        "am",
+        "been",
+        "being",
+        "do",
+        "does",
+        "did",
+        "doing",
+        "would",
+        "could",
+        "might",
+        "must",
+        "shall",
+        "about",
+        "across",
+        "after",
+        "against",
+        "between",
+        "into",
+        "through",
+        "during",
+        "before",
+        "after",
+        "above",
+        "below",
+        "up",
+        "down",
+        "in",
+        "out",
+        "on",
+        "off",
+        "over",
+        "under",
+        "again",
+        "further",
+        "then",
+        "once",
+    ]);
+
+    // Helper function to process text into meaningful keywords
+    function processTextToKeywords(text) {
+        return text
+            .split(/[\s,.:;!?()[\]{}'"]+/) // Split on punctuation and spaces
+            .map((word) => word.toLowerCase().trim()) // Normalize words
+            .filter(
+                (word) =>
+                    word.length > 1 && // Remove single characters
+                    !STOP_WORDS.has(word.toLowerCase()) && // Remove stop words
+                    !/^\d+$/.test(word), // Remove pure numbers
+            );
+    }
+
     // Fetch personal information once and start the observer after it's loaded
     (async function fetchPersonalInfo() {
         try {
@@ -375,7 +500,12 @@
                                     basicInfoSection.appendChild(infoItem);
 
                                     infoValue.addEventListener("click", () => {
-                                        highlightKeywordInDiv(processedValue[0]);
+                                        const words = processTextToKeywords(
+                                            processedValue[0],
+                                        );
+                                        if (words.length > 0) {
+                                            highlightKeywordInDiv(words);
+                                        }
                                     });
                                 } else {
                                     // Multiple items go to list section
@@ -402,7 +532,13 @@
                                             ul.appendChild(li);
 
                                             li.addEventListener("click", () => {
-                                                highlightKeywordInDiv(item);
+                                                const words =
+                                                    processTextToKeywords(item);
+                                                if (words.length > 0) {
+                                                    highlightKeywordInDiv(
+                                                        words,
+                                                    );
+                                                }
                                             });
                                         }
                                     });
@@ -434,7 +570,11 @@
                                 basicInfoSection.appendChild(infoItem);
 
                                 infoValue.addEventListener("click", () => {
-                                    highlightKeywordInDiv(processedValue);
+                                    const words =
+                                        processTextToKeywords(processedValue);
+                                    if (words.length > 0) {
+                                        highlightKeywordInDiv(words);
+                                    }
                                 });
                             }
                         },

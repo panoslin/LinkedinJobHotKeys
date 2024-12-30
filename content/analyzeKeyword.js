@@ -6,6 +6,9 @@ function highlightKeywordInDiv(keyword) {
         return;
     }
 
+    // Handle both single keyword and array of keywords
+    const keywords = Array.isArray(keyword) ? keyword : [keyword];
+
     // Remove existing highlights
     const removeHighlights = (node) => {
         if (
@@ -26,9 +29,11 @@ function highlightKeywordInDiv(keyword) {
     };
     removeHighlights(targetDiv);
 
-    // Escape special characters in the keyword
-    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const regex = new RegExp(`(${escapedKeyword})`, "gi"); // Case-insensitive match
+    // Create regex pattern for all keywords
+    const escapedKeywords = keywords.map((kw) =>
+        kw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+    );
+    const regex = new RegExp(`(${escapedKeywords.join("|")})`, "gi");
 
     // Highlight matches in text nodes
     const highlightMatches = (node) => {
