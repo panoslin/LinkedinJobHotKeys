@@ -51,17 +51,52 @@ function findMultipleLCA(elements) {
 function findLCAElements(labels) {
     const lcaElements = new Set();
 
+    function isDescendant(parent, child) {
+        let node = child.parentElement;
+        while (node) {
+            if (node === parent) return true;
+            node = node.parentElement;
+        }
+        return false;
+    }
+
+    function shouldAddElement(newElement) {
+        // Convert Set to Array for iteration and modification
+        const existingElements = Array.from(lcaElements);
+        
+        // Check if new element is a child of any existing element
+        for (const existing of existingElements) {
+            if (isDescendant(existing, newElement)) {
+                return false; // Skip adding if it's a child of an existing element
+            }
+        }
+        
+        // Check if new element is a parent of any existing elements
+        // and remove those children
+        for (const existing of existingElements) {
+            if (isDescendant(newElement, existing)) {
+                lcaElements.delete(existing);
+            }
+        }
+        
+        return true; // Add the new element
+    }
+
     labels.forEach((label) => {
-        const id = label.getAttribute("for"); // Get the 'for' attribute value
-        if (!id) return;
+        const id = label.getAttribute("for");
+        if (!id) {
+            if (shouldAddElement(label)) {
+                lcaElements.add(label);
+            }
+            return;
+        }
 
         let targetElement = fuzzyFindElement(id);
-
         if (!targetElement) return;
 
         // Find the LCA of the label and the target element
         const lca = findLCA(label, targetElement);
-        if (lca) {
+        if (lca && shouldAddElement(lca)) {
             lcaElements.add(lca);
         }
     });
