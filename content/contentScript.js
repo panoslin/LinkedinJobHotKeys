@@ -251,7 +251,7 @@
                 }
             } else if (request.action === "fill-form") {
                 console.log("fillForm action triggered!");
-                const container = document.querySelector("form");
+                const container = findMultipleLCA(Array.from(document.querySelectorAll('label, fieldset')));
                 fillForm(
                     personalInfo,
                     filledForms,
@@ -633,7 +633,7 @@
 
         const throttledCallback = throttle(async (mutationsList) => {
             for (const mutation of mutationsList) {
-                if (mutation.type === "childList") {
+                if (mutation.type === "childList" && window.location.hostname.includes("linkedin.com")) {
                     // predictCompatibility();
                     uncheckFollowCompanyCheckbox();
                     addShortBadge();
