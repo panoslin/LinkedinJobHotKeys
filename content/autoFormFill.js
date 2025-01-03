@@ -174,7 +174,7 @@ function fillForm(
     chatGPTAccessToken,
     force = false,
     root,
-    resumeText
+    resumeText,
 ) {
     if (!root) {
         return;
@@ -209,7 +209,7 @@ function fillForm(
                 chatGPTAccessToken,
                 true,
                 document.querySelector("form .ph5"),
-                resumeText
+                resumeText,
             );
         });
     } else {
@@ -223,8 +223,8 @@ function fillForm(
         (force ||
             // not all fields are processed
             (!Array.from(labels).every((label) =>
-                    filledForms.has(label.attributes["for"]?.value),
-                ) &&
+                filledForms.has(label.attributes["for"]?.value),
+            ) &&
                 !areAllFieldsFilled(form) &&
                 !Array.from(labels).some((label) => {
                     return label.attributes?.for?.value?.startsWith(
@@ -240,20 +240,24 @@ function fillForm(
         }
 
         // add all id's to filledForms
-        labels.forEach(label => filledForms.add(label.attributes['for']?.value));
+        labels.forEach((label) =>
+            filledForms.add(label.attributes["for"]?.value),
+        );
         const forms = findLCAElements(labels);
 
         const formPromises = Array.from(forms)
-            .filter(element => {
-                if (element.tagName.toLowerCase() === 'fieldset') {
-                    return !Array.from(element.querySelectorAll('input, select, textarea')).every(isFieldFilled);
+            .filter((element) => {
+                if (element.tagName.toLowerCase() === "fieldset") {
+                    return !Array.from(
+                        element.querySelectorAll("input, select, textarea"),
+                    ).every(isFieldFilled);
                 } else {
                     return !areAllFieldsFilled(element);
                 }
             })
-            .map(form => {
+            .map((form) => {
                 console.log(form);
-                const modifiedPersonalInfo = { ...personalInfo };
+                const modifiedPersonalInfo = {...personalInfo};
                 delete modifiedPersonalInfo.summarizedResume;
                 delete modifiedPersonalInfo.testMessage;
                 modifiedPersonalInfo.resumeText = resumeText;
@@ -267,11 +271,11 @@ function fillForm(
                 `;
 
                 return extractForm(chatGPTAccessToken, userPrompt)
-                    .then(response => {
+                    .then((response) => {
                         console.log(response);
                         fillFormFields(response);
                     })
-                    .catch(error => {
+                    .catch((error) => {
                         console.error("Error processing form:", error);
                     });
             });
@@ -283,12 +287,12 @@ function fillForm(
             })
             .finally(() => {
                 if (autoFillStatus) {
-                    autoFillStatus.innerHTML = 'Auto Fill<span class="shortcut mr2 ml2">Ctrl + F(ill)</span>';
+                    autoFillStatus.innerHTML =
+                        'Auto Fill<span class="shortcut mr2 ml2">Ctrl + F(ill)</span>';
                     autoFillStatus.classList.add("no-spinner");
                 } else {
                     displayToast("success");
                 }
-
             });
     } else {
         console.log("No forms to process.");
