@@ -63,14 +63,14 @@ function findLCAElements(labels) {
     function shouldAddElement(newElement) {
         // Convert Set to Array for iteration and modification
         const existingElements = Array.from(lcaElements);
-        
+
         // Check if new element is a child of any existing element
         for (const existing of existingElements) {
             if (isDescendant(existing, newElement)) {
                 return false; // Skip adding if it's a child of an existing element
             }
         }
-        
+
         // Check if new element is a parent of any existing elements
         // and remove those children
         for (const existing of existingElements) {
@@ -78,14 +78,14 @@ function findLCAElements(labels) {
                 lcaElements.delete(existing);
             }
         }
-        
+
         return true; // Add the new element
     }
 
     labels.forEach((label) => {
         const id = label.getAttribute("for");
         if (!id) {
-            if (shouldAddElement(label)) {
+            if (label.tagName.toLowerCase() !== "label" && shouldAddElement(label)) {
                 lcaElements.add(label);
             }
             return;
