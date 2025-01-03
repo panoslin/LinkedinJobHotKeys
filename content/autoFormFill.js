@@ -34,7 +34,7 @@ function fillFormFields(fieldData) {
                         radio.value === field.value ||
                         document
                             .querySelector(`label[for="${radio.id}"]`)
-                            .textContent.trim() === field.value
+                            ?.textContent?.trim() === field.value
                     ) {
                         radio.checked = true;
                         radio.click(); // Click the radio button
@@ -67,29 +67,26 @@ function fillFormFields(fieldData) {
                     if (optionToSelect) {
                         element.value = optionToSelect.value;
                     } else {
-                        console.warn(
+                        console.log(
                             `No matching option found for selector: ${field.querySelector} and value: ${field.value}`,
                         );
                     }
                 } else if (element.tagName.toLowerCase() === "textarea") {
                     element.value = field.value;
                 } else {
-                    console.warn(
+                    console.log(
                         `Unhandled element type: ${element.type} for selector: ${field.querySelector}`,
                     );
                     return;
                 }
                 break;
         }
-
-        // Trigger input or change event if necessary
-        const eventType = ["checkbox", "radio", "select-one"].includes(
-            element.type,
-        )
-            ? "change"
-            : "input";
+        // Dispatch both change and input events
         element.dispatchEvent(
-            new Event(eventType, {bubbles: true, cancelable: true}),
+            new Event("input", {bubbles: true, cancelable: true}),
+        );
+        element.dispatchEvent(
+            new Event("change", {bubbles: true, cancelable: true}),
         );
     });
 }
@@ -251,7 +248,7 @@ function fillForm(
                 if (element.tagName.toLowerCase() === 'fieldset') {
                     return !Array.from(element.querySelectorAll('input, select, textarea')).every(isFieldFilled);
                 } else {
-                    return !isFieldFilled(element.querySelector('input, select, textarea'));
+                    return !areAllFieldsFilled(element);
                 }
             })
             .map(form => {
