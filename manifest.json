@@ -27,7 +27,6 @@
       "resources": [
         "scripts/pdf.worker.js",
         "popup/keywords.css",
-        "content/inspection_mode.css",
         "content/toast.css"
       ],
       "matches": ["<all_urls>"]
@@ -38,8 +37,9 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://*.linkedin.com/*"],
+      "matches": ["*://*/*"],
       "js": [
+        "scripts/pdf.worker.js",
         "scripts/config.js",
         "scripts/chatGPT.js",
         "content/fuzzyFindElement.js",
@@ -50,6 +50,12 @@
         "content/autoFormFill.js",
         "content/contentScript.js"
       ],
+      "css": [
+        "popup/keywords.css",
+        "content/inspection_mode.css",
+        "content/toast.css"
+      ],
+      "all_frames": true,
       "run_at": "document_end"
     }
   ],

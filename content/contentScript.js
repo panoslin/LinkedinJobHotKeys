@@ -1,9 +1,9 @@
 (() => {
-    if (window.__contentScriptInjected) {
-        console.log("contentScript.js already injected.");
-        return;
-    }
-    window.__contentScriptInjected = true;
+    // if (window.__contentScriptInjected) {
+    //     console.log("contentScript.js already injected.");
+    //     return;
+    // }
+    // window.__contentScriptInjected = true;
 
     let personalInfo = null;
     let resumeText = null;
