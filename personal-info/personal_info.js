@@ -6,34 +6,27 @@ document.addEventListener("DOMContentLoaded", () => {
     let personalInfo;
 
     document.getElementById("homeIcon").addEventListener("click", () => {
-        window.location.href = chrome.runtime.getURL(
-            "landing/landing.html?fromHome=true",
-        );
+        window.location.href = chrome.runtime.getURL("landing/landing.html?fromHome=true");
     });
 
     // Load saved data and populate the form
-    chrome.storage.local.get(
-        ["personalInfo", "chatGPTAccessToken"],
-        (result) => {
-            if (result.personalInfo) {
-                personalInfo = result.personalInfo;
-                Object.entries(result.personalInfo).forEach(([key, value]) => {
-                    if (key !== "resume") {
-                        const input = document.getElementById(key);
-                        if (input) input.value = value;
-                    }
-                });
-            }
-            chatGPTAccessToken = result.chatGPTAccessToken;
-        },
-    );
+    chrome.storage.local.get(["personalInfo", "chatGPTAccessToken"], (result) => {
+        if (result.personalInfo) {
+            personalInfo = result.personalInfo;
+            Object.entries(result.personalInfo).forEach(([key, value]) => {
+                if (key !== "resume") {
+                    const input = document.getElementById(key);
+                    if (input) input.value = value;
+                }
+            });
+        }
+        chatGPTAccessToken = result.chatGPTAccessToken;
+    });
 
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        const uploadResumeSpinner = document.getElementById(
-            "uploadResumeSpinner",
-        );
+        const uploadResumeSpinner = document.getElementById("uploadResumeSpinner");
         const uploadResumeText = document.getElementById("uploadResumeText");
         uploadResumeSpinner.style.display = "inline-block";
         uploadResumeText.textContent = "Uploading...";
@@ -75,10 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 uploadResumeText.textContent = "Extracting Information ...";
 
                 // Redact sensitive information
-                const redactedResumeText = redactSensitiveInfo(
-                    resumeText,
-                    personalInfo,
-                );
+                const redactedResumeText = redactSensitiveInfo(resumeText, personalInfo);
 
                 // Save data to local storage
                 await new Promise((resolve) => {

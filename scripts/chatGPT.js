@@ -105,13 +105,7 @@ async function extractForm(apiToken, userPrompt, resume, model = "gpt-4o") {
             strict: true,
         },
     };
-    return await sendPrompt(
-        apiToken,
-        userPrompt,
-        systemPrompt,
-        model,
-        response_format,
-    );
+    return await sendPrompt(apiToken, userPrompt, systemPrompt, model, response_format);
 }
 
 // /**
@@ -210,13 +204,7 @@ async function extractPersonalInfo(apiToken, userPrompt, model = "gpt-4o") {
             strict: true,
         },
     };
-    return await sendPrompt(
-        apiToken,
-        userPrompt,
-        systemPrompt,
-        model,
-        response_format,
-    );
+    return await sendPrompt(apiToken, userPrompt, systemPrompt, model, response_format);
 }
 
 /**
@@ -254,13 +242,7 @@ async function extractKeywords(apiToken, userPrompt, model = "gpt-4o") {
             },
         },
     };
-    return await sendPrompt(
-        apiToken,
-        userPrompt,
-        systemPrompt,
-        model,
-        response_format,
-    );
+    return await sendPrompt(apiToken, userPrompt, systemPrompt, model, response_format);
 }
 
 /**
@@ -273,13 +255,7 @@ async function extractKeywords(apiToken, userPrompt, model = "gpt-4o") {
  * @param {Object} [response_format={}] - The response format for the API request.
  * @returns {Promise<Object[]>} - A promise that resolves to the parsed JSON response or an empty array on failure.
  */
-async function sendPrompt(
-    apiToken,
-    userPrompt,
-    systemPrompt,
-    model = "gpt-4o",
-    response_format = null,
-) {
+async function sendPrompt(apiToken, userPrompt, systemPrompt, model = "gpt-4o", response_format = null) {
     const API_URL = "https://api.openai.com/v1/chat/completions";
 
     const messages = [
@@ -322,9 +298,7 @@ async function sendPrompt(
             console.error("Rate limit reached. Please wait and try again.");
             return [];
         }
-        throw new Error(
-            `API request failed with status ${response.status}: ${errorText}`,
-        );
+        throw new Error(`API request failed with status ${response.status}: ${errorText}`);
     }
 
     const completion = await response.json();
@@ -337,9 +311,7 @@ async function sendPrompt(
     }
 
     if (choice.finish_reason === "length") {
-        console.warn(
-            "Completion finished with incomplete output. Please try again with more context.",
-        );
+        console.warn("Completion finished with incomplete output. Please try again with more context.");
         console.warn(choice.message?.content || "No content returned.");
         return [];
     }

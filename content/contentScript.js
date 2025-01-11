@@ -150,30 +150,20 @@
     // Fetch personal information once and start the observer after it's loaded
     (async function fetchPersonalInfo() {
         try {
-            const result = await chrome.storage.local.get([
-                "personalInfo",
-                "resumeText",
-                "chatGPTAccessToken",
-            ]);
+            const result = await chrome.storage.local.get(["personalInfo", "resumeText", "chatGPTAccessToken"]);
             personalInfo = result.personalInfo;
             resumeText = result.resumeText;
             chatGPTAccessToken = result.chatGPTAccessToken;
 
             if (!personalInfo) {
-                console.warn(
-                    "Personal info not found. Please set it in the extension popup.",
-                );
+                console.warn("Personal info not found. Please set it in the extension popup.");
                 return;
             }
             if (!resumeText) {
-                console.warn(
-                    "Resume text not found. Please set it in the extension popup.",
-                );
+                console.warn("Resume text not found. Please set it in the extension popup.");
             }
             if (!chatGPTAccessToken) {
-                console.warn(
-                    "ChatGPT Access Token not found. Please set it in the extension popup.",
-                );
+                console.warn("ChatGPT Access Token not found. Please set it in the extension popup.");
             }
 
             startObserver();
@@ -191,9 +181,7 @@
 
         styleElement = document.createElement("link");
         styleElement.rel = "stylesheet";
-        styleElement.href = chrome.runtime.getURL(
-            "content/inspection_mode.css",
-        );
+        styleElement.href = chrome.runtime.getURL("content/inspection_mode.css");
         document.head.appendChild(styleElement);
 
         styleElement = document.createElement("link");
@@ -202,63 +190,37 @@
         document.head.appendChild(styleElement);
     })();
 
-    chrome.runtime.onMessage.addListener(
-        async (request, sender, sendResponse) => {
-            console.log(request);
-            if (request.action === "updatePersonalInfo") {
-                try {
-                    const result = await chrome.storage.local.get([
-                        "personalInfo",
-                        "resumeText",
-                    ]);
-                    personalInfo = result.personalInfo;
-                    resumeText = result.resumeText;
+    chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+        console.log(request);
+        if (request.action === "updatePersonalInfo") {
+            try {
+                const result = await chrome.storage.local.get(["personalInfo", "resumeText"]);
+                personalInfo = result.personalInfo;
+                resumeText = result.resumeText;
 
-                    if (!personalInfo) {
-                        console.warn(
-                            "Personal info not found. Please set it in the extension popup.",
-                        );
-                        return;
-                    }
-                    if (!resumeText) {
-                        console.warn(
-                            "Resume text not found. Please set it in the extension popup.",
-                        );
-                    }
-                    startObserver();
-                } catch (error) {
-                    console.error(
-                        "Failed to update personal information:",
-                        error,
-                    );
+                if (!personalInfo) {
+                    console.warn("Personal info not found. Please set it in the extension popup.");
+                    return;
                 }
-            } else if (request.action === "fill-form") {
-                console.log("fillForm action triggered!");
-                const container = findMultipleLCA(Array.from(document.querySelectorAll('label, fieldset')));
-                fillForm(
-                    personalInfo,
-                    filledForms,
-                    chatGPTAccessToken,
-                    true,
-                    container,
-                    resumeText,
-                );
-            } else if (request.action === "fill-form-select") {
-                console.log("fillForm action with select triggered!");
-                inspector.setDynamicFunction((selectedElement) => {
-                    fillForm(
-                        personalInfo,
-                        filledForms,
-                        chatGPTAccessToken,
-                        true,
-                        selectedElement,
-                        resumeText,
-                    );
-                });
-                inspector.enableInspectMode();
+                if (!resumeText) {
+                    console.warn("Resume text not found. Please set it in the extension popup.");
+                }
+                startObserver();
+            } catch (error) {
+                console.error("Failed to update personal information:", error);
             }
-        },
-    );
+        } else if (request.action === "fill-form") {
+            console.log("fillForm action triggered!");
+            const container = findMultipleLCA(Array.from(document.querySelectorAll("label, fieldset")));
+            fillForm(personalInfo, filledForms, chatGPTAccessToken, true, container, resumeText);
+        } else if (request.action === "fill-form-select") {
+            console.log("fillForm action with select triggered!");
+            inspector.setDynamicFunction((selectedElement) => {
+                fillForm(personalInfo, filledForms, chatGPTAccessToken, true, selectedElement, resumeText);
+            });
+            inspector.enableInspectMode();
+        }
+    });
 
     function dismissApplicationSentModal() {
         const modalHeading = document.querySelector(".artdeco-modal h2");
@@ -266,17 +228,10 @@
 
         if (
             modalText &&
-            ([
-                "Application sent",
-                "Premium",
-                "Top Choice",
-                "Added to your applied jobs",
-            ].includes(modalText) ||
+            (["Application sent", "Premium", "Top Choice", "Added to your applied jobs"].includes(modalText) ||
                 modalText.includes("Your application was sent"))
         ) {
-            const dismissButton = document.querySelector(
-                '.artdeco-modal button[aria-label="Dismiss"]',
-            );
+            const dismissButton = document.querySelector('.artdeco-modal button[aria-label="Dismiss"]');
             if (dismissButton) {
                 dismissButton.click();
                 console.log("Dismiss button clicked for modal.");
@@ -288,9 +243,7 @@
     }
 
     function uncheckFollowCompanyCheckbox() {
-        const followCheckbox = document.getElementById(
-            "follow-company-checkbox",
-        );
+        const followCheckbox = document.getElementById("follow-company-checkbox");
         if (followCheckbox && followCheckbox.checked) {
             followCheckbox.checked = false;
             followCheckbox.dispatchEvent(new Event("change", {bubbles: true}));
@@ -298,50 +251,27 @@
     }
 
     async function analyzeKeyword(mutation) {
-        const jobId = new URL(window.location.href).searchParams.get(
-            "currentJobId",
-        );
+        const jobId = new URL(window.location.href).searchParams.get("currentJobId");
         const jd = extractTextFromElement(".jobs-search__job-details--wrapper");
-        const applied = document.querySelector(
-            ".jobs-s-apply a.jobs-s-apply__application-link",
-        );
+        const applied = document.querySelector(".jobs-s-apply a.jobs-s-apply__application-link");
 
         if (applied) {
-            document
-                .querySelectorAll(".chat-gpt-suggested-keywords-container")
-                .forEach((el) => el.remove());
-            document
-                .querySelector(".upsell-premium-custom-section-card__container")
-                ?.remove();
+            document.querySelectorAll(".chat-gpt-suggested-keywords-container").forEach((el) => el.remove());
+            document.querySelector(".upsell-premium-custom-section-card__container")?.remove();
             document.querySelector("#how-you-match-card-container")?.remove();
-        } else if (
-            jd &&
-            resumeText &&
-            chatGPTAccessToken &&
-            jobId !== curKeywordJid &&
-            !applied &&
-            jd.length > 300
-        ) {
+        } else if (jd && resumeText && chatGPTAccessToken && jobId !== curKeywordJid && !applied && jd.length > 300) {
             curKeywordJid = jobId;
 
-            document
-                .querySelectorAll(".chat-gpt-suggested-keywords-container")
-                .forEach((el) => el.remove());
-            document
-                .querySelector(".upsell-premium-custom-section-card__container")
-                ?.remove();
+            document.querySelectorAll(".chat-gpt-suggested-keywords-container").forEach((el) => el.remove());
+            document.querySelector(".upsell-premium-custom-section-card__container")?.remove();
             document.querySelector("#how-you-match-card-container")?.remove();
 
             const userPrompt = jd;
-            const container = document.querySelector(
-                ".job-details-jobs-unified-top-card__container--two-pane div",
-            );
+            const container = document.querySelector(".job-details-jobs-unified-top-card__container--two-pane div");
 
             if (container) {
                 const chatGPTContainer = document.createElement("div");
-                chatGPTContainer.classList.add(
-                    "chat-gpt-suggested-keywords-container",
-                );
+                chatGPTContainer.classList.add("chat-gpt-suggested-keywords-container");
 
                 const loadingStatus = document.createElement("div");
                 loadingStatus.classList.add("loading-status");
@@ -350,20 +280,11 @@
                 container.appendChild(chatGPTContainer);
 
                 try {
-                    const response = await extractKeywords(
-                        chatGPTAccessToken,
-                        userPrompt,
-                    );
+                    const response = await extractKeywords(chatGPTAccessToken, userPrompt);
                     console.log(response);
                     loadingStatus.remove();
-                    document
-                        .querySelector(
-                            ".upsell-premium-custom-section-card__container",
-                        )
-                        ?.remove();
-                    document
-                        .querySelector("#how-you-match-card-container")
-                        ?.remove();
+                    document.querySelector(".upsell-premium-custom-section-card__container")?.remove();
+                    document.querySelector("#how-you-match-card-container")?.remove();
 
                     const {keywords, summary} = response;
 
@@ -384,52 +305,35 @@
 
                     function processKeywordValue(value) {
                         // If value is an array with objects
-                        if (
-                            Array.isArray(value) &&
-                            value.length > 0 &&
-                            typeof value[0] === "object"
-                        ) {
+                        if (Array.isArray(value) && value.length > 0 && typeof value[0] === "object") {
                             const items = [];
                             value.forEach((obj) => {
-                                Object.entries(obj).forEach(
-                                    ([subKey, subValue]) => {
-                                        // Handle arrays within objects
-                                        if (Array.isArray(subValue)) {
-                                            subValue.forEach((item) => {
-                                                if (
-                                                    item &&
-                                                    typeof item === "string"
-                                                ) {
-                                                    items.push(
-                                                        `${subKey}: ${item}`,
-                                                    );
-                                                }
-                                            });
-                                        }
-                                        // Handle boolean values
-                                        else if (
-                                            typeof subValue === "boolean"
-                                        ) {
-                                            if (subValue) {
-                                                items.push(subKey);
+                                Object.entries(obj).forEach(([subKey, subValue]) => {
+                                    // Handle arrays within objects
+                                    if (Array.isArray(subValue)) {
+                                        subValue.forEach((item) => {
+                                            if (item && typeof item === "string") {
+                                                items.push(`${subKey}: ${item}`);
                                             }
+                                        });
+                                    }
+                                    // Handle boolean values
+                                    else if (typeof subValue === "boolean") {
+                                        if (subValue) {
+                                            items.push(subKey);
                                         }
-                                        // Handle string values
-                                        else if (typeof subValue === "string") {
-                                            items.push(
-                                                `${subKey}: ${subValue}`,
-                                            );
-                                        }
-                                    },
-                                );
+                                    }
+                                    // Handle string values
+                                    else if (typeof subValue === "string") {
+                                        items.push(`${subKey}: ${subValue}`);
+                                    }
+                                });
                             });
                             return items;
                         }
                         // If value is a simple array of strings
                         else if (Array.isArray(value)) {
-                            return value.filter(
-                                (item) => item && typeof item === "string",
-                            );
+                            return value.filter((item) => item && typeof item === "string");
                         }
                         // If value is a string
                         else if (typeof value === "string") {
@@ -451,92 +355,17 @@
                     }
 
                     // Update the keywords processing section
-                    Object.entries(keywords).forEach(
-                        ([category, keywordList]) => {
-                            const processedValue =
-                                processKeywordValue(keywordList);
+                    Object.entries(keywords).forEach(([category, keywordList]) => {
+                        const processedValue = processKeywordValue(keywordList);
 
-                            if (!processedValue) return;
+                        if (!processedValue) return;
 
-                            // If the processed value is an array
-                            if (Array.isArray(processedValue)) {
-                                if (processedValue.length === 0) return;
+                        // If the processed value is an array
+                        if (Array.isArray(processedValue)) {
+                            if (processedValue.length === 0) return;
 
-                                if (processedValue.length === 1) {
-                                    // Single item goes to basic info
-                                    const infoItem =
-                                        document.createElement("div");
-                                    infoItem.classList.add("info-item");
-
-                                    const infoLabel =
-                                        document.createElement("div");
-                                    infoLabel.classList.add("info-label");
-                                    infoLabel.textContent = category;
-
-                                    const infoValue =
-                                        document.createElement("div");
-                                    infoValue.classList.add("info-value");
-                                    infoValue.textContent = processedValue[0];
-
-                                    infoItem.appendChild(infoLabel);
-                                    infoItem.appendChild(infoValue);
-                                    basicInfoSection.appendChild(infoItem);
-
-                                    infoValue.addEventListener("click", () => {
-                                        const words = processTextToKeywords(
-                                            processedValue[0],
-                                        );
-                                        if (words.length > 0) {
-                                            highlightKeywordInDiv(words);
-                                        }
-                                    });
-                                } else {
-                                    // Multiple items go to list section
-                                    const sectionDiv =
-                                        document.createElement("div");
-                                    sectionDiv.classList.add("info-section");
-
-                                    const titleDiv =
-                                        document.createElement("h2");
-                                    titleDiv.classList.add("section-title");
-                                    titleDiv.textContent = category;
-                                    sectionDiv.appendChild(titleDiv);
-
-                                    const ul = document.createElement("ul");
-                                    processedValue.forEach((item) => {
-                                        if (
-                                            item &&
-                                            typeof item === "string" &&
-                                            item.trim()
-                                        ) {
-                                            const li =
-                                                document.createElement("li");
-                                            li.textContent = item;
-                                            ul.appendChild(li);
-
-                                            li.addEventListener("click", () => {
-                                                const words =
-                                                    processTextToKeywords(item);
-                                                if (words.length > 0) {
-                                                    highlightKeywordInDiv(
-                                                        words,
-                                                    );
-                                                }
-                                            });
-                                        }
-                                    });
-
-                                    if (ul.children.length > 0) {
-                                        sectionDiv.appendChild(ul);
-                                        listSections.push(sectionDiv);
-                                    }
-                                }
-                            }
-                            // If the processed value is a string
-                            else if (
-                                typeof processedValue === "string" &&
-                                processedValue.trim()
-                            ) {
+                            if (processedValue.length === 1) {
+                                // Single item goes to basic info
                                 const infoItem = document.createElement("div");
                                 infoItem.classList.add("info-item");
 
@@ -546,22 +375,75 @@
 
                                 const infoValue = document.createElement("div");
                                 infoValue.classList.add("info-value");
-                                infoValue.textContent = processedValue;
+                                infoValue.textContent = processedValue[0];
 
                                 infoItem.appendChild(infoLabel);
                                 infoItem.appendChild(infoValue);
                                 basicInfoSection.appendChild(infoItem);
 
                                 infoValue.addEventListener("click", () => {
-                                    const words =
-                                        processTextToKeywords(processedValue);
+                                    const words = processTextToKeywords(processedValue[0]);
                                     if (words.length > 0) {
                                         highlightKeywordInDiv(words);
                                     }
                                 });
+                            } else {
+                                // Multiple items go to list section
+                                const sectionDiv = document.createElement("div");
+                                sectionDiv.classList.add("info-section");
+
+                                const titleDiv = document.createElement("h2");
+                                titleDiv.classList.add("section-title");
+                                titleDiv.textContent = category;
+                                sectionDiv.appendChild(titleDiv);
+
+                                const ul = document.createElement("ul");
+                                processedValue.forEach((item) => {
+                                    if (item && typeof item === "string" && item.trim()) {
+                                        const li = document.createElement("li");
+                                        li.textContent = item;
+                                        ul.appendChild(li);
+
+                                        li.addEventListener("click", () => {
+                                            const words = processTextToKeywords(item);
+                                            if (words.length > 0) {
+                                                highlightKeywordInDiv(words);
+                                            }
+                                        });
+                                    }
+                                });
+
+                                if (ul.children.length > 0) {
+                                    sectionDiv.appendChild(ul);
+                                    listSections.push(sectionDiv);
+                                }
                             }
-                        },
-                    );
+                        }
+                        // If the processed value is a string
+                        else if (typeof processedValue === "string" && processedValue.trim()) {
+                            const infoItem = document.createElement("div");
+                            infoItem.classList.add("info-item");
+
+                            const infoLabel = document.createElement("div");
+                            infoLabel.classList.add("info-label");
+                            infoLabel.textContent = category;
+
+                            const infoValue = document.createElement("div");
+                            infoValue.classList.add("info-value");
+                            infoValue.textContent = processedValue;
+
+                            infoItem.appendChild(infoLabel);
+                            infoItem.appendChild(infoValue);
+                            basicInfoSection.appendChild(infoItem);
+
+                            infoValue.addEventListener("click", () => {
+                                const words = processTextToKeywords(processedValue);
+                                if (words.length > 0) {
+                                    highlightKeywordInDiv(words);
+                                }
+                            });
+                        }
+                    });
 
                     // Add the sections to the container only if they have content
                     if (basicInfoSection.children.length > 0) {
@@ -587,19 +469,11 @@
         addShortcutText(ctrlZButtonSelectors, "Ctrl + X");
         // for positioning current job posting
         addShortcutText(
-            [
-                ".jobs-search-results-list__list-item--active .job-card-container__link strong",
-            ],
+            [".jobs-search-results-list__list-item--active .job-card-container__link strong"],
             "Ctrl + Z(oning)",
         );
-        addShortcutText(
-            [".job-details-jobs-unified-top-card__job-title h1 a"],
-            "Ctrl + D(ownload JD)",
-        );
-        addShortcutText(
-            ['footer[role="presentation"] .display-flex .auto-fill-button'],
-            "Ctrl + F(ill)",
-        );
+        addShortcutText([".job-details-jobs-unified-top-card__job-title h1 a"], "Ctrl + D(ownload JD)");
+        addShortcutText(['footer[role="presentation"] .display-flex .auto-fill-button'], "Ctrl + F(ill)");
     }
 
     function startObserver() {
@@ -644,9 +518,7 @@
     function downloadJD(applied = false, jd) {
         const blob = new Blob([jd], {type: "text/plain"});
         const url = URL.createObjectURL(blob);
-        const currentJobId = new URL(window.location.href).searchParams.get(
-            "currentJobId",
-        );
+        const currentJobId = new URL(window.location.href).searchParams.get("currentJobId");
 
         chrome.runtime.sendMessage({
             action: "download",
@@ -678,9 +550,7 @@
     }
 
     function selectAndClickNextLi() {
-        let activeLi = document.querySelector(
-            ".jobs-search-results-list__list-item--active",
-        );
+        let activeLi = document.querySelector(".jobs-search-results-list__list-item--active");
         if (!activeLi) {
             document.querySelector(".job-card-list").click();
             return;
@@ -691,9 +561,7 @@
 
         let li = nextLi;
         while (li) {
-            const viewedElement = li.querySelector(
-                ".job-card-container__footer-job-state",
-            );
+            const viewedElement = li.querySelector(".job-card-container__footer-job-state");
             const text = viewedElement?.textContent.trim();
             if (!viewedElement || !["Viewed", "Applied"].includes(text)) {
                 count += 1;
@@ -707,16 +575,12 @@
 
         li = nextLi;
         while (li) {
-            const viewedElement = li.querySelector(
-                ".job-card-container__footer-job-state",
-            );
+            const viewedElement = li.querySelector(".job-card-container__footer-job-state");
             const text = viewedElement?.textContent.trim();
 
             if (!viewedElement || !["Viewed", "Applied"].includes(text)) {
                 li.scrollIntoView({behavior: "smooth", block: "center"});
-                const clickableElement = li.querySelector(
-                    ".job-card-container--clickable",
-                );
+                const clickableElement = li.querySelector(".job-card-container--clickable");
                 if (clickableElement) {
                     clickableElement.click();
                     return;
@@ -725,9 +589,7 @@
             li = li.nextElementSibling;
         }
 
-        const activePaginationLi = document.querySelector(
-            ".artdeco-pagination__indicator.active",
-        );
+        const activePaginationLi = document.querySelector(".artdeco-pagination__indicator.active");
         const nextPaginationLi = activePaginationLi?.nextElementSibling;
         nextPaginationLi?.querySelector("button")?.click();
     }
@@ -739,19 +601,13 @@
             makeRecord(false);
         } else if (ctrlKey && shiftKey && code === "KeyX") {
             event.preventDefault();
-            if (
-                !document.querySelector(
-                    ".jobs-s-apply a.jobs-s-apply__application-link",
-                )
-            ) {
+            if (!document.querySelector(".jobs-s-apply a.jobs-s-apply__application-link")) {
                 makeRecord(false);
             }
             selectAndClickNextLi();
         } else if (ctrlKey && code === "KeyZ") {
             event.preventDefault();
-            const activeLi = document.querySelector(
-                ".jobs-search-results-list__list-item--active",
-            );
+            const activeLi = document.querySelector(".jobs-search-results-list__list-item--active");
             activeLi?.scrollIntoView({behavior: "smooth", block: "center"});
         } else if (ctrlKey && !shiftKey && code === "KeyX") {
             event.preventDefault();
@@ -773,19 +629,12 @@
             } else {
                 inspector.setDynamicFunction((selectedElement) => {
                     displayToast("loading");
-                    makePredictionRequest(
-                        resumeText,
-                        "",
-                        selectedElement.innerText,
-                    )
+                    makePredictionRequest(resumeText, "", selectedElement.innerText)
                         .then((response) => {
                             displayToast(response.predicted_class === 1);
                         })
                         .catch((error) => {
-                            displayToast(
-                                error.message ||
-                                    "An unexpected error occurred.",
-                            );
+                            displayToast(error.message || "An unexpected error occurred.");
                             console.error("Error:", error);
                         });
                 });
@@ -798,9 +647,7 @@
     });
 
     function extractTextFromElement(selector) {
-        const jobTitleElement = document.querySelector(
-            ".job-details-jobs-unified-top-card__job-title a",
-        );
+        const jobTitleElement = document.querySelector(".job-details-jobs-unified-top-card__job-title a");
         const jobTitle = jobTitleElement?.textContent.trim();
         const element = document.querySelector(selector);
         if (jobTitle && element) {
@@ -811,16 +658,10 @@
     }
 
     function predictCompatibility() {
-        const jobDescriptionEle = document.querySelector(
-            ".jobs-box__html-content .mt4",
-        );
-        const jobId = new URL(window.location.href).searchParams.get(
-            "currentJobId",
-        );
+        const jobDescriptionEle = document.querySelector(".jobs-box__html-content .mt4");
+        const jobId = new URL(window.location.href).searchParams.get("currentJobId");
         if (jobDescriptionEle && jobId !== curPredictionJid) {
-            const jdText = extractTextFromElement(
-                ".jobs-box__html-content .mt4",
-            );
+            const jdText = extractTextFromElement(".jobs-box__html-content .mt4");
             const topCard = document.querySelector(
                 ".job-details-jobs-unified-top-card__container--two-pane .mt4 div.display-flex",
             );
@@ -829,11 +670,7 @@
             );
             if (!compatibleButton && topCard) {
                 const jobsApplyDiv = document.createElement("div");
-                jobsApplyDiv.classList.add(
-                    "jobs-s-apply",
-                    "inline-flex",
-                    "ml2",
-                );
+                jobsApplyDiv.classList.add("jobs-s-apply", "inline-flex", "ml2");
                 jobsApplyDiv.innerHTML = `
                         <div class="jobs-apply-button--top-card">
                             <button class="artdeco-button artdeco-button--3 artdeco-button--premium ember-view evaluation" disabled>
@@ -844,25 +681,19 @@
                 topCard.appendChild(jobsApplyDiv);
             }
             if (compatibleButton) {
-                compatibleButton.querySelector("span").textContent =
-                    "Evaluating ☕️";
+                compatibleButton.querySelector("span").textContent = "Evaluating ☕️";
                 compatibleButton.disabled = true;
                 if (!resumeText) {
-                    compatibleButton.querySelector("span").textContent =
-                        "upload Resume to Evaluate";
+                    compatibleButton.querySelector("span").textContent = "upload Resume to Evaluate";
                 } else {
                     makePredictionRequest(resumeText, "", jdText)
                         .then((response) => {
-                            compatibleButton.disabled =
-                                response.predicted_class !== 1;
+                            compatibleButton.disabled = response.predicted_class !== 1;
                             compatibleButton.querySelector("span").textContent =
-                                response.predicted_class === 1
-                                    ? "Compatible 🎉"
-                                    : "Incompatible 🙁";
+                                response.predicted_class === 1 ? "Compatible 🎉" : "Incompatible 🙁";
                         })
                         .catch((error) => {
-                            compatibleButton.querySelector("span").textContent =
-                                error.message;
+                            compatibleButton.querySelector("span").textContent = error.message;
                         });
                 }
 
@@ -871,11 +702,7 @@
         }
     }
 
-    async function makePredictionRequest(
-        resumeText,
-        resumePdfPath,
-        jobDescriptionText,
-    ) {
+    async function makePredictionRequest(resumeText, resumePdfPath, jobDescriptionText) {
         const url = CONFIG.API_ENDPOINT;
         const data = {
             resume_text: resumeText,
@@ -935,11 +762,7 @@
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(
-                `Error ${response.status}: ${
-                    errorData.detail || "Unknown error"
-                }`,
-            );
+            throw new Error(`Error ${response.status}: ${errorData.detail || "Unknown error"}`);
         }
 
         const data = await response.json();
