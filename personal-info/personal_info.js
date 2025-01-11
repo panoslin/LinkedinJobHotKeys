@@ -73,15 +73,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 // Extract text from the PDF
                 uploadResumeText.textContent = "Extracting Information ...";
-                const resumeText = await extractTextFromPDF(typedarray);
-                chrome.runtime.sendMessage({
-                    action: "forwardToContentScript",
-                    message: {
-                        action: "summarizeResume",
-                        chatGPTAccessToken: chatGPTAccessToken,
-                        resumeText: resumeText,
-                    },
-                });
 
                 // Redact sensitive information
                 const redactedResumeText = redactSensitiveInfo(

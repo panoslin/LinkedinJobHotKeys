@@ -105,22 +105,11 @@ document.addEventListener("DOMContentLoaded", () => {
                                     return;
                                 }
 
-                                uploadResumeText.textContent =
-                                    "Extracting Information ...";
-                                const [summarizedResume, extractedInfo] =
-                                    await Promise.all([
-                                        summarizeResume(
-                                            chatGPTAccessToken,
-                                            resumeText,
-                                        ),
-                                        extractPersonalInfo(
-                                            chatGPTAccessToken,
-                                            resumeText,
-                                        ),
-                                    ]);
-
-                                personalInfo.summarizedResume =
-                                    JSON.stringify(summarizedResume);
+                                uploadResumeText.textContent ="Extracting Information ...";
+                                const extractedInfo = await extractPersonalInfo(
+                                    chatGPTAccessToken,
+                                    resumeText,
+                                );
 
                                 for (const [key, value] of Object.entries(
                                     extractedInfo,

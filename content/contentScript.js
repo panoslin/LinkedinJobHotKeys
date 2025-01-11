@@ -232,23 +232,6 @@
                         error,
                     );
                 }
-            } else if (request.action === "summarizeResume") {
-                const {chatGPTAccessToken, resumeText} = request;
-                try {
-                    const summarizedResume = await summarizeResume(
-                        chatGPTAccessToken,
-                        resumeText,
-                    );
-                    const response = await chrome.storage.local.get(
-                        "personalInfo",
-                    );
-                    const personalInfo = response.personalInfo || {};
-                    personalInfo.summarizedResume =
-                        JSON.stringify(summarizedResume);
-                    await chrome.storage.local.set({personalInfo});
-                } catch (error) {
-                    console.error("Failed to summarize resume:", error);
-                }
             } else if (request.action === "fill-form") {
                 console.log("fillForm action triggered!");
                 const container = findMultipleLCA(Array.from(document.querySelectorAll('label, fieldset')));

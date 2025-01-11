@@ -114,55 +114,55 @@ async function extractForm(apiToken, userPrompt, resume, model = "gpt-4o") {
     );
 }
 
-/**
- * Summarize resume using OpenAI's model.
- *
- * @param {string} apiToken - Your OpenAI API token.
- * @param {string} userPrompt - The user's input prompt.
- * @param {string} [model="gpt-4"] - The OpenAI model to use.
- * @returns {Promise<Object[]>} - A promise that resolves to the parsed JSON response or an empty array on failure.
- */
-async function summarizeResume(apiToken, userPrompt, model = "gpt-4o") {
-    const systemPrompt =
-        "Summarize and show me the comprehensive list of technical and non-technical qualifications of this resume";
-    const response_format = {
-        type: "json_schema",
-        json_schema: {
-            name: "resume_summary_schema",
-            schema: {
-                type: "object",
-                properties: {
-                    Technical_Qualifications: {
-                        type: "object",
-                        additionalProperties: {
-                            type: "array",
-                            items: {type: "string"},
-                        },
-                    },
-                    Non_Technical_Qualifications: {
-                        type: "object",
-                        additionalProperties: {
-                            type: "array",
-                            items: {type: "string"},
-                        },
-                    },
-                },
-                required: [
-                    "Technical_Qualifications",
-                    "Non_Technical_Qualifications",
-                ],
-                additionalProperties: true, // Allows additional keys at the root level
-            },
-        },
-    };
-    return await sendPrompt(
-        apiToken,
-        userPrompt,
-        systemPrompt,
-        model,
-        response_format,
-    );
-}
+// /**
+//  * Summarize resume using OpenAI's model.
+//  *
+//  * @param {string} apiToken - Your OpenAI API token.
+//  * @param {string} userPrompt - The user's input prompt.
+//  * @param {string} [model="gpt-4"] - The OpenAI model to use.
+//  * @returns {Promise<Object[]>} - A promise that resolves to the parsed JSON response or an empty array on failure.
+//  */
+// async function summarizeResume(apiToken, userPrompt, model = "gpt-4o") {
+//     const systemPrompt =
+//         "Summarize and show me the comprehensive list of technical and non-technical qualifications of this resume";
+//     const response_format = {
+//         type: "json_schema",
+//         json_schema: {
+//             name: "resume_summary_schema",
+//             schema: {
+//                 type: "object",
+//                 properties: {
+//                     Technical_Qualifications: {
+//                         type: "object",
+//                         additionalProperties: {
+//                             type: "array",
+//                             items: {type: "string"},
+//                         },
+//                     },
+//                     Non_Technical_Qualifications: {
+//                         type: "object",
+//                         additionalProperties: {
+//                             type: "array",
+//                             items: {type: "string"},
+//                         },
+//                     },
+//                 },
+//                 required: [
+//                     "Technical_Qualifications",
+//                     "Non_Technical_Qualifications",
+//                 ],
+//                 additionalProperties: true, // Allows additional keys at the root level
+//             },
+//         },
+//     };
+//     return await sendPrompt(
+//         apiToken,
+//         userPrompt,
+//         systemPrompt,
+//         model,
+//         response_format,
+//     );
+// }
 
 /**
  * Extracts personal information from an uploaded resume using OpenAI's model.
