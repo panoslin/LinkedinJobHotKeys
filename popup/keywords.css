@@ -30,7 +30,7 @@
   position: relative;
   padding: 15px 20px;
   border: 2px solid #005582; /* Subtle border to frame the text */
-  border-radius: 12px; /* Smooth rounded edges */
+  border-radius: 36px; /* Smooth rounded edges */
   /*background: linear-gradient(135deg, #e8f4fc, #ffffff); !* Soft gradient for depth *!*/
   overflow: hidden;
   /*animation: pulse 1.5s infinite ease-in-out; !* Smooth glowing effect *!*/
@@ -45,7 +45,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  border-radius: 12px;
+  border-radius: 36px;
   border: 2px solid transparent;
   background: linear-gradient(45deg, #005582, #6dd5fa, #005582);
   background-size: 400% 400%;

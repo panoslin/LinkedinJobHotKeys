@@ -44,3 +44,8 @@
     background-position: 0% 50%;
   }
 }
+
+.artdeco-modal {
+  min-width: 98vw;
+  max-height: 90vh;
+}
